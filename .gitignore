@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.pytest_cache/
+
+config.local.toml
+
+# Not published yet
+condition_grounded_rag_architecture.html
+
+data/papers/*
+data/index/*
+!data/papers/.gitkeep
+!data/index/.gitkeep
+
+eval/runs/
+frontend/node_modules/
+frontend/dist/
