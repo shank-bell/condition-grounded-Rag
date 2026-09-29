@@ -1,0 +1,202 @@
+"""Comparing experimental conditions: shared by stage 6 (question vs evidence) and stage 7 (paper vs paper).
+
+Everything is deterministic string logic on the fields of a Condition Profile, so a verdict can always be
+traced back to the exact values that produced it.
+"""
+from __future__ import annotations
+
+import re
+
+from ..schemas import ConditionProfile
+
+_DECOR = ("base", "large", "small", "tiny", "mini", "medium", "xlarge", "xxlarge", "xl", "xxl", "huge", "cased",
+          "uncased", "single", "ensemble", "distilled", "multilingual", "finetuned", "pretrained")
+_SIZE_LABELS = {"base", "large", "small", "tiny", "mini", "medium", "xlarge", "xxlarge", "xl", "xxl", "huge"}
+_LANG_ALIASES = {"en": "english", "eng": "english", "hi": "hindi", "kn": "kannada", "ta": "tamil", "te": "telugu",
+                 "de": "german", "fr": "french", "es": "spanish", "zh": "chinese", "ru": "russian", "ar": "arabic",
+                 "sw": "swahili", "ja": "japanese", "ko": "korean", "mr": "marathi", "bn": "bengali"}
+_METRIC_ALIASES = {"acc": "accuracy", "exactmatch": "em", "f1score": "f1", "fscore": "f1", "rougel": "rougel"}
+_METRIC_NOISE = ("score", "dev", "test", "val", "validation", "avg", "average")
+
+
+def norm(text: str | None) -> str:
+    return re.sub(r"[^a-z0-9]", "", (text or "").lower())
+
+
+NULLISH = {"not specified", "unspecified", "n/a", "na", "none", "null", "unknown", "not stated", "not applicable",
+           "not reported", "not mentioned", "not available", "-", "--", "—", ""}
+
+
+def is_nullish(text: str | None) -> bool:
+    """'not specified', 'N/A' and friends: what a language model writes instead of leaving a field empty."""
+    return text is None or text.strip().strip(".").lower() in NULLISH
+
+
+_SPLIT_LABEL = {"dev": "dev set", "development": "dev set", "val": "dev set", "validation": "dev set",
+                "test": "test set", "train": "train set"}
+_DATASET_PARTS = re.compile(
+    r"^(?P<name>.+?)\s+v?(?P<ver>\d+(?:\.\d+)+)(?:\s+(?P<split>dev(?:elopment)?|test|train|validation|val))?(?:\s+set)?$", re.I)
+
+
+def split_dataset(name: str) -> tuple[str, str | None, str | None]:
+    """'SQuAD 2.0 test' -> ('SQuAD', '2.0', 'test set'); names without a dotted version ('SST-2') are unchanged."""
+    m = _DATASET_PARTS.match(name.strip())
+    if not m:
+        return name, None, None
+    split = m["split"].lower() if m["split"] else None
+    return m["name"], m["ver"], _SPLIT_LABEL.get(split) if split else None
+
+
+def split_version(name: str) -> tuple[str, str | None]:
+    """'SQuAD 2.0' -> ('SQuAD', '2.0')."""
+    base, version, _ = split_dataset(name)
+    return base, version
+
+
+def norm_version(text: str | None) -> str:
+    t = (text or "").lower().strip()
+    t = re.sub(r"^v(?:ersion)?\s*", "", t)
+    return t
+
+
+def parse_params(text: str | None) -> float | None:
+    """Parameter count in millions from '340M', '1.5B', '110 million'; None if it is a label like 'large'."""
+    m = re.search(r"(\d+(?:\.\d+)?)\s*(k|m|million|b|billion)\b", (text or "").lower())
+    if not m:
+        return None
+    val, unit = float(m.group(1)), m.group(2)
+    return val * {"k": 0.001, "m": 1, "million": 1, "b": 1000, "billion": 1000}[unit]
+
+
+def _strip_decor(n: str) -> tuple[str, str | None]:
+    """(family, size label) for a normalised model name: 'bertlarge' -> ('bert', 'large')."""
+    size = None
+    changed = True
+    while changed:
+        changed = False
+        for d in sorted(_DECOR, key=len, reverse=True):
+            if n.endswith(d) and len(n) > len(d):
+                if d in _SIZE_LABELS and size is None:
+                    size = d
+                n = n[: -len(d)]
+                changed = True
+                break
+    return n, size
+
+
+def model_family(model: str | None) -> str:
+    return _strip_decor(norm(model))[0]
+
+
+def model_size_label(p: ConditionProfile) -> str | None:
+    """Size recorded for the profile: the explicit field, else a label carried by the model name (BERT-large)."""
+    if p.model_size:
+        return p.model_size
+    return _strip_decor(norm(p.model))[1]
+
+
+def metric_key(metric: str | None) -> str:
+    n = norm(metric)
+    for noise in _METRIC_NOISE:
+        n = n.replace(noise, "")
+    return _METRIC_ALIASES.get(n, n)
+
+
+def values_match(field: str, requested: str, observed: str) -> bool:
+    """Does an observed value satisfy a requested condition? 'BERT' is satisfied by 'BERT-large', not by 'RoBERTa'."""
+    if not requested or not observed:
+        return False
+    if field == "model":
+        rf, rs = _strip_decor(norm(requested))
+        of, os_ = _strip_decor(norm(observed))
+        return rf == of and (rs is None or os_ is None or rs == os_)
+    if field == "dataset":
+        r, o = norm(requested), norm(observed)
+        return len(r) >= 3 and len(o) >= 3 and (r == o or o.startswith(r) or r.startswith(o))
+    if field == "dataset_version":
+        return norm_version(requested) == norm_version(observed) or _num_equal(requested, observed)
+    if field == "language":
+        r, o = norm(requested), norm(observed)
+        return _LANG_ALIASES.get(r, r) == _LANG_ALIASES.get(o, o)
+    if field == "model_size":
+        pr, po = parse_params(requested), parse_params(observed)
+        if pr is not None and po is not None:
+            return abs(pr - po) <= 0.05 * max(pr, po)
+        return norm(requested) == norm(observed)
+    if field == "setting":
+        tr, to = setting_tags(requested), setting_tags(observed)
+        if tr and to:
+            return tr <= to
+    r, o = norm(requested), norm(observed)          # task, setting: free text, so containment either way
+    return len(r) >= 4 and len(o) >= 4 and (r in o or o in r)
+
+
+def _num_equal(a: str, b: str) -> bool:
+    try:
+        return float(norm_version(a)) == float(norm_version(b))
+    except ValueError:
+        return False
+
+
+def observed_values(profile: ConditionProfile, field: str) -> list[str]:
+    """Values a profile records for a condition field (model gets its size label as a model_size value too)."""
+    if field == "model_size":
+        size = model_size_label(profile)
+        return [size] if size and not is_nullish(size) else []
+    value = getattr(profile, field, None)
+    return [value] if value and not is_nullish(value) else []
+
+
+_SETTING_TAGS = (
+    ("zero-shot", r"zero[- ]?shot"), ("few-shot", r"few[- ]?shot"), ("fine-tuned", r"fine[- ]?tun"),
+    ("translate-train", r"translate[- ]?train"), ("translate-test", r"translate[- ]?test"),
+    ("dev", r"\b(?:dev|development|validation|val)\b"), ("test", r"\btest\b"), ("train", r"\btrain(?:ing)?\b"),
+    ("single", r"\bsingle\b"), ("ensemble", r"\bensemble"), ("in-domain", r"in[- ]?domain"),
+    ("out-of-domain", r"out[- ]?of[- ]?domain"), ("feature-based", r"feature[- ]?based"),
+)
+
+
+def setting_tags(text: str | None) -> frozenset[str]:
+    """Evaluation-setting categories found in a free-text setting ('zero-shot transfer' -> {'zero-shot'}).
+
+    Free-text settings such as 'each N' carry no tag: they are too noisy to name as the explanation of a difference."""
+    t = (text or "").lower()
+    return frozenset(tag for tag, pattern in _SETTING_TAGS if re.search(pattern, t))
+
+
+def differing_conditions(a: ConditionProfile, b: ConditionProfile) -> list[str]:
+    """Condition fields that are recorded on both profiles with different values (dataset and metric are
+    the shared subject of the comparison, so they are not listed). The free-text task is not compared: labels
+    such as 'cross-lingual classification' vs 'sentence pair question answering' are extraction noise, not conditions."""
+    diffs: list[str] = []
+    for f in ("dataset_version", "model_size", "language"):
+        va, vb = observed_values(a, f), observed_values(b, f)
+        if va and vb and not values_match(f, va[0], vb[0]):
+            diffs.append(f)
+    ta, tb = setting_tags(a.setting), setting_tags(b.setting)
+    if ta and tb and ta != tb:
+        diffs.append("setting")
+    return diffs
+
+
+# Conditions that change a result. If exactly one side records one of these we cannot say the two results were
+# obtained under the same conditions, so the pair must not be called a genuine contradiction.
+_RESULT_CHANGING = ("dataset_version", "model_size", "setting")
+
+
+def _recorded(p: ConditionProfile, field: str) -> bool:
+    return bool(setting_tags(p.setting)) if field == "setting" else bool(observed_values(p, field))
+
+
+def unrecorded_conditions(a: ConditionProfile, b: ConditionProfile) -> list[str]:
+    """Result-changing conditions recorded on one profile but missing on the other."""
+    return [f for f in _RESULT_CHANGING if _recorded(a, f) != _recorded(b, f)]
+
+
+def claim_text(p: ConditionProfile) -> str:
+    """One natural-language sentence for a profile, used as NLI input and as evidence in prompts."""
+    parts = [f"{p.model or 'The system'} obtains {p.value:g} {p.metric or 'score'}"]
+    if p.dataset:
+        parts.append(f"on {p.dataset}{(' ' + p.dataset_version) if p.dataset_version else ''}")
+    extra = [x for x in (p.setting, p.language, p.model_size) if x]
+    return " ".join(parts) + (f" ({', '.join(extra)})" if extra else "") + "."
