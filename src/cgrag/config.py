@@ -19,6 +19,7 @@ class LLMConfig(BaseModel):
     keep_alive: str = "15m"
     extract_temperature: float = 0.0
     generate_temperature: float = 0.2
+    parallel: int = 1            # concurrent requests during offline extraction (the Ollama server must allow it)
 
 
 class ModelsConfig(BaseModel):
@@ -74,7 +75,15 @@ class CriticConfig(BaseModel):
     max_regenerate: int = 1
 
 
+class AgentsConfig(BaseModel):
+    """A different open-weights model per agent (any Ollama tag, e.g. hf.co/<user>/<repo>). Empty = [llm].model."""
+    orchestrator_model: str = ""
+    applicability_model: str = ""
+
+
 class FeaturesConfig(BaseModel):
+    orchestrator_agent: bool = True   # False: fixed rules decide the path instead of the planner agent (ablation)
+    applicability_agent: bool = True  # False: the deterministic matcher alone decides coverage (ablation)
     applicability: bool = True
     contradiction: bool = True
     critic: bool = True
@@ -83,6 +92,7 @@ class FeaturesConfig(BaseModel):
 
 class Settings(BaseModel):
     llm: LLMConfig = LLMConfig()
+    agents: AgentsConfig = AgentsConfig()
     models: ModelsConfig = ModelsConfig()
     devices: DevicesConfig = DevicesConfig()
     paths: PathsConfig = PathsConfig()
