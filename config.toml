@@ -1,0 +1,68 @@
+# Shared defaults. Machine-specific overrides go in config.local.toml (git-ignored),
+# e.g. a college PC with a bigger GPU:
+#   [llm]
+#   model = "gemma4:e4b"
+#   [devices]
+#   embedder = "cuda"
+#   nli = "cuda"
+
+[llm]
+host = "http://localhost:11434"
+model = "gemma4:e4b"
+think = false                # thinking off: faster, and JSON extraction doesn't need it
+num_ctx = 8192
+keep_alive = "15m"
+extract_temperature = 0.0
+generate_temperature = 0.2
+
+[models]
+embedder = "BAAI/bge-m3"
+reranker = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+nli = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+query_classifier = "allenai/scibert_scivocab_uncased"
+
+[devices]                    # "cuda" or "cpu"; 6 GB VRAM is shared with the Ollama model
+embedder = "cpu"
+reranker = "cpu"
+nli = "cpu"
+classifier = "cpu"
+
+[paths]
+papers_dir = "data/papers"
+index_dir = "data/index"
+profile_db = "data/index/profiles.sqlite"
+chroma_dir = "data/index/chroma"
+bm25_path = "data/index/bm25.pkl"
+
+[chunking]
+chunk_size = 2000
+chunk_overlap = 200
+
+[retrieval]
+dense_k = 30
+bm25_k = 30
+rrf_k = 60
+fused_top = 20
+rerank_keep = 10
+rerank_threshold = -2.0      # cross-encoder logit; calibrate on real data
+section_boost = 0.15         # soft boost for chunks whose section matches the intent
+generate_top = 5
+
+[applicability]
+max_reretrieve = 1
+
+[contradiction]
+nli_threshold = 0.70         # contradiction probability that flags a candidate pair
+numeric_rel_diff = 0.02      # same-metric values differing by more than this flag a pair
+max_pairs = 45
+
+[critic]
+entail_threshold = 0.50
+max_regenerate = 1
+
+# Ablation switches (used by the evaluation)
+[features]
+applicability = true
+contradiction = true
+critic = true
+profile_in_context = true
