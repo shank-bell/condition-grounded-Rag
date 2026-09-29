@@ -97,6 +97,7 @@ class ApplicabilityResult(BaseModel):
     missing: list[str] = Field(default_factory=list)
     re_retrieved: bool = False
     warning: str | None = None
+    reasoning: str = ""            # the agent's short notes on the conditions the profiles could not settle
 
 
 class ContradictionPair(BaseModel):
