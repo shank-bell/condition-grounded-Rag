@@ -69,6 +69,7 @@ class OllamaLLM:
         system: str | None = None,
         temperature: float | None = None,
         retries: int = 1,
+        max_tokens: int | None = None,
     ) -> tuple[T, LLMResult]:
         """Ask for JSON matching model_cls; retry once on invalid output."""
         messages = ([{"role": "system", "content": system}] if system else []) + [
@@ -78,7 +79,7 @@ class OllamaLLM:
         schema = model_cls.model_json_schema()
         last_err: Exception | None = None
         for _ in range(retries + 1):
-            result = self.chat(messages, schema=schema, temperature=temp)
+            result = self.chat(messages, schema=schema, temperature=temp, max_tokens=max_tokens)
             try:
                 return model_cls.model_validate_json(result.text), result
             except ValidationError as err:
