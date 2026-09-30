@@ -5,6 +5,46 @@ aren't visible from the code alone. The full architecture is in
 `condition_grounded_rag_architecture.html` (git-ignored, kept local/private — read it directly
 for the design; don't re-derive it from here).
 
+## RESUME HERE (written 2026-09-30 ~17:00 because the context window was full; read this first)
+Standing orders from the user for the evening of 2026-09-30 (do NOT stop to ask them questions; manage everything and
+report at the end):
+- **Labelling is TOMORROW (2026-10-01).** Today: (1) train the Stage 1 SciBERT classifier in an automated loop, monitored by
+  agents, until the targets are met; (2) finish the ingestion pipeline. Both must be complete by tomorrow. The user was
+  online until ~17:30, then away. They interrupt when the context fills: keep this file and the memory notes current.
+- **Git:** the user runs the commits themselves in PowerShell, ONE FILE = ONE COMMIT, no attribution lines, identity per
+  command (`$id = '-c','user.name=shank-bell','-c','user.email=shashankbelludi1@gmail.com'`, then `git @id commit -m msg -- file`).
+  Give the block BEFORE starting a work session and again at the end (`git status --short` for the exact list). 24 commits
+  (bd69943..a754fff) are on GitHub; everything after `a754fff` is uncommitted.
+- The five departures of 2026-09-30 are approved (user: "do what you think is best"); the eight older ones still wait.
+
+Work streams and where each one stands:
+- **A. SciBERT campaign** - spec, thresholds, the monitor-agent prompt and an iteration log are in `docs/stage1_campaign.md`.
+  Data generation for iteration 1 was running (`data/index/query_runs/iter1/`: `generate.log`, output `llm_generated.jsonl`;
+  `template.jsonl` there predates two fixes to `make_template_questions.py`, so regenerate it). The trainer, prepare and
+  install scripts are written but have never been run. The dev set `eval/stage1_dev.jsonl` (107 questions) is built.
+- **B. Ingestion completion.** Done: garbled-table filter (code + tests, pushed), table-of-contents rule, backup of the index
+  before the polish at `D:\backup_cgrag\index_before_polish`. NOT done: `scripts/reclean_profiles.py --apply` (removes ~1,560
+  profiles of 15 garbled table chunks; run it when nothing else holds the index); the column-wise-table problem; re-extracting
+  the affected papers (`scripts/ingest.py --force <stems>`); final `scripts/ingest_metrics.py`; `docs/ingestion_report.md`.
+  *Column-wise tables:* the layout model sometimes returns a table whose cells each hold a whole column joined by `<br>`
+  (RAG p6 Tables 1+2 merged side by side, DistilBERT p3 Tables 2+3, RoBERTa p9 Tables 6+7, ...). `pdf_loader.pipe_table` turns
+  `<br>` into spaces, so those tables are not "structured" and their numbers are lost. Scan result (`scripts/scan_stacked.py`,
+  log `data/index/scan_stacked.log`): 11 of 350 layout tables (3%) are column-wise - RAG p6, DistilBERT p3, TinyBERT p11,
+  GPT-3 p19/46/63, Llama 2 p6/61/62/63 - so a full unstacker is disproportionate; do a simple line-wise unstack or accept
+  the loss and list it as a limitation. RoBERTa p9 (Tables 6+7 merged) is a different case: side-by-side tables in one box. Options: unstack by lines, or rebuild the grid from the words inside the table
+  box and split side-by-side tables at a repeated "Model" header. mT5 Tables 10/11 are recognised but have no caption.
+  Size-only row labels ("7B") in LLaMA / Llama 2: repair only where a full-word family sits on a neighbouring row.
+- **C. Online-side changes to build**, each behind a config flag and listed below as a departure to confirm:
+  (1) *E2B -> 12B escalation*, `[features] escalation`. Escalate on an OUTCOME only, never on "E2B disagrees with the rules"
+  (that fires on ~80% of questions and is slower than always using 12B): E2B output unusable; retrieval weak (top rerank
+  score < -2.0 or < 2 chunks kept) -> 12B re-plans; any "not covered" verdict of the E2B Applicability agent -> 12B second
+  opinion before a scope warning is shown. (2) *Stage 6 profile-guided retrieval*, `[features] profile_guided_retrieval`: when
+  a condition is missing, ask the profile store which chunks record it (e.g. language = Kannada + NLI) and add them. Reason:
+  with 28 papers the Kannada NLI question IS answerable (IndicXNLI in 2212.05409: mBERT 58.6, XLM-R 71.5, MuRIL 74.0,
+  IndicBERT+Samanantar 74.7; 100 Kannada profiles) yet the pipeline still says "not covered" - a false scope warning from a
+  retrieval miss. The earlier "Kannada correctly warned" demo was only true on the 10-paper index.
+- **D. Labelling (tomorrow)**: see "Labelling plan" below. **E. Docs / final report / second git block.**
+
 ## What this is
 BE major project, Dept. of ISE, BMSCE. Team: Shashank BU, Adarsh Kumar,Aditya Venkatesh Dhanakshirur, Tarun K.
 Guide: Dr. Rajeshwari K. A RAG pipeline over CS/AI research papers with two novel contributions:
@@ -44,6 +84,9 @@ Both read/write a shared **Condition Profile** store (SQLite) keyed to chunks, b
    are also labelled agents in the doc; they already run on an open-weights HF model (DeBERTa NLI) with code decisions —
    ask the user before making their decisions LLM-driven. Fine-tuning a model for an agent was discussed and deferred
    (low payoff, no labelled plans, unproven serving path for a tuned Gemma 4 in Ollama).
+7. **Autonomy (2026-09-30 evening).** The user delegated the evening's work ("you manage all things here, don't come asking
+   me"). Decide, document, keep every departure flagged in this file and behind a config flag, and report at the end.
+   Never stop mid-run to ask; the only outputs they expect are short status lines and the final report + git block.
 
 ## Timeline
 13 days from 2026-09-27 (so ends ~2026-10-10): ~10 days coding, last 3 for the paper. Day 3 = 2026-09-29.
@@ -70,7 +113,8 @@ Ollama 0.34.4's GPU discovery crashed (0xc0000005) and it silently ran on the **
 Visual C++ Redistributable (`winget install Microsoft.VCRedist.2015+.x64`, now 14.51) and restarting Ollama.
 Always check `ollama ps` shows **100% GPU** and `nvidia-smi` shows memory in use; CPU fallback looks like 10x slower.
 The server is started by hand with more parallel slots (not persistent; after a reboot start it again):
-`$env:OLLAMA_NUM_PARALLEL="8"; $env:OLLAMA_KEEP_ALIVE="60m"; & "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe" serve`
+`$env:OLLAMA_NUM_PARALLEL="8"; $env:OLLAMA_KEEP_ALIVE="60m"; $env:OLLAMA_MAX_LOADED_MODELS="2"; & "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe" serve`
+(`MAX_LOADED_MODELS=2` keeps 12B and E2B resident together; the server that runs now was started with these values.)
 
 ### LLM choice
 Pulled: `gemma4:e2b` (the doc's model), `gemma4:e4b`, `gemma4:12b`. `config.local.toml` (git-ignored, machine-specific)
@@ -82,7 +126,7 @@ profile-extraction call 2.0 / 3.2 / 6-7 s; a 300-token answer ~1.6 / 2.7 / 5.7 s
 parallel slots: ~1-2.5 min. Real pipeline on 12b with every agent on: 4-15 s per question when warm; the first question
 after start is ~30 s while the embedder/reranker/NLI load.
 
-## State of the build (2026-09-30, day 4; GitHub has the 56 commits of 2026-09-29, everything since is uncommitted)
+## State of the build (2026-09-30, day 4; GitHub has 56 commits of 09-29 + 24 of 09-30 up to a754fff; later work is uncommitted)
 **Offline path** (`src/cgrag/ingestion`, `models.py`, `stores`): PDF loader (`pdf_loader.py`: rows merged, headings,
 tables) -> section chunker (`chunker.py`, IMRaD tags, 2000/200) -> `tables.py` (aligns each number with its column
 header) -> Condition Profile Extractor (`profile_extractor.py`, LLM + JSON schema, per-table views, parallel calls,
@@ -108,12 +152,15 @@ React + Vite UI in `frontend/`; `scripts/ask.py` prints everything the pipeline 
 - Stage 9 `critic.py`: NLI per sentence vs the cited chunk (+ other sources: mis-citation repair), accepts a sentence
   backed by a recorded profile (number + metric + model, dev/test consistent) or whose numbers all occur in the source
   when NLI does not contradict; skips "the sources do not say" / conflict-echo sentences; regenerates once.
-**Tests:** 105 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
+**Tests:** 107 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
 API holds the index): `scripts/smoke_questions.py` (5 questions through the whole pipeline, per-stage timings, `--set
 KEY=VALUE` to compare model sizes per use case), `scripts/ingest_metrics.py` (store integrity, fill rates, table-cell recall,
 row-label accuracy), `scripts/audit_sample.py` (random profiles next to their source row, for a hand check),
 `scripts/table_detail.py <paper>` / `scripts/debug_view.py <chunk_id>` (why a table lost results), `scripts/reclean_profiles.py`
 (re-apply the extractor's clean-up rules to stored profiles, no LLM), `scripts/upload_test.py` (API end to end).
+Added the evening of 2026-09-30 (uncommitted until the user commits): Stage 1 campaign `scripts/build_stage1_dev.py`,
+`make_template_questions.py`, `prepare_query_data.py`, `train_query_classifier.py` (rewritten), `install_query_classifier.py`;
+table diagnostics `garble_report.py`, `table_finder.py <paper> <N>`, `raw_tables.py <paper> <page>`, `scan_stacked.py`.
 **Ingested (2026-09-30):** all 28 PDFs in `data/papers`: 1,385 chunks (292 recognised tables), 11,865 profiles, ~114 min of
 12B extraction (median 2.2 min/paper, max 15 min); ChromaDB / BM25 / profile store consistent, 0 broken links, vectors 1024-d.
 Profile fields filled: model / metric / value 100%, task 96%, dataset 95%, setting 98%, language 83%, model_size 37%,
@@ -130,22 +177,25 @@ agents on gemma4:e2b and the answer on 12b, first question ~30-47 s; /upload of 
 the new paper was queryable at once (removed again afterwards). E2B agents give the same coverage decisions as 12B agents
 (-2.4 s per question) but plan worse (E2B over-refines simple lookups, never decomposes a comparison). E2B on Stage 1 is
 NOT good enough (put "mBERT" into model_size, "XNLI" into task -> false scope warnings), so Stage 1 stays on 12B.
-**Not done yet:** SciBERT classifier not trained (`scripts/make_query_training_data.py`, `scripts/train_query_classifier.py`
-ready); no evaluation (gold sets, baselines, RAGAS not installed); no team-labelled field-level F1; rerank threshold and
-retrieval settings uncalibrated; UI never opened in a browser.
+**Not done yet:** SciBERT classifier not trained (campaign scripts written, never run - see RESUME HERE and
+`docs/stage1_campaign.md`); no evaluation (gold sets, baselines, RAGAS not installed); no team-labelled field-level F1;
+rerank threshold and retrieval settings uncalibrated; UI never opened in a browser.
 
 ## Departures from the architecture (all need the user's OK; ones marked * were not yet approved)
+(2026-09-30: the user delegated the decision on the five departures of that day - layout add-on, whole-table chunks, headers
+applied in code, statistics-table skip, clean-up rules - with "do what you think is best"; they are approved. The eight
+older ones marked * further down, and the flagged additions at the end of this list, still wait for an explicit OK.)
 - 12B Gemma instead of E2B (user's choice for the pilot; one-line switch). Stage 1 uses Gemma zero-shot until the SciBERT
   2-head classifier is trained (approved). Stage 2 and 6 are LLM agents with per-agent model settings (user requirement).
 - *Chunker leaves the References section out of the index (appendices are kept; so is a results table that a float
   pushed between the last reference and an appendix heading).
-- *(2026-09-30) Stage A finds tables and their captions with PyMuPDF's layout add-on (`pymupdf4llm` + `pymupdf-layout`,
+- (approved 2026-09-30) Stage A finds tables and their captions with PyMuPDF's layout add-on (`pymupdf4llm` + `pymupdf-layout`,
   same vendor, AGPL); text and headings still come from PyMuPDF. A caption is paired with its nearest table (best
   assignment per page). An unnumbered line is a section heading only if the whole line is a section name (a bold
   run-in title like "Multilingual Masked Language Models" flipped a paper to "methods").
-- *(2026-09-30) Stage B keeps each recognised table whole as a chunk of its own (caption + header + rows; over 5000 chars
+- (approved 2026-09-30) Stage B keeps each recognised table whole as a chunk of its own (caption + header + rows; over 5000 chars
   it is cut between rows with caption and header repeated) instead of cutting at 2000 characters.
-- *(2026-09-30) Stage C reads a recognised table through its header, applied in code ("row label: column = value; ..."),
+- (approved 2026-09-30) Stage C reads a recognised table through its header, applied in code ("row label: column = value; ..."),
   so the LLM no longer matches numbers to columns; tables whose caption is about statistics / model sizes are not sent
   to the LLM; the "Methods" context given to the LLM is prose only (a results table filed under "methods" is never used);
   cap raised to 60 chunks per paper. Clean-up rules after the LLM (`_normalize` / `_is_result`, and
@@ -170,12 +220,45 @@ retrieval settings uncalibrated; UI never opened in a browser.
   is not compared; settings are compared by tags (dev/test/zero-shot/...).
 - *Stage 8 adds passages found to cover a requested condition and shows the most relevant recorded results first.
 - *Stage 9 also accepts profile-backed and number-grounded sentences, repairs mis-citations, skips conflict echoes.
+- *(2026-09-30 evening, new) Stage C does not read garbled tables: a table with `tables.garble_ratio` >= 0.10 (cells that hold
+  three or more separate numbers, glued numbers such as "0.000.10", ". 83.83" fragments, "53.84 9" split numbers) is skipped
+  and its stored profiles are removed (`scripts/reclean_profiles.py`); a table of contents is not a table (dot leaders).
+  Affects 15 chunks / ~1,560 profiles (T5 Table 16, GPT-3 appendix, LLaMA MMLU detail, ELECTRA Table 8, ...).
+- *(2026-09-30 evening, new) Stage 1 training data: LLM-written questions + template questions with labels correct by
+  construction + a blind LLM relabel that keeps only questions whose label the second pass confirms + an assistant-written
+  dev set (`eval/stage1_dev.jsonl`, labels are the assistant's judgement, not gold). Training is automated and monitored by
+  sub-agents (see `docs/stage1_campaign.md`). The silver-label SciBERT itself was approved on 2026-09-29.
+- *(planned, not built yet) `[features] escalation`: E2B agents escalate to 12B on an outcome (unusable output / weak retrieval /
+  a "not covered" verdict before a scope warning). *(planned) `[features] profile_guided_retrieval`: Stage 6 also pulls chunks
+  recorded in the profile store for a missing condition. Both need the user's confirmation once built.
 
 ## Open questions for the user (recommendation in brackets)
 - A third "middle" complexity level? Doc and schema have two [keep two].
 - Make Stages 7 and 9 decisions LLM-driven too? They already use an open-weights NLI model [leave as is].
 - Joint condition coverage (a single finding matching all conditions) as an extra warning? Beyond the doc [propose, needs OK].
 - Final LLM (12B / e4b / e2b) and per-agent models; which machine produces the paper's numbers.
+- Orchestrator size (decided 2026-09-30 by the assistant under the user's delegation): E2B with the outcome-based escalation
+  to 12B above; revisit after SciBERT is trained (comparisons then come out "complex" and the code guardrail decomposes them).
+
+## Labelling plan (tomorrow, 2026-10-01; labels are an ANSWER KEY for the evaluation, never training data)
+Only one model is trained in the whole project: the Stage 1 SciBERT classifier, on LLM-written questions. Nothing is trained on
+the team's labels (30 questions / 50 pairs are far too few, and training on them would spoil the test). Three jobs:
+- **A. Profile check** (~300 random profiles from 10 papers: 6 easy - BERT, SQuAD 2.0, XNLI, XLM-R, GLUE, MuRIL - and 4 hard - T5,
+  GPT-3, LLaMA, Llama 2): per field OK / WRONG / MISSING against the source table row -> the doc's field-level F1. ~1 min each.
+- **B. Questions** (~30; 10 fully covered, 10 with one condition missing, 10 partly covered; each with intent + complexity,
+  the conditions it names, corpus coverage looked up in a corpus map, and the expected behaviour). ~5 min each. Trap example:
+  "How well do models perform on Kannada NLI?" IS covered (IndicXNLI); "XLM-R on XNLI for Kannada?" is NOT (XNLI has 15
+  languages, none Kannada). Never assume coverage. Intent/complexity also test SciBERT on real questions.
+- **C. Result pairs** (~50; two people label independently, a third settles; Cohen's kappa >= 0.6): EXPLAINED (tick which
+  condition differs: dataset version/split, model size, language, setting, other) / GENUINE / NOT COMPARABLE, judged from the
+  papers, not from the system's verdict. Real examples: human EM on SQuAD 82.3 vs 86.9 (v1.1 vs v2.0) = EXPLAINED; XLM-R XNLI
+  average 83.6 (translate-train-all, XLM-R paper) vs 79.2 (zero-shot, mT5 paper's row) = EXPLAINED (setting).
+Suggested split: Aditya + Tarun each label all 50 pairs; Adarsh + Shashank 150 profiles each; all four write 7-8 questions.
+Due 2026-10-03 (evaluation runs 10-04/05). Gemini (browser) is allowed as an ASSISTANT only (draft questions, explain table
+layouts, a second opinion after two humans labelled independently, pasted text only, prompt/date/model version recorded); it
+must not be the labeller of record (same model family as Gemma -> correlated errors; the doc requires human kappa). The
+official LLM baseline in the evaluation is local Gemma 12B with the same prompt. Never paste the architecture doc or the
+system's answers/labels into a chat tool. I offered to generate the three Excel sheets + a script that scores them (~1 h).
 
 ## How to run
 ```
@@ -210,13 +293,13 @@ Git push on this network sometimes fails once with "Recv failure: Connection was
 4. Retrieval / rerank settings and the agents' decisions are unmeasured; the LLM sometimes rates a comparison question
    "simple" (the Orchestrator agent compensates).
 
-## Next steps
-1. (done 2026-09-30: all 28 papers in, wide multilingual tables fixed.) Left in the extractor: citation-labelled rows
-   (map "Devlin et al. (2018)" to mBERT), group-label fragments, garbled appendix tables, ~15 missed result tables; and
-   the team's hand-check of ~10 papers (field-level F1, needs their labels). Optional speed-up (needs the user's OK): fill
-   table cells in code and let the LLM decide only the table-level conditions.
-2. Generate training questions and train the SciBERT classifier (it should also fix "comparison rated simple", which lets
-   the planner decompose comparisons - the E2B planner does not do that on its own).
+## Next steps (order of work; details in "RESUME HERE")
+1. Ingestion completion (stream B): apply the garble clean-up, decide/fix the column-wise tables, re-extract the affected
+   papers, final metrics + `docs/ingestion_report.md`. Left over on purpose: citation-labelled rows ("Devlin et al. (2018)" =
+   mBERT needs an alias step), group-label fragments in Llama 2, the team's hand-check (labelling, tomorrow).
+2. SciBERT campaign (stream A) per `docs/stage1_campaign.md`; then install the best checkpoint, run
+   `scripts/smoke_questions.py`, check that comparisons are "complex", write `docs/stage1_training_report.md`.
+2b. Build the escalation and profile-guided retrieval (stream C) with tests, flags and departure entries; smoke-test them.
 3. Start the API and open the UI in a browser; test upload; consider warming the models at API start. UI decision
    (user, 2026-09-30): keep it a simple Claude-style chat page for now and polish it late; it must keep showing the
    coverage bar and conflict badges (stage 10 of the doc). The page already sends chat history for follow-ups.
