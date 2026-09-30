@@ -52,7 +52,8 @@ class Pipeline:
         self.vectors = VectorStore(self.cfg.paths.chroma_dir)
         self.profiles = ProfileStore(self.cfg.paths.profile_db)
         self.retriever = HybridRetriever(self.vectors, BM25Store.load(self.cfg.paths.bm25_path), self.cfg.retrieval)
-        self.understand = QueryUnderstanding(self.llm, profiles=self.profiles)
+        self.understand = QueryUnderstanding(self._agent_llm(self.cfg.agents.understanding_model), profiles=self.profiles)
+        self.refine_llm = self._agent_llm(self.cfg.agents.refinement_model)
         self.orchestrator = OrchestratorAgent(self._agent_llm(self.cfg.agents.orchestrator_model), self.cfg.features)
         self.applicability = ApplicabilityAgent(
             self.profiles, self.cfg.applicability.max_reretrieve,
@@ -62,9 +63,9 @@ class Pipeline:
 
     def _agent_llm(self, model: str) -> OllamaLLM:
         """The LLM an agent uses: the shared one, or its own open-weights model when the config names one."""
-        if not model or model == self.cfg.llm.model:
+        if not model or model == self.llm.cfg.model:
             return self.llm
-        return OllamaLLM(self.cfg.model_copy(update={"llm": self.cfg.llm.model_copy(update={"model": model})}))
+        return OllamaLLM(self.cfg, model=model)
 
     def reload_indexes(self) -> None:
         """Pick up papers added since start-up (the keyword index is a file rebuilt after ingestion)."""
@@ -85,7 +86,7 @@ class Pipeline:
         queries = [question]
         if plan.refine:
             with t("3_refine"):
-                queries = refine(question, analysis, self.llm, decompose=plan.decompose)
+                queries = refine(question, analysis, self.refine_llm, decompose=plan.decompose)
             trace.append(f"3 queries: {queries}")
 
         with t("4_retrieve"):
@@ -97,7 +98,7 @@ class Pipeline:
         with t("2b_replan"):                     # the agent looks at what came back and may re-plan once
             review = self.orchestrator.review(question, plan, n_kept=len(kept), weak=weak)
         if review.action == "refine_and_retry":
-            queries = refine(question, analysis, self.llm, decompose=False)
+            queries = refine(question, analysis, self.refine_llm, decompose=False)
             candidates = self.retriever.retrieve(queries, analysis.intent)
             kept, weak = rerank_filter(question, candidates, self.cfg.retrieval)
             trace.append(f"2 re-plan ({review.reason or 'weak evidence'}): rewrote the question {queries} and searched again "
