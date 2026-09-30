@@ -1,0 +1,107 @@
+factual|simple|How many parameters does XLM-R large have?
+factual|simple|Which optimizer was used to pre-train RoBERTa?
+factual|simple|What vocabulary size does mT5 use?
+factual|simple|How many languages does MuRIL cover?
+factual|simple|What learning rate is used when fine-tuning BERT on SQuAD?
+factual|simple|Who introduced the SQuAD dataset?
+factual|simple|what is the size of the CC-100 corpus
+factual|simple|What is the maximum input length Longformer can handle?
+factual|simple|How many layers does BERT-base have?
+factual|simple|What is the hidden size of DistilBERT?
+factual|simple|Which tokenizer does T5 use?
+factual|simple|What does GLUE stand for?
+factual|simple|How many training examples does SQuAD 2.0 contain?
+factual|simple|what batch size did they use for pretraining ALBERT
+factual|simple|What is the size of the mC4 corpus?
+factual|simple|How many parameters does Llama 2 70B have?
+factual|simple|how many params in GPT-3
+factual|simple|electra small parameters
+factual|simple|How many tokens was LLaMA-65B trained on?
+factual|complex|Which corpora was XLM-R pre-trained on, and how many languages and tokens does each one contain?
+factual|complex|What are the layer counts, hidden sizes and parameter counts of the T5 model variants?
+factual|complex|Which datasets make up the GLUE benchmark and what task does each one test?
+factual|complex|What pre-training data, batch size and number of steps were used for RoBERTa?
+factual|complex|How many parameters, layers and attention heads does each LLaMA model size have?
+factual|complex|What are the sizes of the training, dev and test sets in XNLI and how many languages does it cover?
+factual|complex|which languages does mBERT cover and what data was it trained on
+factual|complex|What batch size and learning rate did DeBERTa use?
+method|simple|How does next sentence prediction work in BERT?
+method|simple|Explain how Sentence-BERT builds sentence embeddings.
+method|simple|How does dense passage retrieval score a passage against a question?
+method|simple|How does Longformer's sliding window attention work?
+method|simple|how does distillation train DistilBERT
+method|simple|How does the replaced token detection objective work?
+method|simple|How is MuRIL pre-trained?
+method|simple|Explain how retrieval-augmented generation works.
+method|simple|How does ALBERT factorize the embedding matrix?
+method|simple|Explain masked language modelling
+method|simple|how does sentence bert pooling work
+method|complex|Why did ALBERT share parameters across layers, and how does that differ from the way DistilBERT compresses BERT?
+method|complex|How does DeBERTa's disentangled attention differ from standard self-attention, and why does it improve results?
+method|complex|Why does ELECTRA train a discriminator instead of a generator, and how does that change the cost of pre-training compared with BERT?
+method|complex|How does retrieval-augmented generation combine a retriever and a generator, and what is the difference between the sequence and token variants?
+method|complex|Why did RoBERTa remove next sentence prediction, and how do its other training changes differ from BERT's?
+method|complex|How does T5 turn every task into text-to-text, and why did the authors choose that over task-specific heads?
+method|complex|How does XLM-R avoid the curse of multilinguality, and how does its data sampling differ from XLM's?
+method|complex|Explain how the Llama 2-Chat safety fine-tuning works and how it differs from the base model training.
+result|simple|What accuracy does XLM-R get on XNLI for Swahili?
+result|simple|What is the F1 of RoBERTa-large on SQuAD 2.0?
+result|simple|What top-20 retrieval accuracy does DPR get on Natural Questions?
+result|simple|What BLEU does T5-11B achieve on WMT English to German translation?
+result|simple|what did GPT-3 175B score on TriviaQA few-shot
+result|simple|How well does MuRIL do on Hindi XNLI?
+result|simple|What is BERT-large's score on MNLI-m?
+result|simple|Does Longformer work well on WikiHop?
+result|simple|What accuracy does mT5-XXL reach on XNLI zero-shot?
+result|simple|What is DistilBERT's GLUE macro score?
+result|simple|How does Llama 2 70B do on MMLU?
+result|simple|F1 of ELECTRA-large on SQuAD 2.0 dev
+result|simple|What EM does BERT-large get on SQuAD v1.1?
+result|simple|How did IndicBERT do on Kannada sentiment?
+result|simple|bert large squad 2.0 f1
+result|simple|xlm-r hindi xnli accuracy
+result|simple|mBERT accuracy for Urdu on XNLI
+result|simple|What is the human performance on SQuAD 2.0?
+result|simple|What F1 do humans get on SQuAD 1.1?
+result|simple|What is the accuracy of mBERT on Hindi XNLI in the translate-train setting?
+result|complex|How does XLM-R perform on XNLI across all fifteen languages?
+result|complex|What are the GLUE dev scores of BERT-base, RoBERTa-base and DistilBERT on every task?
+result|complex|What accuracies do the different mT5 model sizes get on XNLI in the zero-shot and translate-train settings?
+result|complex|Report Llama 2's results on the safety and helpfulness human evaluations.
+result|complex|What scores does IndicBERT get on each of the IndicXTREME tasks and languages?
+result|complex|What are the SQuAD 1.1 and 2.0 results for BERT-base and BERT-large on both dev and test?
+result|complex|How do the T5 model sizes score on GLUE, SuperGLUE and SQuAD?
+result|complex|What are LLaMA's zero-shot results on all the common sense reasoning benchmarks?
+result|complex|what do the different ALBERT sizes get on GLUE, SQuAD and RACE
+result|complex|What F1 does XLM-R get on MLQA for English and Hindi?
+result|complex|List the languages covered by IndicXNLI and the accuracy of IndicBERT on each.
+comparison|complex|How does XLM-R compare with mBERT on XNLI?
+comparison|complex|Is RoBERTa better than XLNet on SQuAD?
+comparison|complex|Which is better for Indian languages, MuRIL or mBERT?
+comparison|complex|Compare T5-Base and T5-Large on GLUE and SuperGLUE.
+comparison|complex|Do the papers agree on how well humans do on SQuAD?
+comparison|complex|bert vs distilbert speed and accuracy
+comparison|complex|Is Llama 2 70B better than GPT-3 175B on MMLU?
+comparison|complex|Which of the small BERT variants, TinyBERT or MobileBERT, keeps more of BERT's GLUE performance?
+comparison|complex|How do ALBERT and RoBERTa differ in accuracy on RACE?
+comparison|complex|xlm-r or mt5 for xnli
+comparison|complex|Do different papers report the same accuracy for BERT-large on MNLI?
+comparison|complex|Compare Sentence-BERT with plain BERT embeddings on STS.
+comparison|complex|How does DPR's retrieval accuracy compare to BM25 on Natural Questions and TriviaQA?
+comparison|complex|Is IndicBERT better than MuRIL on IndicXNLI?
+comparison|complex|T5 small vs T5 base glue
+comparison|complex|How much does RoBERTa improve over BERT on GLUE?
+comparison|complex|What are the main differences between the SQuAD 1.1 and 2.0 datasets?
+comparison|complex|How does BERT-base do on MRPC, and how does that compare with BERT-large?
+comparison|complex|What is the difference between BERT-base and BERT-large in size and performance?
+survey|complex|Give me an overview of pre-trained language models for Indian languages.
+survey|complex|What are the main techniques for compressing BERT?
+survey|complex|Summarize what these papers say about cross-lingual transfer.
+survey|complex|What approaches exist for handling long documents with transformers?
+survey|complex|Overview of retrieval-augmented approaches to question answering.
+survey|complex|What are the main pre-training objectives used by the models in these papers?
+survey|complex|what do we know about multilingual pretraining
+survey|complex|Summarize the evidence on how model size affects performance.
+survey|complex|What are the different ways papers evaluate safety of language models?
+survey|complex|Give an overview of benchmarks used to evaluate natural language understanding.
+survey|complex|What are the main limitations of BERT-style pre-training discussed across the papers?
