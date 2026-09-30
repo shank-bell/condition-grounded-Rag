@@ -32,7 +32,12 @@ PLAN_SYSTEM = (
     "check_contradictions: compare results across papers to tell genuine conflicts from differences caused by different "
     "experimental conditions. Use it for comparisons, for a reported number that several papers may report, and for "
     "'do the papers agree' questions. Skip it for definitions and how-it-works questions.\n"
-    "Return JSON with refine, decompose, check_contradictions and reason (one short sentence)."
+    "Return JSON with refine, decompose, check_contradictions and reason (one short sentence).\n"
+    "Examples of the decision (refine, decompose, check_contradictions):\n"
+    "- 'What accuracy does RoBERTa get on MNLI?' -> false, false, true (one clearly worded lookup of a reported number)\n"
+    "- 'How does DistilBERT compare with BERT-base on GLUE?' -> true, true, true (a comparison of two things)\n"
+    "- 'bert for hindi?? does it work' -> true, false, true (informal wording, one topic)\n"
+    "- 'What is next sentence prediction?' -> false, false, false (a definition)"
 )
 
 REVIEW_SYSTEM = (
