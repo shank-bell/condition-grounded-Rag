@@ -7,6 +7,7 @@ here. Rows whose cells cannot be matched to a header unambiguously are left exac
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 
 from .pdf_loader import is_table_row
 
@@ -87,3 +88,240 @@ def linearize(lines: list[str]) -> tuple[list[str], list[int]]:
                     out[r] = f"{split[0]}: {cells}"
         i = j + 1
     return out, rows
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Structured tables. The loader writes a table it recognised as   <caption>\n| header | ... |\n| row | ... |   so the
+# column of every number is known exactly; the header is applied here, in code, instead of trusting the LLM to count.
+# ---------------------------------------------------------------------------------------------------------------------
+_PIPE_ROW = re.compile(r"^\s*\|.*\|\s*$")
+_CELL_NUM = re.compile(r"^[\(\[]?[-+]?\d+(?:[.,]\d+)?(?:\s*±\s*\d+(?:\.\d+)?)?[%)\]]?$")
+_CELL_PAIR = re.compile(r"^[\(\[]?[-+]?\d+(?:\.\d+)?\s*/\s*(?:[-+]?\d+(?:\.\d+)?|[-–—])[%)\]]?$|^[-–—]\s*/\s*[-+]?\d+(?:\.\d+)?$")
+_DASHES = {"", "-", "–", "—"}
+_FOOTNOTE = re.compile(r"[\s†‡*§¶♠♣♦♥]+$")
+_PLAIN_NUMBER = re.compile(r"\d+(?:\.\d+)?")
+MAX_SUBHEADER_CELL = 14        # a header continuation row ("EM F1 EM F1") has short cells; a group label is a long sentence
+
+
+def is_pipe_row(line: str) -> bool:
+    return bool(_PIPE_ROW.match(line))
+
+
+def is_numeric_cell(cell: str) -> bool:
+    c = cell.strip()
+    return bool(_CELL_NUM.match(c) or _CELL_PAIR.match(c))
+
+
+def split_cells(line: str) -> list[str]:
+    body = line.strip()
+    body = body[1:] if body.startswith("|") else body
+    body = body[:-1] if body.endswith("|") else body
+    return [c.strip() for c in body.split("|")]
+
+
+@dataclass
+class ParsedTable:
+    caption: str
+    header: list[str]             # one name per column ("Dev EM"), "" where the column has none
+    rows: list[list[str]]         # every row after the header rows, cells as written
+
+
+def _is_subheader(row: list[str]) -> bool:
+    filled = [c for c in row if c]
+    return (len(filled) >= 2 and not any(is_numeric_cell(c) for c in filled)
+            and all(len(c) <= MAX_SUBHEADER_CELL for c in filled))
+
+
+def header_row_count(grid: list[list[str]]) -> int:
+    n = 1
+    while n < len(grid) and _is_subheader(grid[n]):
+        n += 1
+    return n if n < len(grid) else 1
+
+
+def _compose_header(rows: list[list[str]]) -> list[str]:
+    width = max(len(r) for r in rows)
+    parts: list[list[str]] = [[] for _ in range(width)]
+    for k, row in enumerate(rows):
+        row = row + [""] * (width - len(row))
+        if k < len(rows) - 1:                                      # "Dev" over "EM F1": a group label spans its blank cells
+            last = ""
+            for j in range(1, width):
+                if row[j]:
+                    last = row[j]
+                elif last:
+                    row[j] = last
+        for j, c in enumerate(row):
+            if c and c not in parts[j]:
+                parts[j].append(c)
+    return [" ".join(p) for p in parts]
+
+
+def parse_table(text: str) -> ParsedTable | None:
+    """A loader-written table (caption, then pipe rows) or None for anything else."""
+    lines = text.split("\n")
+    idx = [i for i, ln in enumerate(lines) if is_pipe_row(ln)]
+    if len(idx) < 2:
+        return None
+    caption = " ".join(ln.strip() for ln in lines[:idx[0]] if ln.strip())
+    grid = [split_cells(lines[i]) for i in idx]
+    if sum(is_numeric_cell(c) for c in grid[0][1:]) >= 2:           # no header row at all
+        return ParsedTable(caption, [], grid)
+    n_head = header_row_count(grid)
+    return ParsedTable(caption, _compose_header(grid[:n_head]), grid[n_head:])
+
+
+def is_structured_table(text: str) -> bool:
+    """A loader-written table with at least one row of numbers."""
+    t = parse_table(text)
+    return t is not None and any(is_numeric_cell(c) for row in t.rows for c in row[1:])
+
+
+_NON_RESULT_CAPTION = re.compile(
+    r"\b(statistics|hyper-?parameters?|model sizes?|dataset (?:sizes?|details|splits?)|data sizes?|corpus|corpora|training data)\b", re.I)
+_RESULT_CUE = re.compile(
+    r"\b(results?|accuracy|accuracies|f1|exact match|em|bleu|rouge|perplexity|scores?|performance|error|ablations?|"
+    r"comparison|compared?|outperform\w*|evaluations?|evaluated)\b", re.I)
+
+
+def is_statistics_table(caption: str) -> bool:
+    """Captions of tables that describe data or models ("Languages and statistics of the CC-100 corpus", "Details on
+    model sizes") and say nothing about results: not worth an LLM call."""
+    return bool(_NON_RESULT_CAPTION.search(caption)) and not _RESULT_CUE.search(caption)
+
+
+_ONLY_NUMBERS = re.compile(r"^[\d.,%\s\-–/]+$")
+_GLUED = re.compile(r"\d\.\d+\.\d|\.\d{2,}\.\d")
+_SPLIT_NUMBER = re.compile(r"^\d+\.\d+ \d$")             # "53.84 9": the next cell starts with the rest of a split number
+GARBLE_LIMIT = 0.10                                        # tables at or above this ratio are not read
+
+
+def garble_ratio(text: str) -> float:
+    """Share of a table's data cells that show the PDF text layer fell apart: a cell holding three or more separate numbers
+    (a column of a stacked table read as one cell), numbers glued together ("0.000.10"), or a fragment that starts with
+    ". ". A table with a high ratio cannot be read reliably, so its numbers are not turned into profiles."""
+    t = parse_table(text)
+    if t is None:
+        return 0.0
+    cells = [c.strip() for row in t.rows for c in row[1:] if c.strip()]
+    if not cells:
+        return 0.0
+    bad = 0
+    for c in cells:
+        if _CELL_PAIR.match(c):
+            continue
+        if ((len(_PLAIN_NUMBER.findall(c)) >= 3 and _ONLY_NUMBERS.match(c) and " " in c) or _GLUED.search(c) or c.startswith(". ")
+                or _SPLIT_NUMBER.match(c)):
+            bad += 1
+    return bad / len(cells)
+
+
+def _join_fragments(cells: list[str]) -> str:
+    """A label that spans several columns arrives cut at column borders ("... model o", "n English tra", "ining"):
+    glue a fragment that starts with a lower-case letter onto one that ends in a letter."""
+    out = ""
+    for c in cells:
+        if out and not (out[-1].isalpha() and c[:1].islower()):
+            out += " "
+        out += c
+    return out.strip()
+
+
+@dataclass
+class _Row:
+    label: str
+    context: str
+    pairs: list[str]
+    n_results: int
+
+
+def _rows(t: ParsedTable) -> list[_Row]:
+    parsed: list[list] = []                   # [label or "", context, pairs, n_results, context id]
+    context, ctx_id = "", 0
+    for cells in t.rows:
+        numeric = [is_numeric_cell(c) for c in cells[1:]]
+        if not any(numeric):                                       # a group label ("Monolingual baselines", "Ours")
+            text = _join_fragments([c for c in cells if c])
+            if text:
+                context, ctx_id = text, ctx_id + 1
+            continue
+        pairs = []
+        for j in range(1, len(cells)):
+            if cells[j] in _DASHES:
+                continue
+            name = t.header[j] if j < len(t.header) and t.header[j] else f"column {j + 1}"
+            pairs.append(f"{name} = {cells[j]}")
+        n = sum(len(_PLAIN_NUMBER.findall(c)) for c, ok in zip(cells[1:], numeric) if ok)
+        parsed.append([_FOOTNOTE.sub("", cells[0]), context, pairs, n, ctx_id])
+    for i in range(1, len(parsed)):                                # "mBERT" centred over two rows arrives as "BERT" / "m"
+        cur, prev = parsed[i], parsed[i - 1]
+        if cur[0] and len(cur[0]) <= 2 and cur[0].isalpha() and cur[0].islower() and prev[0][:1].isupper() and prev[4] == cur[4]:
+            prev[0] = cur[0] = cur[0] + prev[0]
+    labelled = [i for i, r in enumerate(parsed) if r[0]]
+    for i, r in enumerate(parsed):                                 # a group label centred over its rows sits on one of them
+        if r[0]:
+            continue
+        same = [k for k in labelled if parsed[k][4] == r[4]]
+        before = max((k for k in same if k < i), default=None)
+        after = min((k for k in same if k > i), default=None)
+        pick = after if after is not None and (before is None or after - i <= i - before) else before
+        r[0] = parsed[pick][0] if pick is not None else ""
+    return [_Row(r[0], r[1], r[2], r[3]) for r in parsed]
+
+
+def table_views(t: ParsedTable, max_results: int = 30) -> list[str]:
+    """What the LLM reads for a table: caption + column names + a few rows at a time, each written as
+    "row label: column = value; ...". Empty when the table has no numeric row."""
+    rows = _rows(t)
+    head = ([t.caption] if t.caption else []) + (["Columns: " + " | ".join(t.header)] if t.header else [])
+    views: list[str] = []
+    batch: list[_Row] = []
+    count = 0
+
+    def flush() -> None:
+        nonlocal batch, count
+        if not batch:
+            return
+        body, shown = [], None
+        for r in batch:
+            if r.context != shown:
+                if r.context:
+                    body.append(f"[{r.context}]")
+                shown = r.context
+            body.append(f"{r.label}: {'; '.join(r.pairs)}" if r.label else "; ".join(r.pairs))
+        views.append("\n".join(head + body))
+        batch, count = [], 0
+
+    for r in rows:
+        if batch and count + r.n_results > max_results:
+            flush()
+        batch.append(r)
+        count += r.n_results
+    flush()
+    return views
+
+
+def split_table_text(text: str, max_chars: int) -> list[str]:
+    """A table longer than max_chars is cut into parts of whole rows, each part starting with the caption and header."""
+    if len(text) <= max_chars:
+        return [text]
+    lines = text.split("\n")
+    idx = [i for i, ln in enumerate(lines) if is_pipe_row(ln)]
+    if len(idx) >= 2:
+        grid = [split_cells(lines[i]) for i in idx]
+        head_end = idx[header_row_count(grid) - 1] + 1
+    else:
+        head_end = 0
+    head, body = lines[:head_end], lines[head_end:]
+    parts: list[str] = []
+    cur: list[str] = []
+    size = sum(len(x) + 1 for x in head)
+    for ln in body:
+        if cur and size + len(ln) + 1 > max_chars:
+            parts.append("\n".join(head + cur))
+            cur, size = [], sum(len(x) + 1 for x in head)
+        cur.append(ln)
+        size += len(ln) + 1
+    if cur:
+        parts.append("\n".join(head + cur))
+    return parts
