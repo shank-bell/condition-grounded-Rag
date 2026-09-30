@@ -102,6 +102,15 @@ def metric_key(metric: str | None) -> str:
     return _METRIC_ALIASES.get(n, n)
 
 
+_PAIR_SPLIT = re.compile(r"\s*(?:-to-|\bto\b|→|->|–|—|/|-)\s*", re.I)
+
+
+def _language_pair(text: str) -> list[str]:
+    """['English', 'German'] for 'English-to-German' / 'en-de' / 'English → German'; [] when the text is not a pair."""
+    parts = [p for p in _PAIR_SPLIT.split(text.strip()) if p]
+    return parts if len(parts) == 2 else []
+
+
 def values_match(field: str, requested: str, observed: str) -> bool:
     """Does an observed value satisfy a requested condition? 'BERT' is satisfied by 'BERT-large', not by 'RoBERTa'."""
     if not requested or not observed:
@@ -117,7 +126,10 @@ def values_match(field: str, requested: str, observed: str) -> bool:
         return norm_version(requested) == norm_version(observed) or _num_equal(requested, observed)
     if field == "language":
         r, o = norm(requested), norm(observed)
-        return _LANG_ALIASES.get(r, r) == _LANG_ALIASES.get(o, o)
+        if _LANG_ALIASES.get(r, r) == _LANG_ALIASES.get(o, o):
+            return True
+        # a translation direction ("English-to-German") names two languages; a source that records either one is on topic
+        return any(_LANG_ALIASES.get(norm(p), norm(p)) == _LANG_ALIASES.get(o, o) for p in _language_pair(requested))
     if field == "model_size":
         pr, po = parse_params(requested), parse_params(observed)
         if pr is not None and po is not None:
