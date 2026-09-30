@@ -35,7 +35,7 @@ class IngestReport:
 
 class Ingestor:
     def __init__(self, llm: OllamaLLM | None = None, vectors: VectorStore | None = None, profiles: ProfileStore | None = None):
-        self.llm = llm or OllamaLLM()
+        self.llm = llm or OllamaLLM(model=get_settings().agents.extractor_model or None)
         self.vectors = vectors or VectorStore()
         self.profiles = profiles or ProfileStore()
 
