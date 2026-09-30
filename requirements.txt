@@ -1,5 +1,8 @@
 pydantic>=2.6
 pymupdf>=1.24
+pymupdf4llm>=1.27          # PyMuPDF's layout add-on: finds tables and their captions (AGPL, same vendor as PyMuPDF)
+pymupdf-layout>=1.27
+requests>=2.31             # scripts/upload_test.py
 langchain-text-splitters>=0.3
 sentence-transformers>=3.0
 transformers>=4.44
