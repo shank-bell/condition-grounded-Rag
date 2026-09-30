@@ -52,3 +52,12 @@ def test_differing_conditions_names_the_explanation():
 def test_claim_text_is_a_sentence():
     p = prof(model="BERT-large", dataset="SQuAD", dataset_version="1.1", metric="F1", value=90.9, setting="dev set")
     assert claim_text(p) == "BERT-large obtains 90.9 F1 on SQuAD 1.1 (dev set)."
+
+
+def test_a_translation_direction_is_matched_by_either_of_its_languages():
+    from cgrag.pipeline.conditions import values_match
+    assert values_match("language", "English-to-German", "German")
+    assert values_match("language", "English to German", "english")
+    assert values_match("language", "en-de", "de")
+    assert not values_match("language", "English-to-German", "French")
+    assert values_match("language", "Hindi", "Hindi") and not values_match("language", "Hindi", "Tamil")
