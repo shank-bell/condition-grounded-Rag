@@ -76,9 +76,13 @@ class CriticConfig(BaseModel):
 
 
 class AgentsConfig(BaseModel):
-    """A different open-weights model per agent (any Ollama tag, e.g. hf.co/<user>/<repo>). Empty = [llm].model."""
+    """A different open-weights model per LLM use case (any Ollama tag, e.g. hf.co/<user>/<repo>). Empty = [llm].model,
+    which is also the model that writes the answer (Stage 8)."""
     orchestrator_model: str = ""
     applicability_model: str = ""
+    understanding_model: str = ""
+    refinement_model: str = ""
+    extractor_model: str = ""
 
 
 class FeaturesConfig(BaseModel):
