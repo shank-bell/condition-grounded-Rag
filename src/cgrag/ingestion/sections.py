@@ -30,6 +30,19 @@ def parse_heading(text: str) -> tuple[str | None, str]:
     return (m.group("num"), m.group("title")) if m else (None, text.strip())
 
 
+_BARE_TITLES = re.compile(
+    r"^(abstract|introduction|related work|background|preliminaries|methods?|methodology|approach|model|experiments?|"
+    r"experimental (?:setup|results|evaluation)|evaluations?|results?(?: and discussions?)?|discussions?|analysis|"
+    r"conclusions?(?: and future work)?|future work|limitations|references|bibliography|acknowledge?ments?|"
+    r"appendix|appendices|supplementary (?:material|materials)|ethics statement|broader impacts?)[.:]?$", re.I)
+
+
+def is_bare_section_title(title: str) -> bool:
+    """An unnumbered line is a section heading only if the whole line is a section name ("Conclusion"); a bold run-in
+    title such as "Multilingual Masked Language Models" is a paragraph title, not the start of a "methods" section."""
+    return bool(_BARE_TITLES.match(title.strip()))
+
+
 def classify_heading(title: str) -> Section | None:
     """Label for a heading's title, or None if no keyword matches."""
     t = title.lower()
