@@ -25,8 +25,11 @@ class LLMResult:
 
 
 class OllamaLLM:
-    def __init__(self, settings: Settings | None = None):
+    def __init__(self, settings: Settings | None = None, model: str | None = None):
+        """`model` overrides [llm].model, so each use case (extractor, agents, answer) can run its own model size."""
         self.cfg = (settings or get_settings()).llm
+        if model and model != self.cfg.model:
+            self.cfg = self.cfg.model_copy(update={"model": model})
         self.client = ollama.Client(host=self.cfg.host)
 
     def chat(
