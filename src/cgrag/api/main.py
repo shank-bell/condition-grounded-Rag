@@ -79,7 +79,7 @@ def _ingest_job(job_id: str, pdf: Path) -> None:
         _jobs[job_id]["status"] = "running"
         try:
             p = _pipeline()
-            ing = Ingestor(p.llm, p.vectors, p.profiles)
+            ing = Ingestor(p._agent_llm(p.cfg.agents.extractor_model), p.vectors, p.profiles)
             report = ing.ingest(pdf, force=True)
             ing.rebuild_keyword_index()
             p.reload_indexes()
