@@ -14,8 +14,10 @@ from ..config import ChunkingConfig, get_settings
 from ..schemas import Chunk, Section
 from .pdf_loader import LoadedPaper
 from .sections import classify_heading, parse_heading
+from .tables import is_structured_table, split_table_text
 
 MIN_CHUNK_CHARS = 60
+TABLE_MAX_CHARS = 5000
 
 
 def label_elements(paper: LoadedPaper) -> list[tuple[Section, "object"]]:
@@ -61,9 +63,12 @@ def chunk_paper(paper: LoadedPaper, cfg: ChunkingConfig | None = None, *, keep_r
             runs.append((label, [el]))
 
     chunks: list[Chunk] = []
-    for label, els in runs:
-        if label == "references" and not keep_references:
-            continue
+
+    def add(label: Section, page: int, body: str) -> None:
+        chunks.append(Chunk(chunk_id=f"{paper.paper_id}:{len(chunks):04d}", paper_id=paper.paper_id,
+                            paper_title=paper.title, page=page, section=label, text=body))
+
+    def add_text(label: Section, els: list) -> None:
         text, starts, pages = "", [], []
         for i, el in enumerate(els):
             if text:
@@ -73,11 +78,24 @@ def chunk_paper(paper: LoadedPaper, cfg: ChunkingConfig | None = None, *, keep_r
             text += el.text
         for doc in splitter.create_documents([text]):
             body = doc.page_content.strip()
-            if len(body) < MIN_CHUNK_CHARS:
-                continue
-            page = pages[max(0, bisect_right(starts, doc.metadata["start_index"]) - 1)]
-            chunks.append(Chunk(
-                chunk_id=f"{paper.paper_id}:{len(chunks):04d}", paper_id=paper.paper_id,
-                paper_title=paper.title, page=page, section=label, text=body,
-            ))
+            if len(body) >= MIN_CHUNK_CHARS:
+                add(label, pages[max(0, bisect_right(starts, doc.metadata["start_index"]) - 1)], body)
+
+    for label, els in runs:
+        if label == "references" and not keep_references:
+            for el in els:
+                if el.kind == "table" and is_structured_table(el.text):
+                    for part in split_table_text(el.text, TABLE_MAX_CHARS):
+                        add("other", el.page, part)
+            continue
+        pending: list = []
+        for el in els:
+            if el.kind == "table" and is_structured_table(el.text):
+                add_text(label, pending)
+                pending = []
+                for part in split_table_text(el.text, TABLE_MAX_CHARS):
+                    add(label, el.page, part)
+            else:
+                pending.append(el)
+        add_text(label, pending)
     return chunks
