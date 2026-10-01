@@ -151,6 +151,29 @@ def values_match(field: str, requested: str, observed: str) -> bool:
     return len(r) >= 4 and len(o) >= 4 and (r in o or o in r)
 
 
+# A question names a benchmark SUITE ("GLUE") while the tables record its member tasks (CoLA, MRPC, ...). Used for COVERAGE only
+# (Stage 6, profile lookups): comparing a GLUE score with an MNLI accuracy (Stage 7) must keep using values_match.
+DATASET_SUITES = {
+    "glue": ("cola", "sst2", "mrpc", "stsb", "qqp", "mnli", "qnli", "rte", "wnli", "diagnostic"),
+    "superglue": ("boolq", "cb", "copa", "multirc", "record", "rte", "wic", "wsc"),
+    "xtreme": ("xnli", "pawsx", "panx", "wikiann", "udpos", "xquad", "mlqa", "tydiqa", "bucc", "tatoeba"),
+    "indicxtreme": ("indicxnli", "indiccopa", "indicsentiment", "indicxpara", "indicqa", "indicner", "indicxquad", "flores"),
+}
+
+
+def dataset_in_suite(requested: str, observed: str) -> bool:
+    """'CoLA' / 'MNLI-m' are tasks of the GLUE suite; 'XNLI' is not part of 'IndicXTREME' (nor 'IndicXNLI' of 'XTREME')."""
+    members = DATASET_SUITES.get(norm(requested))
+    o = norm(observed)
+    return bool(members) and o != norm(requested) and any(o == m or (len(m) >= 4 and o.startswith(m)) for m in members)
+
+
+def covers(field: str, requested: str, observed: str) -> bool:
+    """Does a recorded value cover a requested condition? `values_match`, plus: a suite named in the question is covered by
+    results on its member tasks."""
+    return values_match(field, requested, observed) or (field == "dataset" and dataset_in_suite(requested, observed))
+
+
 def _num_equal(a: str, b: str) -> bool:
     try:
         return float(norm_version(a)) == float(norm_version(b))
