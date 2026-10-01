@@ -30,7 +30,7 @@ class OllamaLLM:
         self.cfg = (settings or get_settings()).llm
         if model and model != self.cfg.model:
             self.cfg = self.cfg.model_copy(update={"model": model})
-        self.client = ollama.Client(host=self.cfg.host)
+        self.client = ollama.Client(host=self.cfg.host, timeout=self.cfg.request_timeout)
 
     def chat(
         self,
