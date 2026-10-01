@@ -18,6 +18,9 @@ INTENT_SECTIONS: dict[str, set[str]] = {
 }
 
 
+CARD_INTENTS = {"result", "comparison", "factual"}      # cards describe reported results; method / survey questions do not use them
+
+
 class HybridRetriever:
     def __init__(self, vectors: VectorStore, bm25: BM25Store, cfg: RetrievalConfig | None = None) -> None:
         self.vectors, self.bm25 = vectors, bm25
@@ -29,14 +32,19 @@ class HybridRetriever:
         rrf: dict[str, float] = {}
         chunks: dict[str, Chunk] = {}
         vectors = embed(queries)
+        use_cards = cfg.use_cards and intent in CARD_INTENTS
         for query, vec in zip(queries, vectors):
             for rank, (chunk, _) in enumerate(self.vectors.query(vec, cfg.dense_k), start=1):
                 chunks[chunk.chunk_id] = chunk
                 rrf[chunk.chunk_id] = rrf.get(chunk.chunk_id, 0.0) + 1.0 / (cfg.rrf_k + rank)
+            ranked_cards = self.vectors.query_cards(vec, cfg.dense_k) if use_cards else []   # what a chunk RECORDS, in a question's words
             sparse = self.bm25.search(query, cfg.bm25_k)
-            missing = [cid for cid, _ in sparse if cid not in chunks]
+            missing = [cid for cid in dict.fromkeys([c for c, _ in sparse] + [c for c, _ in ranked_cards]) if cid not in chunks]
             for chunk in self.vectors.get(missing):
                 chunks[chunk.chunk_id] = chunk
+            for rank, (cid, _) in enumerate(ranked_cards, start=1):
+                if cid in chunks:
+                    rrf[cid] = rrf.get(cid, 0.0) + 1.0 / (cfg.rrf_k + rank)
             for rank, (cid, _) in enumerate(sparse, start=1):
                 if cid in chunks:
                     rrf[cid] = rrf.get(cid, 0.0) + 1.0 / (cfg.rrf_k + rank)
