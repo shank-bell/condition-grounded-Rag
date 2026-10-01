@@ -20,6 +20,7 @@ class LLMConfig(BaseModel):
     extract_temperature: float = 0.0
     generate_temperature: float = 0.2
     parallel: int = 1
+    request_timeout: float = 240.0
 
 
 class ModelsConfig(BaseModel):
@@ -83,6 +84,7 @@ class AgentsConfig(BaseModel):
     understanding_model: str = ""
     refinement_model: str = ""
     extractor_model: str = ""
+    fallback_model: str = ""
 
 
 class FeaturesConfig(BaseModel):
@@ -92,6 +94,8 @@ class FeaturesConfig(BaseModel):
     contradiction: bool = True
     critic: bool = True
     profile_in_context: bool = True
+    escalation: bool = False
+    profile_guided_retrieval: bool = False
 
 
 class Settings(BaseModel):
