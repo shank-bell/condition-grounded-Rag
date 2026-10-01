@@ -59,6 +59,7 @@ class RetrievalConfig(BaseModel):
     rerank_threshold: float = -2.0
     section_boost: float = 0.15
     generate_top: int = 5
+    use_cards: bool = True       # retrieval cards (ingestion/cards.py): a card vector as a third ranking + keyword index + reranker text
 
 
 class ApplicabilityConfig(BaseModel):
@@ -96,6 +97,7 @@ class FeaturesConfig(BaseModel):
     profile_in_context: bool = True
     escalation: bool = False          # an agent on a small model hands a bad outcome to the fallback model (see AgentsConfig)
     profile_guided_retrieval: bool = False   # Stage 6 also pulls chunks whose profiles record a missing condition
+    joint_coverage: bool = False      # Stage 6 also requires model, dataset and language to be recorded TOGETHER (see applicability.py)
 
 
 class Settings(BaseModel):
