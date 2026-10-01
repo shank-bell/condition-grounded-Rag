@@ -11,7 +11,8 @@ the 28 papers in `data/papers` with `scripts/ingest_metrics.py` (no LLM; `--json
 | Papers | 28 (all indexed, all with profiles) |
 | Chunks | 1,385 (292 are recognised tables kept whole) |
 | Vectors / BM25 documents | 1,385 / 1,385, 1,024-dimensional BGE-M3 vectors |
-| Condition Profiles | **10,305** (11,865 extracted, 1,560 removed by the garbled-table rule below) in 284 chunks |
+| Condition Profiles | **10,275** (11,865 extracted, 1,560 removed by the garbled-table rule below, 30 by the junk-metric rule on 1 Oct) in 284 chunks |
+| Retrieval cards (1 Oct) | 284 chunks carry a card built from their profiles (mean 245 characters), a second vector each; `scripts/reindex_cards.py` rebuilds them in 16 s without an LLM (run it after `reclean_profiles.py --apply`; `ingest.py` builds them automatically) |
 | Integrity | 0 profiles pointing to a missing chunk, 0 broken Methods links, 0 papers without an extraction log |
 | Extraction time | ~114 min in total, median 2.2 min per paper (max 15 min, the two 60-page model reports) |
 
@@ -51,11 +52,18 @@ little higher, but that is not measured and is not claimed.
    LLaMA recall from 96 % to 18 % before it was fixed).
 8. **References are not indexed** (appendices are; a results table pushed between the last reference and an appendix is kept).
 
+9. **Junk metric names are dropped** (1 Oct): a metric that is one run of 20+ letters or longer than 45 characters (a mis-read header such as
+   `mniorpasasatsdtateuravg`, 30 profiles of one IndicXTREME table) is not a result (`profile_extractor._junk_metric`).
+10. **Retrieval cards** (1 Oct, `ingestion/cards.py`): see `docs/oct1_fixes_and_metrics.md` section 4. The profile store is read, not changed.
+
 ## Known limitations (frozen, to be stated in the paper)
-- **Column-wise tables** (11 of 350 layout tables, 3 %): the layout model sometimes returns one cell per column with the rows
-  joined by `<br>` (RAG p6, DistilBERT p3, TinyBERT p11, GPT-3 p19/46/63, Llama 2 p6/61/62/63), or two tables merged side by
-  side (RoBERTa p9). They stay in the index as text chunks (retrieval finds them and the answer can read them) but yield no
-  reliable profiles. Decision: not worth a general un-stacker for 3 % of the tables.
+- **Column-wise tables** (11 of 350 layout tables flagged by `scripts/scan_stacked.py`; looked at one by one on 1 Oct): only **two
+  are real stacked / side-by-side merges** (RAG p6, DistilBERT p3 Tables 2+3 - parameter counts and timings, plus RoBERTa p9 Tables
+  6+7). The rest are not column-wise: TinyBERT p11 is an ordinary table with three-line headers (parsed correctly), GPT-3 p19 is two
+  blocks with a repeated header row, Llama 2 p6 mixes a figure and a table, Llama 2 p61 is prose examples. The merged ones stay in
+  the index as text chunks (retrieval finds them and the answer can read them) but yield no reliable profiles. Decision: no
+  un-stacker. NOTE: the DistilBERT GLUE table itself (Table 1) was extracted fine (31 profiles); an earlier claim in this project
+  that "DistilBERT vs BERT-base on GLUE has no profile because the layout model missed its tables" was wrong.
 - **Tables missed by the layout model**: ~15 result tables (DistilBERT T2/T3, RoBERTa T7, T5 T11/T13-15, RAG T2, mT5 T10/T11
   has no caption, ...). T5 cell recall is 22 % because its 1,400 appendix cells were garbled and removed.
 - **Rows labelled by a citation** ("Devlin et al. (2018)" meaning mBERT) are not resolved to a model name.
