@@ -94,9 +94,10 @@ def make_plan(analysis: QueryAnalysis, features: FeaturesConfig) -> Plan:
 
 
 class OrchestratorAgent:
-    def __init__(self, llm: OllamaLLM, features: FeaturesConfig) -> None:
+    def __init__(self, llm: OllamaLLM, features: FeaturesConfig, fallback: OllamaLLM | None = None) -> None:
         self.llm = llm
         self.features = features
+        self.fallback = fallback      # the bigger model an unusable plan or a weak retrieval is escalated to (or None)
 
     def plan(self, question: str, analysis: QueryAnalysis, n_papers: int) -> Plan:
         rules = make_plan(analysis, self.features)
@@ -107,12 +108,23 @@ class OrchestratorAgent:
                   f"ANALYSIS: intent={analysis.intent}, complexity={analysis.complexity}, "
                   f"conditions named={analysis.conditions.specified() or 'none'}\n"
                   f"LIBRARY: {n_papers} papers")
+        escalated = False
         try:
             decision, _ = self.llm.structured(prompt, PlanDecision, system=PLAN_SYSTEM, max_tokens=160, retries=0)
         except ValueError:
-            rules.notes.append("planner: agent output unusable, fixed rules used")
-            return rules
-        return self._within_guardrails(decision, rules, analysis)
+            if self.fallback is None:
+                rules.notes.append("planner: agent output unusable, fixed rules used")
+                return rules
+            try:                                     # escalation: the small model's plan was unusable
+                decision, _ = self.fallback.structured(prompt, PlanDecision, system=PLAN_SYSTEM, max_tokens=160, retries=0)
+                escalated = True
+            except ValueError:
+                rules.notes.append("planner: agent output unusable (also on the fallback model), fixed rules used")
+                return rules
+        plan = self._within_guardrails(decision, rules, analysis)
+        if escalated:
+            plan.notes.append(f"planner escalated to {self.fallback.cfg.model} (the small model's plan was unusable)")
+        return plan
 
     @staticmethod
     def _within_guardrails(decision: PlanDecision, rules: Plan, analysis: QueryAnalysis) -> Plan:
@@ -142,8 +154,12 @@ class OrchestratorAgent:
         if not self.features.orchestrator_agent:
             return Review(action="refine_and_retry", reason="weak evidence") if weak else Review()
         prompt = f"QUESTION: {question}\nOBSERVATION: the search kept {n_kept} passages; weak evidence: {weak}."
+        # Escalation: this call only happens after a weak or thin retrieval, so the bigger model (when configured) re-plans.
+        llm = self.fallback or self.llm
         try:
-            review, _ = self.llm.structured(prompt, Review, system=REVIEW_SYSTEM, max_tokens=100, retries=0)
+            review, _ = llm.structured(prompt, Review, system=REVIEW_SYSTEM, max_tokens=100, retries=0)
         except ValueError:
             return Review(action="refine_and_retry" if weak else "proceed", reason="agent output unusable")
+        if self.fallback is not None:
+            review.reason = f"{review.reason.strip()} [decided by {self.fallback.cfg.model}]".strip()
         return review
