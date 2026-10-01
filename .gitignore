@@ -17,3 +17,8 @@ data/index/*
 eval/runs/
 frontend/node_modules/
 frontend/dist/
+
+# Labelling workbooks and their private answer keys (built by scripts/make_label_sheets.py); the filled-in results go to eval/labels/
+data/labelling/
+# Experimental index copies
+data/index_exp/
