@@ -10,8 +10,9 @@ Files written into --run-dir (what a monitor reads):
   errors.json    misclassified questions of the best checkpoint (val, dev A, dev B) + per-class scores
 A monitor ends the run early by creating the file STOP in --run-dir; the best checkpoint is kept.
 
-Evaluation sets: val (held-out clean questions), dev A (decisions), dev B (never used for decisions; reported at the end).
-composite = mean(val intent F1, val complexity F1, dev-A intent accuracy, dev-A complexity accuracy).
+Evaluation sets: val (held-out clean questions; val_llm = its LLM-written part, templates left out), dev A (decisions), dev B
+(logged, but its errors were read once after iteration 1). Split C of the dev file is NOT scored here (scripts/eval_stage1.py, at the end).
+composite = mean(val_llm intent F1, val_llm complexity F1, dev-A intent accuracy, dev-A complexity accuracy).
 """
 from __future__ import annotations
 
@@ -120,9 +121,10 @@ def main() -> None:
 
     train = [r for r in read(args.train) if r["intent"] in INTENTS and r["complexity"] in COMPLEXITIES]
     val = read(args.val)
+    val_llm = [r for r in val if r.get("source") not in ("template", "seed")]
     dev = read(args.dev) if args.dev.exists() else []
     dev_a, dev_b = [r for r in dev if r.get("split") == "A"], [r for r in dev if r.get("split") == "B"]
-    print(f"train {len(train)} | val {len(val)} | dev A {len(dev_a)} B {len(dev_b)} | iteration {args.iteration}", flush=True)
+    print(f"train {len(train)} | val {len(val)} ({len(val_llm)} LLM-written) | dev A {len(dev_a)} B {len(dev_b)} | iteration {args.iteration}", flush=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     name = cfg.models.query_classifier
@@ -151,13 +153,18 @@ def main() -> None:
 
     def evaluate(epoch: int) -> bool:
         nonlocal best, best_preds
-        sets = {"val": val, "dev_a": dev_a, "dev_b": dev_b}
+        sets = {"val": val, "val_llm": val_llm, "dev_a": dev_a, "dev_b": dev_b}
         preds = {k: predict(model, tok, v, device) for k, v in sets.items() if v}
         sc = {k: score(sets[k], p) for k, p in preds.items()}
-        parts = [sc["val"]["intent_f1"], sc["val"]["cx_f1"]] + ([sc["dev_a"]["intent_acc"], sc["dev_a"]["cx_acc"]] if "dev_a" in sc else [])
+        # Template questions repeat their wording, so they inflate the validation score: the composite uses the LLM-written
+        # part of the validation set whenever it is big enough.
+        main = "val_llm" if len(val_llm) >= 30 else "val"
+        parts = [sc[main]["intent_f1"], sc[main]["cx_f1"]] + ([sc["dev_a"]["intent_acc"], sc["dev_a"]["cx_acc"]] if "dev_a" in sc else [])
         composite = round(sum(parts) / len(parts), 4)
         line = {"kind": "eval", "iteration": args.iteration, "epoch": epoch, "step": step, "composite": composite,
                 "val_intent_f1": sc["val"]["intent_f1"], "val_cx_f1": sc["val"]["cx_f1"], "val_intent_acc": sc["val"]["intent_acc"], "val_cx_acc": sc["val"]["cx_acc"]}
+        if "val_llm" in sc:
+            line.update({"val_llm_n": sc["val_llm"]["n"], "val_llm_intent_f1": sc["val_llm"]["intent_f1"], "val_llm_cx_f1": sc["val_llm"]["cx_f1"]})
         for k in ("dev_a", "dev_b"):
             if k in sc:
                 line.update({f"{k}_intent_acc": sc[k]["intent_acc"], f"{k}_cx_acc": sc[k]["cx_acc"], f"{k}_joint_acc": sc[k]["joint_acc"]})
