@@ -5,8 +5,9 @@
 from __future__ import annotations
 
 import threading
+import time
 import uuid
-from functools import lru_cache
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
@@ -16,7 +17,27 @@ from pydantic import BaseModel, Field
 from ..config import get_settings
 from ..schemas import QueryResponse
 
-app = FastAPI(title="Condition-Grounded Scientific RAG")
+_warm: dict = {"status": "starting", "seconds": None, "models": {}, "error": None}
+
+
+def _warm_up() -> None:
+    """Build the pipeline and load every model in the background, so the server answers /health at once and the first question
+    finds the models loaded (a cold first question took 30-100 s)."""
+    t0 = time.perf_counter()
+    try:
+        _warm["models"] = _pipeline().warm_up()
+        _warm.update(status="ready", seconds=round(time.perf_counter() - t0, 1))
+    except Exception as err:                       # a failed warm-up must not stop the server: questions still load models on demand
+        _warm.update(status="failed", error=f"{type(err).__name__}: {err}")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    threading.Thread(target=_warm_up, daemon=True, name="warm-up").start()
+    yield
+
+
+app = FastAPI(title="Condition-Grounded Scientific RAG", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_methods=["*"], allow_headers=["*"])
@@ -37,17 +58,28 @@ class QueryRequest(BaseModel):
     history: list[Turn] = Field(default_factory=list, max_length=20)
 
 
-@lru_cache(maxsize=1)
+_pipeline_lock = threading.Lock()
+_pipeline_obj = None
+
+
 def _pipeline():
-    from ..pipeline.run import Pipeline
-    return Pipeline()
+    """One shared pipeline; the lock stops a question that arrives during warm-up from building a second one."""
+    global _pipeline_obj
+    with _pipeline_lock:
+        if _pipeline_obj is None:
+            from ..pipeline.run import Pipeline
+            _pipeline_obj = Pipeline()
+        return _pipeline_obj
 
 
 @app.get("/health")
 def health() -> dict:
+    """Light: reports the warm-up state; counts appear once the pipeline exists (the UI can show "warming up")."""
+    if _warm["status"] == "starting":
+        return {"status": "starting", "warm": _warm}
     p = _pipeline()
     return {"status": "ok", "llm": p.cfg.llm.model, "chunks": p.vectors.count(), "profiles": p.profiles.count(),
-            "papers": len(_paper_rows())}
+            "papers": len(_paper_rows()), "warm": _warm}
 
 
 @app.post("/query", response_model=QueryResponse)
