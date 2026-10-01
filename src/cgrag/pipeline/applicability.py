@@ -77,10 +77,12 @@ class Evidence:
 
 
 class ApplicabilityAgent:
-    def __init__(self, profiles: ProfileStore, max_reretrieve: int = 1, llm: OllamaLLM | None = None) -> None:
+    def __init__(self, profiles: ProfileStore, max_reretrieve: int = 1, llm: OllamaLLM | None = None,
+                 fallback: OllamaLLM | None = None) -> None:
         self.profiles = profiles
         self.max_reretrieve = max_reretrieve
         self.llm = llm
+        self.fallback = fallback if llm is not None else None    # the bigger model that gives a second opinion (escalation)
 
     # ---------- tool: profile lookup ----------
 
@@ -124,13 +126,14 @@ class ApplicabilityAgent:
             lines.append(line + (" | text mentions: " + " || ".join(mentions) if mentions else ""))
         return "\n".join(lines)
 
-    def _judge(self, question: str, todo: dict[str, str], settled: dict[str, str], evidence: list[Evidence]) -> Judgement | None:
+    def _judge(self, question: str, todo: dict[str, str], settled: dict[str, str], evidence: list[Evidence],
+               llm: OllamaLLM | None = None) -> Judgement | None:
         prompt = (f"QUESTION: {question}\n"
                   f"SETTLED BY THE PROFILE LOOKUP: {', '.join(f'{f}={v}' for f, v in settled.items()) or 'nothing'}\n"
                   f"TO JUDGE: {', '.join(f'{f}={v}' for f, v in todo.items())}\n"
                   f"EVIDENCE:\n{self._digest(todo, evidence)}")
         try:
-            out, _ = self.llm.structured(prompt, _judgement_model(len(todo)), system=SYSTEM, max_tokens=500, retries=0)
+            out, _ = (llm or self.llm).structured(prompt, _judgement_model(len(todo)), system=SYSTEM, max_tokens=500, retries=0)
         except ValueError:
             return None
         return out
@@ -147,15 +150,17 @@ class ApplicabilityAgent:
 
     # ---------- the check ----------
 
-    def _assess(self, requested: dict[str, str], chunks: list[RetrievedChunk], question: str) -> tuple[ApplicabilityResult, str]:
-        """Coverage of each requested condition by these passages, and the agent's search query for what is missing."""
+    def _assess(self, requested: dict[str, str], chunks: list[RetrievedChunk], question: str,
+                llm: OllamaLLM | None = None) -> tuple[ApplicabilityResult, str]:
+        """Coverage of each requested condition by these passages, and the agent's search query for what is missing.
+        `llm` overrides the agent's own model (the escalation's second opinion)."""
         evidence = self._evidence(chunks, list(requested))
         by_id = {e.chunk_id: e for e in evidence}
         covering = self._lookup(requested, evidence)
         todo = {f: v for f, v in requested.items() if not covering[f]}
         query, notes = "", []
-        judged = self._judge(question, todo, {f: v for f, v in requested.items() if f not in todo}, evidence) \
-            if todo and self.llm is not None else None
+        judged = self._judge(question, todo, {f: v for f, v in requested.items() if f not in todo}, evidence, llm) \
+            if todo and (llm or self.llm) is not None else None
         for field, wanted in todo.items():
             # the LLM may write the condition as "language" or as "language=Kannada": compare the field name only
             verdict = next((v for v in (judged.verdicts if judged else [])
@@ -213,5 +218,13 @@ class ApplicabilityAgent:
             kept = research(terms, query) if query else research(terms)
             result, query = self._assess(requested, kept, question)
             retried = True
+        escalated = False
+        if result.missing and self.fallback is not None:
+            # Escalation: the small model says "not covered" (or its output was unusable). Before a scope warning is
+            # shown, the bigger model judges the same evidence once; its verdict replaces the small model's.
+            result, _ = self._assess(requested, kept, question, llm=self.fallback)
+            escalated = True
         result.re_retrieved = retried
+        result.escalated = escalated
+        result.profile_guided = bool(getattr(research, "guided_ids", None))
         return kept, result
