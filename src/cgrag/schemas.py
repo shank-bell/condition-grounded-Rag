@@ -26,6 +26,7 @@ class Chunk(BaseModel):
     page: int
     section: Section = "other"
     text: str
+    card: str = ""            # retrieval card built from the chunk's profiles (ingestion/cards.py); used by retrieval only
 
 
 class ExtractedProfile(BaseModel):
@@ -99,6 +100,7 @@ class ApplicabilityResult(BaseModel):
     warning: str | None = None
     reasoning: str = ""            # the agent's short notes on the conditions the profiles could not settle
     profile_guided: bool = False   # chunks were added because their profiles record a missing condition
+    joint_covered: bool | None = None   # model + dataset + language recorded TOGETHER by one result? None = not checked (fewer than two named)
     escalated: bool = False        # the larger fallback model gave a second opinion on a "not covered" verdict
 
 
