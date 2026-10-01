@@ -11,6 +11,7 @@ generate_temperature = 0.2
 [agents]
 orchestrator_model = ""
 applicability_model = ""
+fallback_model = ""
 
 [models]
 embedder = "BAAI/bge-m3"
@@ -64,3 +65,5 @@ applicability = true
 contradiction = true
 critic = true
 profile_in_context = true
+escalation = true
+profile_guided_retrieval = true
