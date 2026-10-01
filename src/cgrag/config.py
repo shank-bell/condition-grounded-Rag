@@ -59,6 +59,7 @@ class RetrievalConfig(BaseModel):
     rerank_threshold: float = -2.0
     section_boost: float = 0.15
     generate_top: int = 5
+    use_cards: bool = True
 
 
 class ApplicabilityConfig(BaseModel):
@@ -96,6 +97,7 @@ class FeaturesConfig(BaseModel):
     profile_in_context: bool = True
     escalation: bool = False
     profile_guided_retrieval: bool = False
+    joint_coverage: bool = False
 
 
 class Settings(BaseModel):
