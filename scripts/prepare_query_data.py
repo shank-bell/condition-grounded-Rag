@@ -56,6 +56,29 @@ def digest(question: str) -> str:
     return hashlib.sha1(key(question).encode("utf-8")).hexdigest()[:16]
 
 
+PREFIXES = ["please tell me ", "quick question: ", "hey, ", "can you tell me ", "i want to know ", "so, ", "question - "]
+
+
+def perturb(question: str, rnd: random.Random) -> str:
+    """The way a real user types: lower case, no question mark, a typo, a chatty prefix. The label does not change."""
+    q = question
+    roll = rnd.random()
+    if roll < 0.35:
+        q = q.lower().rstrip("?").strip()
+    elif roll < 0.7:
+        words = q.split()
+        idx = [i for i, w in enumerate(words) if len(w) >= 5 and w.isalpha()]
+        if idx:
+            i = rnd.choice(idx)
+            j = rnd.randrange(1, len(words[i]) - 1)
+            w = words[i]
+            words[i] = w[:j] + w[j + 1] + w[j] + w[j + 2:]                 # two neighbouring letters swapped
+            q = " ".join(words)
+    else:
+        q = rnd.choice(PREFIXES) + (q[0].lower() + q[1:] if q[:2].isalpha() and not q[:2].isupper() else q)
+    return q
+
+
 def main() -> None:
     cfg = get_settings()
     ap = argparse.ArgumentParser()
@@ -63,6 +86,8 @@ def main() -> None:
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--relabel", action="store_true", help="blind LLM pass over questions not clean by construction")
     ap.add_argument("--relabel-all", action="store_true", help="also relabel templates and seeds (diagnostic; they stay clean)")
+    ap.add_argument("--augment", type=float, default=0.0,
+                    help="add a perturbed copy (typo / lower case / chatty prefix) of this fraction of the TRAIN questions")
     ap.add_argument("--val-frac", type=float, default=0.12)
     ap.add_argument("--seed", type=int, default=3)
     ap.add_argument("--cache", type=Path, default=cfg.paths.index_dir / "query_runs" / "relabel_cache.jsonl")
@@ -100,15 +125,20 @@ def main() -> None:
             try:
                 out, _ = llm.structured(f"Question: {r['question']}", Label, system=RUBRIC, temperature=0.0, max_tokens=40, retries=0)
                 return {"h": digest(r["question"]), "intent": out.intent, "complexity": out.complexity}
-            except ValueError:
+            except Exception:                                 # unusable JSON or a timed-out request: the question stays unlabelled
                 return None
 
-        with ThreadPoolExecutor(max_workers=max(1, cfg.llm.parallel)) as pool:
-            new = [d for d in pool.map(judge, todo) if d]
-        with args.cache.open("a", encoding="utf-8") as fh:
-            for d in new:
-                cache[d["h"]] = d
-                fh.write(json.dumps(d) + "\n")
+        args.cache.parent.mkdir(parents=True, exist_ok=True)
+        done = 0
+        with ThreadPoolExecutor(max_workers=max(1, cfg.llm.parallel)) as pool, args.cache.open("a", encoding="utf-8") as fh:
+            for d in pool.map(judge, todo):
+                done += 1
+                if d:
+                    cache[d["h"]] = d
+                    fh.write(json.dumps(d) + "\n")
+                if done % 200 == 0:                           # progress + durable cache: a re-run resumes where this stopped
+                    fh.flush()
+                    print(f"  relabelled {done}/{len(todo)}", flush=True)
 
     agree = defaultdict(lambda: [0, 0, 0, 0])                 # per source-kind: n, intent agree, complexity agree, both
     for r in rows:
@@ -142,13 +172,24 @@ def main() -> None:
 
     train, val_clean = split(clean, args.val_frac)
     _, val_noisy = split(noisy, args.val_frac) if noisy else ([], [])
+    if args.augment > 0:                                       # only the training side: the validation sets stay as written
+        copies = []
+        for r in rnd.sample(train, int(len(train) * args.augment)):
+            q = perturb(r["question"], rnd)
+            if key(q) not in seen and q != r["question"]:
+                seen.add(key(q))
+                copies.append({**r, "question": q, "source": f"augment:{r.get('source', 'llm')}"})
+        train += copies
+        rnd.shuffle(train)
+        print(f"augmented {len(copies)} train questions (typos / lower case / chatty prefixes)")
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for name, data in (("train", train), ("val_clean", val_clean), ("val_noisy", val_noisy)):
         (args.out_dir / f"{name}.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in data), encoding="utf-8")
     stats = {
         "questions": len(rows), "clean": len(clean), "noisy": len(noisy), "train": len(train), "val_clean": len(val_clean), "val_noisy": len(val_noisy),
         "train_by_class": {f"{i}/{c}": n for (i, c), n in sorted(Counter((r["intent"], r["complexity"]) for r in train).items())},
-        "train_by_source": dict(Counter(r.get("source", "?").split(":")[0] if r.get("source") in ("template", "seed") else "llm" for r in train)),
+        "train_by_source": dict(Counter(r["source"].split(":")[0] if r.get("source", "").split(":")[0] in ("template", "seed", "augment") else "llm"
+                                        for r in train)),
         "agreement": {f"{i}/{c}/{s}": {"n": a[0], "intent": round(a[1] / a[0], 3), "complexity": round(a[2] / a[0], 3), "both": round(a[3] / a[0], 3)}
                       for (i, c, s), a in sorted(agree.items())},
     }
