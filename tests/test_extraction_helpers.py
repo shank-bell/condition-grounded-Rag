@@ -1,6 +1,6 @@
 """Regression tests for the parts of stage C that were debugged on real papers (BERT tables)."""
 from cgrag.ingestion.pdf_loader import is_table_row
-from cgrag.ingestion.profile_extractor import _normalize, _views, salvage_profiles
+from cgrag.ingestion.profile_extractor import _is_result, _junk_metric, _normalize, _views, salvage_profiles
 from cgrag.ingestion.tables import linearize
 from cgrag.schemas import ExtractedProfile
 
@@ -142,3 +142,11 @@ def test_version_glued_to_dataset_name_is_split():
     assert (q.dataset, q.dataset_version) == ("SST-2", None)
     r = _normalize(ExtractedProfile(dataset="SQuAD", dataset_version="2.0", value=1.0))
     assert r.dataset_version == "2.0"
+
+
+def test_a_metric_made_of_a_long_run_of_letters_is_a_misread_header_not_a_metric():
+    assert _junk_metric("mniorpasasatsdtateuravg") and _junk_metric("x" * 50)
+    for real in ("accuracy", "F1", "exact match", "Spearman correlation", "top-20 accuracy", "preferred metric", "R-L"):
+        assert not _junk_metric(real)
+    junk = ExtractedProfile(model="MuRIL", metric="mniorpasasatsdtateuravg", value=68.2)
+    assert not _is_result(junk) and _is_result(junk.model_copy(update={"metric": "average"}))
