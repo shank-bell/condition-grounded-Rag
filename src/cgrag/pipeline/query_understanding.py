@@ -15,7 +15,7 @@ import re
 from ..llm import OllamaLLM
 from ..schemas import QUERY_CONDITION_FIELDS, QueryAnalysis, QueryConditions
 from ..stores.profile_store import ProfileStore
-from .conditions import model_family, norm, setting_tags, split_version
+from .conditions import TASK_WORDS, model_family, norm, setting_tags, split_version
 from .intent_classifier import IntentClassifier
 
 SYSTEM = (
@@ -77,6 +77,8 @@ def _in_question(field: str, value: str, question: str) -> bool:
 def clean_conditions(conditions: QueryConditions, question: str) -> QueryConditions:
     """Keep only conditions the question really states, and put each one in its proper field."""
     kept = {f: v for f, v in conditions.specified().items() if _in_question(f, v, question)}
+    if kept.get("dataset") and norm(kept["dataset"]) in TASK_WORDS:
+        kept.setdefault("task", kept.pop("dataset"))           # "NLI" / "question answering" is a task, not a dataset
     dataset = kept.get("dataset")
     if dataset and "dataset_version" not in kept:              # "SQuAD 2.0" is the dataset SQuAD, version 2.0
         name, version = split_version(dataset)
@@ -97,7 +99,7 @@ def _find(name: str, text: str) -> re.Match | None:
 def vocabulary_conditions(question: str, vocab: dict[str, list[str]]) -> dict[str, str]:
     """Dataset, version, model and language written literally in the question."""
     found: dict[str, str] = {}
-    for name in sorted({d for d in vocab.get("dataset", []) if len(d) >= 3}, key=len, reverse=True):
+    for name in sorted({d for d in vocab.get("dataset", []) if len(d) >= 3 and norm(d) not in TASK_WORDS}, key=len, reverse=True):
         m = _find(name, question)
         if m:
             found["dataset"] = name
