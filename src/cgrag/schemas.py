@@ -96,6 +96,8 @@ class ApplicabilityResult(BaseModel):
     re_retrieved: bool = False
     warning: str | None = None
     reasoning: str = ""
+    profile_guided: bool = False
+    escalated: bool = False
 
 
 class ContradictionPair(BaseModel):
