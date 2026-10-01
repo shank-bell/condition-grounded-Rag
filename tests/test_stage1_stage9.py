@@ -68,6 +68,14 @@ def test_ablation_flags_switch_stages_off():
 
 # ---------- text helpers ----------
 
+def test_an_abbreviation_does_not_end_a_sentence():
+    from cgrag.pipeline.text import split_sentences
+    text = ("DistilBERT is much smaller (66 million parameters vs. BERT-base at 110 million). Devlin et al. (2019) report 79.5 on GLUE. "
+            "Languages differ, e.g. Hindi and Tamil. See Fig. 3 for details.")
+    assert [s[:12] for s in split_sentences(text, min_chars=8)] == ["DistilBERT i", "Devlin et al", "Languages di", "See Fig. 3 f"]
+    assert split_sentences(text, min_chars=8)[0].endswith("110 million).")
+
+
 def test_citation_parsing():
     assert citations("BERT scores 90.9 F1 [1][3]. Also [2, 4].") == [1, 3, 2, 4]
     assert strip_citations("BERT scores 90.9 F1 [1].") == "BERT scores 90.9 F1."
