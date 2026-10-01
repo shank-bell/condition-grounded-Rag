@@ -52,6 +52,7 @@ rerank_keep = 10
 rerank_threshold = -2.0      # cross-encoder logit; calibrate on real data
 section_boost = 0.15         # soft boost for chunks whose section matches the intent
 generate_top = 5
+use_cards = true             # retrieval cards: a short summary of what a chunk records (from its profiles) for dense + keyword search and the reranker
 
 [applicability]
 max_reretrieve = 1
@@ -75,3 +76,4 @@ critic = true
 profile_in_context = true
 escalation = true            # a small-model agent hands a bad outcome (unusable output, weak retrieval, "not covered") to fallback_model
 profile_guided_retrieval = true   # Stage 6 also pulls chunks whose profiles record a missing condition
+joint_coverage = true        # Stage 6 also requires the named model, dataset and language to be recorded TOGETHER by one result (see docs/oct1_fixes_and_metrics.md)
