@@ -1,0 +1,48 @@
+comparison|complex|Is DeBERTa better than RoBERTa on MNLI?
+comparison|complex|Which is better for Hindi, mBERT or XLM-R?
+comparison|complex|How does Llama 2 70B compare with the original LLaMA 65B on MMLU?
+comparison|complex|Do the ELECTRA and BERT papers agree on how well BERT-large does on GLUE?
+comparison|complex|mT5 vs XLM-R on XNLI zero-shot
+comparison|complex|What is the difference between RAG-Token and RAG-Sequence?
+comparison|complex|Compare the pre-training data of RoBERTa and XLNet.
+comparison|complex|Does distillation hurt accuracy more than the pruning approach?
+comparison|complex|Which model gets a higher F1 on SQuAD 2.0, ALBERT or XLNet?
+comparison|complex|Are the reported SQuAD human performance numbers consistent across papers?
+result|simple|What accuracy does XLM-R get on XNLI for Swahili?
+result|simple|What is BERT-large's F1 on SQuAD 1.1?
+result|simple|mT5-XXL score on XQuAD
+result|simple|How well does IndicBERT do on IndicXNLI for Tamil?
+result|simple|What GLUE score does RoBERTa reach?
+result|simple|What is LLaMA-65B's accuracy on MMLU?
+result|complex|Give the XNLI accuracy of XLM-R for every language.
+result|complex|What are BERT's scores on all the GLUE tasks?
+result|complex|List the results of Llama 2 across the safety benchmarks.
+result|complex|How do the different mT5 model sizes perform on XQuAD?
+result|complex|Show the accuracy of MuRIL, mBERT and XLM-R on all IndicXNLI languages.
+result|complex|What are the results of the T5 variants across GLUE, SuperGLUE and SQuAD?
+factual|simple|How many attention heads does BERT-large have?
+factual|simple|What is the training corpus of GPT-3?
+factual|simple|Which dataset is used to pre-train MuRIL?
+factual|simple|what is the context window of llama 2
+factual|simple|What is the mask ratio used in BERT's masked language modelling?
+factual|simple|What does the acronym RAG stand for?
+factual|complex|What are the layer counts, hidden sizes and parameter counts of the ALBERT configurations?
+factual|complex|List the pre-training corpora used for XLM-R and their sizes.
+factual|complex|What batch size, learning rate and number of steps were used to pre-train RoBERTa?
+factual|complex|Which languages does MuRIL support and which scripts do they use?
+method|simple|How does next sentence prediction work in BERT?
+method|simple|Why does ELECTRA train a discriminator instead of a generator?
+method|simple|How does DPR encode passages?
+method|simple|How does SBERT produce sentence embeddings?
+method|simple|explain how disentangled attention works
+method|simple|why does XLNet use permutation language modeling
+method|complex|How does RAG retrieve documents and how does it combine them during generation?
+method|complex|Explain how DistilBERT is trained and why the triple loss is used.
+method|complex|How does mT5 handle so many languages, and how was its vocabulary built?
+method|complex|How were the Llama 2 chat models fine-tuned, and what role did reinforcement learning play?
+survey|complex|Give me an overview of multilingual pre-trained language models.
+survey|complex|What are the main approaches to making BERT smaller?
+survey|complex|Summarize what the papers say about evaluating toxicity in language models.
+survey|complex|What is known about cross-lingual transfer for low-resource Indian languages?
+survey|complex|Overview of retrieval-augmented generation
+survey|complex|What are the main pre-training objectives used across these papers?
