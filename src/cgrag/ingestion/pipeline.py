@@ -12,6 +12,7 @@ from ..models import embed
 from ..stores.bm25_store import BM25Store
 from ..stores.profile_store import ProfileStore
 from ..stores.vector_store import VectorStore
+from .cards import build_card
 from .chunker import chunk_paper
 from .pdf_loader import load_pdf
 from .profile_extractor import extract_paper
@@ -54,11 +55,17 @@ class Ingestor:
         profiles, stats = extract_paper(chunks, self.llm)                   # C
         t["extract"] = time.perf_counter() - t0
         t0 = time.perf_counter()
+        by_chunk: dict[str, list] = {}
+        for p in profiles:
+            by_chunk.setdefault(p.chunk_id, []).append(p)
+        chunks = [c.model_copy(update={"card": build_card(by_chunk.get(c.chunk_id, []))}) for c in chunks]    # retrieval cards (cards.py)
         vectors = embed([c.text for c in chunks])                           # D
+        carded = [c.card for c in chunks if c.card]
+        card_vectors = embed(carded) if carded else None
         t["embed"] = time.perf_counter() - t0
         self.vectors.delete_paper(paper_id)
         self.profiles.delete_paper(paper_id)
-        self.vectors.add(chunks, vectors)
+        self.vectors.add(chunks, vectors, card_vectors)
         self.profiles.add_many(profiles)
         self.profiles.log_extraction(paper_id, stats.chunks_extracted, len(profiles), self.llm.cfg.model, t["extract"])
         return IngestReport(
