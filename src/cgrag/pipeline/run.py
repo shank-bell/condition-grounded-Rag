@@ -7,12 +7,13 @@
 from __future__ import annotations
 
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from functools import lru_cache
 
 from ..config import Settings, get_settings
 from ..llm import OllamaLLM
-from ..models import rerank_scores
+from ..models import embed, get_nli, rerank_scores
 from ..schemas import ApplicabilityResult, ClaimCheck, ContradictionPair, QueryResponse, RetrievedChunk
 from ..stores.bm25_store import BM25Store
 from ..stores.profile_store import ProfileStore
@@ -24,7 +25,7 @@ from .generate import generate, select_sources
 from .orchestrator import OrchestratorAgent
 from .query_understanding import QueryUnderstanding
 from .refinement import refine
-from .rerank import rerank_filter
+from .rerank import rerank_filter, rerank_text
 from .respond import respond
 from .retrieval import HybridRetriever
 
@@ -63,7 +64,7 @@ class Pipeline:
         self.orchestrator = OrchestratorAgent(orchestrator_llm, self.cfg.features, self._escalation_target(orchestrator_llm))
         self.applicability = ApplicabilityAgent(
             self.profiles, self.cfg.applicability.max_reretrieve, llm=applicability_llm,
-            fallback=self._escalation_target(applicability_llm))
+            fallback=self._escalation_target(applicability_llm), joint=self.cfg.features.joint_coverage)
         self.contradictions = ContradictionResolver(self.profiles, self.cfg.contradiction)
         self.critic = ClaimChecker(self.cfg.critic)
 
@@ -79,11 +80,44 @@ class Pipeline:
             return None
         return self.fallback_llm
 
+    def warm_up(self) -> dict[str, float]:
+        """Load every local model once - embedder, reranker, NLI, SciBERT and each Ollama model the pipeline uses - so the first
+        real question is not the slow one (cold, it takes 30-100 s). Returns seconds per model.
+
+        The Ollama models load side by side (a separate server, in threads). The torch models load one after another in this
+        thread: `from_pretrained` sets a process-wide default dtype while it builds a model, so two loads at once can leave a model
+        half fp16, half fp32 ("mat1 and mat2 must have the same dtype")."""
+        llms = {m.cfg.model: m for m in (self.llm, self.refine_llm, self.understand.llm, self.orchestrator.llm,
+                                         self.applicability.llm, self.fallback_llm) if m is not None}
+        seconds: dict[str, float] = {}
+
+        def timed(name: str, fn) -> None:
+            t0 = time.perf_counter()
+            fn()
+            seconds[name] = round(time.perf_counter() - t0, 1)
+
+        torch_jobs = {"embedder": lambda: embed(["warm up"]),
+                      "reranker": lambda: rerank_scores("warm up", ["warm up"]),
+                      "nli": lambda: get_nli().probs([("warm up", "warm up")])}
+        if self.understand.classifier:
+            torch_jobs["scibert"] = lambda: self.understand.classifier.predict("warm up")
+        with ThreadPoolExecutor(max_workers=max(1, len(llms))) as pool:
+            futures = [pool.submit(timed, f"ollama:{name}", lambda m=m: m.chat([{"role": "user", "content": "Reply with OK."}],
+                                                                              max_tokens=3, temperature=0.0))
+                       for name, m in llms.items()]
+            for name, fn in torch_jobs.items():
+                timed(name, fn)
+            for future in futures:
+                future.result()
+        return seconds
+
     def reload_indexes(self) -> None:
         """Pick up papers added since start-up (the keyword index is a file rebuilt after ingestion)."""
         self.retriever.bm25 = BM25Store.load(self.cfg.paths.bm25_path)
 
-    def run(self, question: str, history: list[dict] | None = None) -> QueryResponse:
+    def run(self, question: str, history: list[dict] | None = None, stop_after: str | None = None) -> QueryResponse:
+        """The whole pipeline. `stop_after="applicability"` returns right after Stage 6 (analysis, coverage, scope warning, the kept
+        passages) without generating an answer: what the evaluation of scope warnings needs, in a third of the time."""
         t, trace = _Timer(), []
         t0 = time.perf_counter()
         if self.vectors.count() == 0:
@@ -121,14 +155,26 @@ class Pipeline:
             with t("6_applicability"):
                 kept, applicability = self.applicability.run(
                     analysis.conditions.specified(), kept,
-                    self._research(question, queries, analysis.intent, kept, analysis.conditions.specified()), question)
+                    self._research(question, queries, analysis.intent, kept, analysis.conditions.specified()), question,
+                    joint_fetch=self._joint_fetch(question))
             trace.append(f"6 coverage {applicability.coverage:.2f}, missing {applicability.missing or 'none'}"
                          + (", re-retrieved" if applicability.re_retrieved else "")
                          + (", profile-guided" if applicability.profile_guided else "")
+                         + (", conditions recorded together" if applicability.joint_covered else "")
+                         + (", NOT recorded together" if applicability.joint_covered is False else "")
                          + (f", second opinion by {self.fallback_llm.cfg.model}" if applicability.escalated else "")
                          + (f" | agent: {applicability.reasoning}" if applicability.reasoning else ""))
         elif self.cfg.features.applicability:
             applicability = ApplicabilityResult()
+        if weak and applicability is not None and applicability.checks and not applicability.missing:
+            # The cross-encoder cannot read results tables (even with their retrieval card it scores the Kannada NLI table -3.9, below
+            # the -2.0 threshold), but the profiles can: when every condition the question names is recorded in the kept passages the
+            # evidence is not "weak", and telling the generator so would put a bogus "scope warning" into the answer.
+            weak = False
+            trace.append("4 weak-evidence flag withdrawn: every condition named in the question is recorded in the kept passages")
+        if stop_after == "applicability":
+            t.ms["total"] = (time.perf_counter() - t0) * 1000
+            return respond(question, "", kept[: self.cfg.retrieval.generate_top], analysis, applicability, [], [], False, trace, t.ms)
 
         contradictions: list[ContradictionPair] = []
         if plan.check_contradictions and len(kept) >= 2:
@@ -185,9 +231,17 @@ class Pipeline:
         research.guided_ids = []
         return research
 
+    def _scored_chunks(self, question: str, ids: list[str], limit: int) -> list[RetrievedChunk]:
+        """The best `limit` of these chunks by the reranker (not thresholded: a profile that records the conditions is the evidence)."""
+        chunks = self.vectors.get(ids) if ids else []
+        if not chunks:
+            return []
+        scores = rerank_scores(question, [rerank_text(c, self.cfg.retrieval.use_cards) for c in chunks])      # the question settles ties
+        best = sorted(zip(chunks, scores), key=lambda cs: cs[1], reverse=True)[:limit]
+        return [RetrievedChunk(chunk=c, score=0.0, rerank_score=float(s)) for c, s in best]
+
     def _profile_guided(self, question: str, requested: dict[str, str], terms: list[str], have: set[str]) -> list[RetrievedChunk]:
-        """Chunks the profile store says record a missing condition, scored against the question (not thresholded:
-        the profile is the evidence that the passage is on the condition)."""
+        """Chunks the profile store says record a missing condition (together with the other named ones)."""
         if not self.cfg.features.profile_guided_retrieval or not requested:
             return []
         ids: list[str] = []
@@ -195,12 +249,18 @@ class Pipeline:
         for field in fields:
             ids += [cid for cid in self.profiles.chunks_recording(requested, field, PROFILE_GUIDED_POOL)
                     if cid not in have and cid not in ids]
-        chunks = self.vectors.get(ids) if ids else []
-        if not chunks:
-            return []
-        scores = rerank_scores(question, [c.text for c in chunks])          # the question settles ties between candidates
-        best = sorted(zip(chunks, scores), key=lambda cs: cs[1], reverse=True)[:PROFILE_GUIDED_SLOTS * len(fields)]
-        return [RetrievedChunk(chunk=c, score=0.0, rerank_score=float(s)) for c, s in best]
+        return self._scored_chunks(question, ids, PROFILE_GUIDED_SLOTS * len(fields))
+
+    def _joint_fetch(self, question: str):
+        """For Stage 6's joint coverage: when results that record the named conditions together exist but none of their chunks was
+        retrieved, add the best of them to the evidence."""
+        def fetch(kept: list[RetrievedChunk], ids: list[str]) -> list[RetrievedChunk]:
+            have = {rc.chunk.chunk_id for rc in kept}
+            if have & set(ids):
+                return kept
+            merged = list(kept) + self._scored_chunks(question, ids, PROFILE_GUIDED_SLOTS)
+            return sorted(merged, key=lambda rc: rc.rerank_score if rc.rerank_score is not None else rc.score, reverse=True)
+        return fetch
 
 
 @lru_cache(maxsize=1)
