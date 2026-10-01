@@ -31,6 +31,8 @@ from .text import split_sentences
 MAX_REPORTED = 6
 MAX_TEXTUAL = 2
 MAX_SENTENCES_PER_CHUNK = 30
+# a reported result: a decimal ("83.6") or a percentage ("97%"). Not "2019" in a citation, not the 6 of "BERT6" or "66 million".
+_NUMBER = re.compile(r"(?<![\w.])\d+\.\d+(?!\w)|(?<![\w.])\d+(?:\.\d+)?\s?%")
 TEXT_RELEVANCE = 0.0          # cross-encoder score a key sentence must reach to count as being about the question
 MIN_SHARED_WORDS = 2          # two sentences can only contradict each other if they talk about the same things
 _STOP = frozenset(
@@ -55,11 +57,19 @@ def same_subject(a: ConditionProfile, b: ConditionProfile) -> bool:
 
 
 def relevant(x: ConditionProfile, y: ConditionProfile, requested: dict[str, str] | None) -> bool:
-    """When the question names a model or a dataset, a conflict matters only if both results are about it."""
-    for field in ("model", "dataset"):
+    """When the question names a model, a dataset or a language, a conflict matters only if both results are about it (a question
+    about Kannada is not answered by a disagreement between two Hindi results). Results with no recorded language are taken to
+    be English, so they still count when the question asks about English."""
+    for field in ("model", "dataset", "language"):
         want = (requested or {}).get(field)
-        if want and not all(any(values_match(field, want, v) for v in observed_values(p, field)) for p in (x, y)):
-            return False
+        if not want:
+            continue
+        for p in (x, y):
+            seen = observed_values(p, field)
+            if field == "language" and not seen and norm(want) == "english":
+                continue
+            if not any(values_match(field, want, v) for v in seen):
+                return False
     return True
 
 
@@ -138,7 +148,10 @@ class ContradictionResolver:
         if not pairs:
             return []
         chunk_by_id = {rc.chunk.chunk_id: rc.chunk for pair in pairs for rc in pair}
-        sentences = {cid: split_sentences(c.text)[:MAX_SENTENCES_PER_CHUNK] for cid, c in chunk_by_id.items()}
+        # Only sentences that report a number can contradict each other as RESULTS: "We compare TinyBERT with ..." and "We
+        # compare our MobileBERT with ..." make NLI say "contradiction" (different subjects), and that is not a conflict.
+        sentences = {cid: [s for s in split_sentences(c.text)[:MAX_SENTENCES_PER_CHUNK] if _NUMBER.search(s)]
+                     for cid, c in chunk_by_id.items()}
         flat = [(cid, s) for cid, ss in sentences.items() for s in ss]
         if not flat:
             return []
