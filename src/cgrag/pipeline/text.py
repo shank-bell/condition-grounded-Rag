@@ -3,7 +3,11 @@ from __future__ import annotations
 
 import re
 
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\[\(\"'“])")
+# A full stop followed by a capital ends a sentence - unless it ends an abbreviation: "66M parameters vs. BERT-base", "Devlin et al. (2018)",
+# "e.g. Hindi", "Fig. 3". (A sentence split in the middle makes the critic judge a fragment.)
+_ABBREVIATIONS = ("vs", "al", "e.g", "i.e", "Fig", "Figs", "Eq", "Eqs", "cf", "approx", "No", "Sec", "Tab", "Dr")
+_NOT_AN_ABBREVIATION = "".join(rf"(?<!\b{re.escape(a)}\.)" for a in _ABBREVIATIONS)
+_SENTENCE_END = re.compile(rf"(?<=[.!?]){_NOT_AN_ABBREVIATION}\s+(?=[A-Z0-9\[\(\"'“])")
 _CITATION = re.compile(r"\[(\d+(?:\s*,\s*\d+)*)\]")
 _WORD = re.compile(r"[a-z0-9]+")
 
