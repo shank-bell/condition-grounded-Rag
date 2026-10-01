@@ -33,6 +33,7 @@ class ProfileStore:
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.lock = threading.Lock()
+        self._cache: list[ConditionProfile] | None = None          # every profile, for chunks_recording()
         with self.lock:
             self.db.executescript(_SCHEMA)
 
@@ -41,6 +42,7 @@ class ProfileStore:
         with self.lock, self.db:
             self.db.executemany(
                 f"INSERT OR REPLACE INTO profiles ({','.join(_COLS)}) VALUES ({','.join('?' * len(_COLS))})", rows)
+            self._cache = None
 
     def log_extraction(self, paper_id: str, chunks_processed: int, n_profiles: int, llm: str, seconds: float) -> None:
         with self.lock, self.db:
@@ -55,6 +57,7 @@ class ProfileStore:
         with self.lock, self.db:
             self.db.execute("DELETE FROM profiles WHERE paper_id=?", (paper_id,))
             self.db.execute("DELETE FROM extraction_log WHERE paper_id=?", (paper_id,))
+            self._cache = None
 
     @staticmethod
     def _row(r: sqlite3.Row) -> ConditionProfile:
@@ -80,6 +83,33 @@ class ProfileStore:
     def all(self) -> list[ConditionProfile]:
         with self.lock:
             return [self._row(r) for r in self.db.execute("SELECT * FROM profiles ORDER BY profile_id")]
+
+    def chunks_recording(self, requested: dict[str, str], missing: str, limit: int = 4) -> list[str]:
+        """Chunks whose profiles record the `missing` condition, best first (Stage 6, profile-guided retrieval).
+
+        Only a chunk with ONE profile that records the missing condition AND every other requested condition counts:
+        for {language: Kannada, task: NLI} that is a Kannada NLI result, not a Kannada QA result and not an NLI result in
+        Hindi; for {language: Kannada, dataset: XNLI} nothing qualifies (XNLI has no Kannada), so no chunk is added and the
+        scope warning stays honest. Ties are ordered by how many matching profiles the chunk holds."""
+        from ..pipeline.conditions import observed_values, values_match
+        wanted = requested.get(missing)
+        if not wanted:
+            return []
+        with self.lock:
+            if self._cache is None:
+                self._cache = [self._row(r) for r in self.db.execute("SELECT * FROM profiles")]
+            profiles = self._cache
+        scores: dict[str, list[int]] = {}                       # chunk_id -> [best score, matching profiles]
+        for p in profiles:
+            if not any(values_match(missing, wanted, v) for v in observed_values(p, missing)):
+                continue
+            s = 1 + sum(1 for f, w in requested.items()
+                        if f != missing and any(values_match(f, w, v) for v in observed_values(p, f)))
+            entry = scores.setdefault(p.chunk_id, [0, 0])
+            entry[0], entry[1] = max(entry[0], s), entry[1] + 1
+        every = len(requested)                                   # the missing condition plus all the others
+        ranked = sorted((cid for cid, (s, _) in scores.items() if s == every), key=lambda cid: -scores[cid][1])
+        return ranked[:limit]
 
     def vocabulary(self) -> dict[str, list[str]]:
         """Distinct values recorded per condition field: the names the paper store already knows."""
