@@ -31,6 +31,14 @@ def test_version_glued_to_the_dataset_is_split_and_task_is_not_a_dataset_name():
     assert real_task.specified() == {"task": "question answering", "dataset": "SQuAD"}
 
 
+def test_a_task_abbreviation_the_llm_put_in_the_dataset_field_is_moved_to_task():
+    got = clean_conditions(QueryConditions(dataset="NLI", language="Kannada"), "How well do models perform on Kannada NLI?")
+    assert got.specified() == {"task": "NLI", "language": "Kannada"}
+    kept = clean_conditions(QueryConditions(task="natural language inference", dataset="NLI"),
+                            "How do models do on NLI (natural language inference)?").specified()
+    assert kept == {"task": "natural language inference"}          # an existing task wins, the abbreviation is not a dataset
+
+
 def test_version_and_size_must_be_in_the_question():
     q = "What is BERT-large F1 on SQuAD v2.0?"
     got = clean_conditions(QueryConditions(model="BERT-large", dataset="SQuAD", dataset_version="v2.0", model_size="340M"), q)
