@@ -54,6 +54,16 @@ def test_claim_text_is_a_sentence():
     assert claim_text(p) == "BERT-large obtains 90.9 F1 on SQuAD 1.1 (dev set)."
 
 
+def test_a_task_abbreviation_matches_its_long_form_and_short_equal_words_match():
+    assert values_match("task", "NLI", "natural language inference")
+    assert values_match("task", "natural language inference", "NLI")
+    assert values_match("task", "NER", "NER") and values_match("task", "NER", "named entity recognition")
+    assert values_match("task", "translation", "machine translation")
+    assert not values_match("task", "NLI", "question answering")
+    assert not values_match("task", "QA", "natural language inference")
+    assert not values_match("dataset", "XNLI", "IndicXNLI")           # different datasets: no loosening for datasets
+
+
 def test_a_translation_direction_is_matched_by_either_of_its_languages():
     from cgrag.pipeline.conditions import values_match
     assert values_match("language", "English-to-German", "German")
