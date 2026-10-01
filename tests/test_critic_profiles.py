@@ -44,6 +44,46 @@ def test_a_different_number_is_not_supported():
     assert [c.supported for c in check([prof("c1", **{**RESULT, "value": 81.9})])] == [False]
 
 
+LIST_ANSWER = ("On the IndicXTREME benchmark (test set, Kannada), the following models achieved these preferred metric scores:\n"
+               "*   **IndicBERT + Samanantar**: 68.2 (test set, 278M) [1]\n"
+               "*   **MuRIL**: 67.8 [1]")
+
+
+def list_check(profiles, answer=LIST_ANSWER):
+    return ClaimChecker(CriticConfig(), lambda: ContradictingNLI()).check(answer, [rc("c1", "table of results")], {"c1": profiles})
+
+
+def test_a_list_lead_in_is_not_a_claim_and_a_list_item_without_a_metric_is_checked_on_number_model_and_setting():
+    recorded = [prof("c1", model="IndicBERT + Samanantar", metric="preferred metric", value=68.2, setting="test set"),
+                prof("c1", model="MuRIL", metric="preferred metric", value=67.8, setting="test set")]
+    checks = list_check(recorded)
+    assert [c.sentence.startswith("On the") for c in checks] == [False, False]                  # the lead-in was skipped
+    assert [c.supported for c in checks] == [True, True]
+
+
+def test_a_list_item_still_needs_a_recorded_result_with_its_number_and_its_model():
+    recorded = [prof("c1", model="IndicBERT + Samanantar", metric="preferred metric", value=68.2, setting="test set"),
+                prof("c1", model="XLM-R", metric="preferred metric", value=67.8, setting="test set")]          # MuRIL's number belongs to XLM-R
+    assert [c.supported for c in list_check(recorded)] == [True, False]
+
+
+def test_a_bare_condition_value_with_a_number_has_no_subject_and_is_not_checked_but_a_system_with_a_number_is():
+    recorded = [prof("c1", model="BERT-base", dataset="CoLA", metric="Matthews", value=56.3),
+                prof("c1", model="BERT-base", dataset="MNLI", metric="accuracy", value=86.7)]
+    nested = """BERT-base:
+*   **CoLA:** 56.3 [1]
+*   **MNLI:** 86.7 [1]
+*   **MuRIL:** 61.2 [1]"""
+    checks = list_check(recorded, nested)
+    assert [c.sentence for c in checks] == ["*   **MuRIL:** 61.2 [1]"] and checks[0].supported is False
+
+
+def test_a_claim_that_names_another_metric_than_the_recorded_one_is_not_supported():
+    answer = "BERT-large reaches 83.1 EM on SQuAD [1]."
+    recorded = [prof("c1", model="BERT-large", metric="F1", value=83.1)]
+    assert [c.supported for c in list_check(recorded, answer)] == [False]
+
+
 def test_the_answers_restatement_of_a_conflict_is_not_checked():
     answer = ("XLM-R beats mBERT on XNLI [1].\n"
               "- Sources [4] and [5] (not comparable): The results differ (92.25 vs 79.2 accuracy) but conditions are unrecorded.")
