@@ -48,15 +48,28 @@ def _numbers_grounded(claim: str, chunk_text: str, profiles: list[ConditionProfi
     return bool(numbers) and numbers <= set(_NUMBER.findall(chunk_text)) | {f"{p.value:g}" for p in profiles}
 
 
+_GENERIC_METRICS = {"accuracy", "acc", "f1", "em", "exactmatch", "bleu", "rouge", "perplexity", "spearman", "pearson", "auc", "recall",
+                    "precision", "mrr"}
+
+
+def _metric_named(metric: str, flat: str, words: set[str]) -> bool:
+    m = norm(metric)
+    return (len(m) >= 3 and m in flat) or metric_key(metric) in words or m in words
+
+
 def _profile_supports(claim: str, profiles: list[ConditionProfile]) -> bool:
     """A recorded result of the source that matches the claim's number, metric and model (and does not contradict its
-    dev/test setting). This is the strongest evidence a table-derived claim can have, and NLI cannot judge tables."""
+    dev/test setting). This is the strongest evidence a table-derived claim can have, and NLI cannot judge tables.
+
+    A list item such as "- mBERT: 58.6 (test set)" does not repeat the metric - the sentence above it ("... accuracy
+    scores:") did - so when the claim names no metric at all (neither one the source records nor a common one), number +
+    model + setting decide; a claim that does name a metric must match the recorded one."""
     numbers, words, flat, tags = set(_NUMBER.findall(claim)), set(re.findall(r"[a-z0-9]+", claim.lower())), norm(claim), setting_tags(claim)
+    names_a_metric = bool(words & _GENERIC_METRICS) or any(p.metric and _metric_named(p.metric, flat, words) for p in profiles)
     for p in profiles:
         if f"{p.value:g}" not in numbers or not p.metric:
             continue
-        metric = norm(p.metric)
-        if not ((len(metric) >= 3 and metric in flat) or metric_key(p.metric) in words or metric in words):
+        if names_a_metric and not _metric_named(p.metric, flat, words):
             continue
         family = model_family(p.model)
         if p.model and len(family) >= 3 and family not in flat:
@@ -103,12 +116,27 @@ class ClaimChecker:
                 best[ci] = cand
         return best
 
+    @staticmethod
+    def _is_bare_condition(text: str, sources: list[RetrievedChunk], profiles: dict[str, list[ConditionProfile]]) -> bool:
+        """Is a short line only a condition value with a number - "CoLA: 56.3" under a model heading - rather than a system with a
+        number ("MuRIL: 67.8")? The first has no subject to verify; the second does, and must be backed by a recorded result."""
+        label = norm(text.split(":")[0]) if ":" in text else norm(re.sub(r"[\d.%]+", " ", text))
+        if not label:
+            return True
+        known = {norm(getattr(p, f)) for rc in sources for p in profiles.get(rc.chunk.chunk_id, [])
+                 for f in ("dataset", "language", "metric", "task", "setting") if getattr(p, f)}
+        return label in known
+
     def check(self, answer: str, sources: list[RetrievedChunk], profiles: dict[str, list[ConditionProfile]]) -> list[ClaimCheck]:
         claims: list[tuple[str, str, list[int]]] = []        # (original sentence, plain claim, cited source indices)
         for sentence in split_sentences(answer, min_chars=1):
             text = plain(sentence)
-            if len(text.split()) < MIN_WORDS or _META.search(text) or _ECHO.search(sentence):
-                continue                                       # headings, hedges, the scope warning and conflict echoes make no claim
+            words = text.split()
+            if len(words) < MIN_WORDS and (not _NUMBER.search(text) or self._is_bare_condition(text, sources, profiles)):
+                continue                       # "MuRIL: 67.8" is a claim; "CoLA: 56.3" under a model heading has no subject to verify
+            if _META.search(text) or _ECHO.search(sentence) or text.rstrip().endswith(":"):
+                continue                       # headings, hedges, list lead-ins ("... achieved these scores:"), the scope warning and
+                                               # conflict echoes make no claim; the list items that follow are checked one by one
             cited = [n - 1 for n in citations(sentence) if 1 <= n <= len(sources)]
             claims.append((sentence, text, cited or list(range(len(sources)))))
         if not claims or not sources:
