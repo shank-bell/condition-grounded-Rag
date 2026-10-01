@@ -5,44 +5,49 @@ aren't visible from the code alone. The full architecture is in
 `condition_grounded_rag_architecture.html` (git-ignored, kept local/private — read it directly
 for the design; don't re-derive it from here).
 
-## RESUME HERE (rewritten 2026-09-30 ~18:15; read this first)
-Standing orders from the user for the evening of 2026-09-30 (do NOT stop to ask them questions; manage everything and
-report at the end): labelling is TOMORROW (2026-10-01); today the Stage 1 SciBERT is trained in an agent-monitored loop until the
-targets are met and the ingestion pipeline is finished. **Both are DONE (see A and B below); Stage 6 escalation and profile-guided
-retrieval are built (C).** The user then meets the assistant on 2026-10-01 for labelling. They interrupt when the context fills:
-keep this file and the memory notes current.
-- **Git:** the user runs the commits themselves in PowerShell, ONE FILE = ONE COMMIT, no attribution lines, identity per
-  command (`$id = '-c','user.name=shank-bell','-c','user.email=shashankbelludi1@gmail.com'`, then `git @id commit -m msg -- file`).
-  Give the block BEFORE starting a work session and again at the end (`git status --short` for the exact list). main = 608b90a
-  on the user's side; everything after it (this evening's work) is uncommitted.
-- The five departures of 2026-09-30 are approved; the eight older ones and this evening's flagged additions (see the departures
-  list) still wait for an explicit OK, but the user delegated the decisions ("you take the pivotal decision").
+## RESUME HERE (rewritten 2026-10-01 ~15:40; read this first)
+Day 5 (1 Oct). Standing orders from the user (do NOT stop to ask them questions; decide, flag, report): fix the five "seen but not
+investigated" items, provide the metrics, build the Excel sheets for the labelling; "you take the pivotal decisions". **All done; the
+numbers and the reasoning are in `docs/oct1_fixes_and_metrics.md` (read it).** Labels are an ANSWER KEY, never training data.
+- **Git:** the user runs the commits themselves in PowerShell, ONE FILE = ONE COMMIT, no attribution lines, identity per command
+  (`$id = '-c','user.name=shank-bell','-c','user.email=shashankbelludi1@gmail.com'`, then `git @id commit -m msg -- file`). Give the
+  block BEFORE starting a session and again at the end (`git status --short` for the exact list). On GitHub: everything up to
+  c5820cf (the 25 files of 30 Sep). **Everything of 1 Oct is uncommitted.** The architecture doc is git-ignored: never commit it.
+- **Machine gotchas found today:** (1) after a reboot / long idle run `python scripts/prewarm_files.py` first (first read of every file costs
+  ~0.25 s on this PC: a cold `import transformers` took ~25 min; prewarmed: 6 s); (2) Ollama can wedge: kill python jobs, kill `ollama.exe`
+  AND the orphan `llama-server.exe`, restart `OLLAMA_NUM_PARALLEL=8 OLLAMA_KEEP_ALIVE=60m OLLAMA_MAX_LOADED_MODELS=2 ollama serve`; every
+  LLM call now times out after 240 s; (3) never run two processes that write the Chroma index; (4) `$env:TEMP` scripts: prefer the Write tool
+  over heredocs with backslashes (they get mangled).
+- **Departures from the architecture** (all behind flags): the five of 30 Sep are approved; the older eight and everything added since
+  (escalation, profile-guided retrieval, retrieval cards, joint coverage, weak-flag withdrawal, Stage 7 language filter, Stage 9 changes,
+  garbled-table skip, Stage 1 training details) are listed under "Departures" and wait for the user's explicit OK (delegated to my judgement).
 
-Work streams and where each one stands:
-- **A. SciBERT campaign - DONE 2026-09-30 18:10** (report `docs/stage1_training_report.md`, log in `docs/stage1_campaign.md`). Three
-  iterations (17:06-18:10), monitor agents (Haiku) per iteration 2 and 3. Installed = iteration 3 (`data/index/query_classifier/`, 419 MB,
-  5.7 ms per question): val_clean F1 0.975 / 0.977, val_llm 0.963 / 0.967, dev A 1.000 / 1.000, dev B 0.974 / 1.000, **dev C (48, held out)
-  1.000 / 1.000**, dev C typed with typos x5 0.983 / 1.000. All six targets met. Comparisons now come out complex. Labels are silver
-  and the dev sets assistant-written: the real test is the team's questions tomorrow. Tools added: `scripts/eval_stage1.py`
-  (`--perturb N`, `--errors-for`), `prepare_query_data.py --augment`, dev split C (`eval/stage1_dev_c_raw.txt`).
-- **B. Ingestion completion - DONE 2026-09-30 17:15** (report: `docs/ingestion_report.md`). Garble clean-up applied
-  (`reclean_profiles.py --apply`: 11,865 -> 10,305 profiles; backup `D:\backup_cgrag\profiles_before_reclean.sqlite`), metrics
-  refreshed (`ingest_metrics.py --json data/index/ingest_metrics.json`, `store_summary.py`): cell recall 80.7 %, row label = model
-  86.4 %, language 97.9 %, fill rates task 96 / dataset 94.8 / language 83.9 / model_size 41.4 / Methods link 75.2. Decisions:
-  the 11 column-wise tables (3 % of 350) and the side-by-side RoBERTa p9 merge are NOT unstacked (a general un-stacker is
-  disproportionate; they stay in the index as text chunks) - listed as limitations; size-only row labels are already
-  down to 2 profiles, no repair needed; no re-extraction was necessary (the garbled chunks are simply skipped). Frozen.
-- **C. Online-side changes - BUILT 2026-09-30 17:15, flags on in `config.toml`, 122 tests pass, NOT yet smoke-tested with the LLM**
-  (1) `[features] escalation` + `[agents] fallback_model` (empty = `[llm].model`): the Orchestrator escalates an unusable plan to the
-  bigger model, a weak / thin retrieval is re-planned by it, and Stage 6 asks it for a second opinion on any "not covered"
-  verdict before the scope warning is shown (`ApplicabilityResult.escalated`); outcome triggers only. (2) `[features]
-  profile_guided_retrieval`: `ProfileStore.chunks_recording(requested, missing)` returns chunks with ONE profile that records the
-  missing condition AND all other requested conditions (Kannada + NLI -> the IndicXNLI chunk 2212.05409:0054; Kannada + XNLI ->
-  nothing, so the honest warning stays); `Pipeline._profile_guided` reranks a pool of 6 and adds the best 2 in Stage 6's re-search
-  (`ApplicabilityResult.profile_guided`). Also fixed in `conditions.values_match`: task abbreviations (NLI = natural language
-  inference, QA, NER, MT ...) and equal short words ("NER" = "NER") - both used to cause false "task not covered". Tests:
-  `tests/test_escalation_and_profile_guided.py`, `tests/test_conditions.py`.
-- **D. Labelling (tomorrow)**: see "Labelling plan" below. **E. Docs / final report / second git block.**
+What stands (details in the docs named):
+- **Stage 1 SciBERT** trained and installed 30 Sep (`docs/stage1_training_report.md`): dev C (48 held out) 1.000 / 1.000, with typos 0.983 / 1.000.
+- **Ingestion frozen** (`docs/ingestion_report.md`): 28 papers, 1,385 chunks, **10,275 profiles**, cell recall 80.7 %, row label = model 86.4 %.
+- **Critic / Stage 7 / retrieval / Stage 6 fixed 1 Oct** (`docs/oct1_fixes_and_metrics.md`): critic false rejections (Kannada answer 3/5 -> 6/6
+  claims supported); false text-only conflicts (need a decimal / percentage in both sentences; language filter); **retrieval cards**
+  (`ingestion/cards.py`, `[retrieval] use_cards`): hit@5 69 -> 90 %, language + task questions 22.5 -> 60 %; **joint coverage**
+  (`[features] joint_coverage`, `applicability._joint`): correct scope decisions 22 -> 32 of 32 (warning recall 5/12 -> 12/12, 0 false
+  warnings); benchmark suites (GLUE = CoLA, MRPC ...) via `conditions.covers`; weak-evidence flag withdrawn when every named condition
+  is recorded; sentence splitter keeps "vs." / "et al."; junk-metric rule (30 profiles).
+- **Escalation measured: no accuracy gain, +0.4 s per question on average (+3.5 s where it fires, 4 of 32).** Flag still ON (the user's design).
+  Decide after job B: `python scripts/eval_questions.py eval/labels/questions_gold.jsonl --set features.escalation=false --tag no_escalation`.
+- **Start-up:** `Pipeline.warm_up()` (torch models sequentially, Ollama in parallel) runs in a background thread at API start
+  (`/health` shows `warm.status`); first question 38.8 -> 10.0 s; API first query 6.2 s.
+- **Column-wise tables:** only 2 of the "11" are real merges; no un-stacker (ingestion report). My 30 Sep claim that DistilBERT's GLUE table was
+  missed was WRONG (it was extracted; the "profile missing" note was a false NLI conflict, now fixed).
+- **Labelling kit built and tested** (`src/cgrag/labelling/`, `scripts/make_label_sheets.py`, `score_labels.py`, `eval_questions.py`,
+  `docs/labelling_guide.md`): 8 workbooks in `data/labelling/` (git-ignored), private keys in `data/labelling/private/`. NOT yet opened in Excel
+  (no LibreOffice here). Tomorrow/now: send the workbooks, collect `_DONE` files by 3 Oct, score with `score_labels.py`.
+
+Open items / next:
+1. The user's OK on the departures; the escalation decision (above).
+2. Send the sheets; help the team label; then `score_labels.py A/B/C`, `eval_questions.py`, a second ablation on the team's questions.
+3. UI in a browser (never opened), evaluation sets + ablation runner for the paper, RAGAS, final LLM / machine decision (see "Next steps").
+4. Known weak spots to remember: the joint check trusts the profile store (a missed table -> a possible false warning; job B's "covered"
+   questions will measure it); the store has some wrong profiles (e.g. BERT-large 89.1 F1 on SQuAD 2.0 in the ALBERT paper); citation-labelled
+   rows ("Devlin et al." = mBERT) are not resolved.
 
 ## What this is
 BE major project, Dept. of ISE, BMSCE. Team: Shashank BU, Adarsh Kumar,Aditya Venkatesh Dhanakshirur, Tarun K.
@@ -125,12 +130,14 @@ profile-extraction call 2.0 / 3.2 / 6-7 s; a 300-token answer ~1.6 / 2.7 / 5.7 s
 parallel slots: ~1-2.5 min. Real pipeline on 12b with every agent on: 4-15 s per question when warm; the first question
 after start is ~30 s while the embedder/reranker/NLI load.
 
-## State of the build (2026-09-30 evening, day 4; user-side main = 608b90a; the evening's work is uncommitted)
+## State of the build (2026-10-01 afternoon, day 5; GitHub = c5820cf; everything of 1 Oct is uncommitted)
 **Offline path** (`src/cgrag/ingestion`, `models.py`, `stores`): PDF loader (`pdf_loader.py`: rows merged, headings,
 tables) -> section chunker (`chunker.py`, IMRaD tags, 2000/200) -> `tables.py` (aligns each number with its column
 header) -> Condition Profile Extractor (`profile_extractor.py`, LLM + JSON schema, per-table views, parallel calls,
-grounding + non-result filters) -> BGE-M3 embeddings (`models.py`) -> ChromaDB + BM25 + SQLite profile store
-(`stores/`). `scripts/ingest.py` runs all of it (BM25 is rebuilt at the end of a run).
+grounding + non-result filters) -> retrieval cards (`cards.py`: a summary of what each chunk records, from its profiles) ->
+BGE-M3 embeddings of chunk + card (`models.py`) -> ChromaDB (collections `chunks` and `cards`) + BM25 (text + card) + SQLite profile store
+(`stores/`). `scripts/ingest.py` runs all of it (BM25 is rebuilt at the end of a run); `scripts/reindex_cards.py` rebuilds the cards of an
+existing index from the profile store (16 s, no LLM; run it after `reclean_profiles.py --apply`).
 **Online path** (`src/cgrag/pipeline`): stages 1-10 in one `run(question)` (`run.py`), both loops (6->4 re-retrieve,
 9->8 regenerate) plus a re-plan after weak retrieval; FastAPI (`api/main.py`: /query, /upload, /papers, /health, /jobs);
 React + Vite UI in `frontend/`; `scripts/ask.py` prints everything the pipeline decided.
@@ -140,21 +147,27 @@ React + Vite UI in `frontend/`; `scripts/ask.py` prints everything the pipeline 
   profile store, language list). Without a checkpoint the LLM produces all three zero-shot.
 - Stage 2 `orchestrator.py`: LLM planner agent (refine / decompose / conflict check), guardrails, fixed-rule fallback,
   re-plan once after weak retrieval. Stage 3 `refinement.py`: rewrite + up to 3 sub-questions, re-appends lost conditions.
-- Stage 4 `retrieval.py`: dense + BM25, RRF k=60, top 20, soft section boost. Stage 5 `rerank.py`: MiniLM cross-encoder,
-  threshold -2.0, keep 10, weak flag.
+- Stage 4 `retrieval.py`: dense + BM25 (+ the card vectors for result / comparison / factual questions), RRF k=60, top 20, soft section
+  boost. Stage 5 `rerank.py`: MiniLM cross-encoder reading card + chunk text, threshold -2.0 (calibrated 1 Oct: best trade-off), keep 10,
+  weak flag (withdrawn by `run.py` when Stage 6 covers every named condition by recorded values).
 - Stage 6 `applicability.py`: profile lookup -> LLM judges what profiles cannot settle (grounded, strict fields) -> own
   follow-up search query -> re-search once (with `profile_guided_retrieval` the re-search also adds chunks whose ONE profile records
   the missing condition together with all other requested conditions) -> with `escalation` the bigger model gives a second
-  opinion on any remaining "not covered" -> scope warning; per-condition coverage (as in the doc).
+  opinion on any remaining "not covered" -> JOINT COVERAGE guardrail (`_joint`, `[features] joint_coverage`): when two or three of model /
+  dataset / language are named, one profile must record them together (benchmark suites: GLUE = CoLA, MRPC ...), else the most specific
+  condition (language, dataset, model) is reported not covered and the warning says what IS recorded -> scope warning; per-condition
+  coverage (as in the doc).
 - Stage 7 `contradiction.py` + `conditions.py`: numeric trigger (same model family/dataset/metric, >2% apart) + strict text-only
   NLI; classes GENUINE / EXPLAINED / NOT_COMPARABLE decided from recorded conditions (dataset_version, model_size,
-  language, setting tags; task is not compared); only conflicts about the named model/dataset; one per paper pair.
+  language, setting tags; task is not compared); only conflicts about the named model/dataset/language; one per paper pair; a
+  text-only conflict needs a decimal or percentage in both sentences (a year in a citation is not a result).
 - Stage 8 `generate.py`: top 5 chunks + passages that cover a requested condition + conflict chunks; recorded results
   listed per source, most relevant to the question's conditions first; scope warning and conflict notes in the prompt.
 - Stage 9 `critic.py`: NLI per sentence vs the cited chunk (+ other sources: mis-citation repair), accepts a sentence
   backed by a recorded profile (number + metric + model, dev/test consistent) or whose numbers all occur in the source
-  when NLI does not contradict; skips "the sources do not say" / conflict-echo sentences; regenerates once.
-**Tests:** 123 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
+  when NLI does not contradict (a claim that names no metric is judged on number + model + setting); skips "the sources do not say" /
+  conflict-echo sentences, list lead-ins ending in ":" and bare "CoLA: 56.3" lines; checks short "MuRIL: 67.8" lines; regenerates once.
+**Tests:** 165 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
 API holds the index): `scripts/smoke_questions.py` (5 questions through the whole pipeline, per-stage timings, `--set
 KEY=VALUE` to compare model sizes per use case), `scripts/ingest_metrics.py` (store integrity, fill rates, table-cell recall,
 row-label accuracy), `scripts/audit_sample.py` (random profiles next to their source row, for a hand check),
@@ -163,9 +176,12 @@ row-label accuracy), `scripts/audit_sample.py` (random profiles next to their so
 Added the evening of 2026-09-30 (uncommitted until the user commits): Stage 1 campaign `scripts/build_stage1_dev.py`,
 `make_template_questions.py`, `prepare_query_data.py`, `train_query_classifier.py` (rewritten), `install_query_classifier.py`;
 table diagnostics `garble_report.py`, `table_finder.py <paper> <N>`, `raw_tables.py <paper> <page>`, `scan_stacked.py`; later that
-evening `eval_stage1.py`, `store_summary.py`.
+evening `eval_stage1.py`, `store_summary.py`. Added 2026-10-01: measurement `eval_retrieval.py` (190 store-derived questions, hit@k / MRR /
+threshold sweep, no LLM), `ablate_stage6.py` (32 scope questions x configurations), `measure_first_question.py`, `prewarm_files.py`,
+`debug_critic.py`, `debug_retrieval.py`, `reindex_cards.py`; labelling `make_label_sheets.py`, `score_labels.py`, `eval_questions.py`
+(see `docs/labelling_guide.md`); library `src/cgrag/labelling/` (xl.py, sampling.py, sheets.py, score.py).
 **Ingested (2026-09-30, frozen, `docs/ingestion_report.md`):** all 28 PDFs in `data/papers`: 1,385 chunks (292 recognised tables),
-**10,305 profiles** (11,865 extracted, 1,560 garbled-table profiles removed), ~114 min of 12B extraction (median 2.2 min/paper, max
+**10,275 profiles** (11,865 extracted, 1,560 garbled-table profiles and 30 junk-metric profiles removed), ~114 min of 12B extraction (median 2.2 min/paper, max
 15 min); ChromaDB / BM25 / profile store consistent, 0 broken links, vectors 1024-d. Profile fields filled: model / metric / value
 100%, task 96%, dataset 94.8%, setting 98.5%, language 83.9%, model_size 41.4%, dataset_version 4.4%, Methods link 75.2%.
 Table-cell recall 80.7% of 12,545 decimal cells in 267 result tables (25 statistics tables skipped on purpose; 84.7% before the
@@ -178,8 +194,10 @@ cells whose order is swapped ("GPS / Acc"), junk in setting / model_size. A row 
 T7, T5 T11/T13-15, RAG T2, mT5 T10/T11, ...).
 **Proven on real papers:** all stages run end to end on the 28 papers; warm questions 7-14 s (median 8.3 s on 2026-09-30 evening
 with SciBERT, escalation and profile-guided retrieval on) with the two agents on gemma4:e2b and the answer on 12b, first question
-~30-47 s; the Kannada NLI question is now answered from IndicXNLI (mBERT 58.6, XLM-R 71.5, MuRIL 74.0, IndicBERT+Samanantar 74.7,
-coverage 100 % via "profile-guided") while "XLM-R on XNLI for Kannada" still gets the scope warning (second opinion by 12B); /upload of a new PDF worked (111 s for a 15-page paper),
+~30-47 s; the Kannada NLI question is answered from IndicXNLI (mBERT 58.6, XLM-R 71.5, MuRIL 74.0, IndicBERT+Samanantar 74.7, coverage 100 %,
+6/6 claims supported) while "XLM-R on XNLI for Kannada" gets the joint-coverage scope warning ("no source reports language = Kannada
+together with model = XLM-R, dataset = XNLI"); 1 Oct: warm median 10.9 s over the five key questions, first question 10.0 s after warm-up
+(38.8 s without), API first query 6.2 s; /upload of a new PDF worked (111 s for a 15-page paper),
 the new paper was queryable at once (removed again afterwards). E2B agents give the same coverage decisions as 12B agents
 (-2.4 s per question) but plan worse (E2B over-refines simple lookups, never decomposes a comparison). E2B on Stage 1 is
 NOT good enough (put "mBERT" into model_size, "XNLI" into task -> false scope warnings), so Stage 1 stays on 12B.
@@ -247,18 +265,32 @@ older ones marked * further down, and the flagged additions at the end of this l
 - *(2026-09-30 evening, new) Stage 1 classifier training details: the validation score used for the composite is the LLM-written
   part (templates inflate it); training data include perturbed copies of the questions (typos, lower case, chatty prefixes); the
   held-out split C of the dev set is scored only at the end. Result and limits: `docs/stage1_training_report.md`.
-- *(2026-09-30 evening, new) Column-wise / side-by-side tables (11 of 350, 3 %) are not un-stacked; they stay as text chunks
-  without reliable profiles (limitation, `docs/ingestion_report.md`).
+- *(2026-09-30 evening, new) Column-wise / side-by-side tables are not un-stacked (looked at on 1 Oct: only 2 of the "11" are real merges);
+  they stay as text chunks without reliable profiles (limitation, `docs/ingestion_report.md`).
+- *(2026-10-01, new; each behind a flag or a documented rule; numbers in `docs/oct1_fixes_and_metrics.md`)
+  **Retrieval cards** (`[retrieval] use_cards`): Stage D also embeds a card (a summary of what the chunk records, built from its profiles) as a
+  second vector, the keyword index and the reranker see it; chunk text, answers and shown sources are unchanged. **Joint coverage**
+  (`[features] joint_coverage`): in addition to the per-condition coverage of the doc, Stage 6 requires the named model / dataset /
+  language to be recorded together by one result (benchmark suites count their member tasks), else the most specific condition is reported
+  as not covered. **Weak-evidence flag withdrawn** when Stage 6 covers every named condition by recorded values. **Stage 7**: only conflicts in
+  the named language; a text-only conflict needs a decimal / percentage in both sentences. **Stage 9**: list lead-ins and bare
+  "label: number" lines are not claims, a claim without a metric is judged on number + model + setting, short "model: number" lines are
+  checked, abbreviations ("vs.", "et al.") do not end a sentence. **Warm-up** at API start (`Pipeline.warm_up`), `[llm] keep_alive`
+  (machine config) and `[llm] request_timeout`. Escalation is measured (no accuracy gain on Stage 6, +0.4 s per question): still ON.
 
 ## Open questions for the user (recommendation in brackets)
 - A third "middle" complexity level? Doc and schema have two [keep two].
 - Make Stages 7 and 9 decisions LLM-driven too? They already use an open-weights NLI model [leave as is].
-- Joint condition coverage (a single finding matching all conditions) as an extra warning? Beyond the doc [propose, needs OK].
+- Joint condition coverage: BUILT 2026-10-01 (flag `joint_coverage`, ON): 22 -> 32 of 32 correct scope decisions. Beyond the doc [keep ON, needs the OK].
+- Escalation (E2B -> 12B second opinion): measured, no gain on Stage 6, +0.4 s per question [decide after the team's job-B questions; flag `features.escalation`].
 - Final LLM (12B / e4b / e2b) and per-agent models; which machine produces the paper's numbers.
 - Orchestrator size (decided 2026-09-30 by the assistant under the user's delegation): E2B with the outcome-based escalation
   to 12B above; revisit after SciBERT is trained (comparisons then come out "complex" and the code guardrail decomposes them).
 
-## Labelling plan (tomorrow, 2026-10-01; labels are an ANSWER KEY for the evaluation, never training data)
+## Labelling plan (2026-10-01; labels are an ANSWER KEY for the evaluation, never training data)
+The workbooks are BUILT (1 Oct): `python scripts/make_label_sheets.py` -> `data/labelling/` (8 files: A for Adarsh and Shashank, B for all four
+with the planned 10 / 10 / 10 mix, C for Aditya and Tarun), guide `docs/labelling_guide.md`, scoring `scripts/score_labels.py` +
+`scripts/eval_questions.py`. Rebuild the sheets if a paper is re-ingested (they snapshot the profile store).
 Only one model is trained in the whole project: the Stage 1 SciBERT classifier, on LLM-written questions. Nothing is trained on
 the team's labels (30 questions / 50 pairs are far too few, and training on them would spoil the test). Three jobs:
 - **A. Profile check** (~300 random profiles from 10 papers: 6 easy - BERT, SQuAD 2.0, XNLI, XLM-R, GLUE, MuRIL - and 4 hard - T5,
@@ -276,14 +308,16 @@ Due 2026-10-03 (evaluation runs 10-04/05). Gemini (browser) is allowed as an ASS
 layouts, a second opinion after two humans labelled independently, pasted text only, prompt/date/model version recorded); it
 must not be the labeller of record (same model family as Gemma -> correlated errors; the doc requires human kappa). The
 official LLM baseline in the evaluation is local Gemma 12B with the same prompt. Never paste the architecture doc or the
-system's answers/labels into a chat tool. I offered to generate the three Excel sheets + a script that scores them (~1 h).
+system's answers/labels into a chat tool. The Excel sheets and the scoring scripts are built (see above).
 
 ## How to run
 ```
+# after a reboot / long idle (a cold `import transformers` takes ~25 min on this PC otherwise):
+.\.venv\Scripts\python scripts\prewarm_files.py                  # ~1 min
 # Ollama (see gotcha above), then:
-.\.venv\Scripts\python scripts\ingest.py [paper stems] [--force]     # do NOT run while the API/pipeline is running
+.\.venv\Scripts\python scripts\ingest.py [paper stems] [--force]     # do NOT run while the API/pipeline is running (cards are built automatically)
 .\.venv\Scripts\python scripts\ask.py "Does BERT work well for Kannada question answering?"
-.\.venv\Scripts\uvicorn cgrag.api.main:app --port 8000               # then: cd frontend; npm run dev
+.\.venv\Scripts\uvicorn cgrag.api.main:app --port 8000               # warms the models in the background (/health: warm.status); then: cd frontend; npm run dev
 .\.venv\Scripts\python -m pytest
 ```
 ChromaDB's persistent folder is single-process: never ingest and query at the same time.
@@ -292,7 +326,8 @@ Git push on this network sometimes fails once with "Recv failure: Connection was
 ## Key files
 - `config.toml` / `src/cgrag/config.py` — single source of truth for models, devices, paths, retrieval params, per-agent
   models (`[agents]`) and the ablation flags in `[features]` (orchestrator_agent, applicability_agent, applicability,
-  contradiction, critic, profile_in_context). Machine overrides go in git-ignored `config.local.toml`.
+  contradiction, critic, profile_in_context, escalation, profile_guided_retrieval, joint_coverage; `[retrieval] use_cards`).
+  Machine overrides go in git-ignored `config.local.toml`.
 - `src/cgrag/schemas.py` — frozen shared Pydantic contracts every stage must use. Extend, don't fork.
 - `src/cgrag/llm.py` — `OllamaLLM` wrapper (`.chat`, `.structured`).
 - `scripts/bench_llm.py` — LLM latency benchmark. `docs/backup_models_huggingface.md` — verified fallback models.
@@ -312,15 +347,16 @@ Git push on this network sometimes fails once with "Recv failure: Connection was
    "simple" (the Orchestrator agent compensates).
 
 ## Next steps (order of work; details in "RESUME HERE")
-DONE 2026-09-30: ingestion frozen (`docs/ingestion_report.md`), SciBERT trained and installed (`docs/stage1_training_report.md`),
-escalation + profile-guided retrieval built and smoke-tested. Left over on purpose: citation-labelled rows ("Devlin et al. (2018)" =
-mBERT needs an alias step), group-label fragments in Llama 2, column-wise tables, the team's hand-check (labelling).
-1. **2026-10-01, with the user: labelling** (see "Labelling plan"). Offer the three Excel sheets + scoring script first (~1 h).
-   Then score the SciBERT on the team's 30 questions (`scripts/eval_stage1.py --dev <their jsonl>`).
-2. Start the API and open the UI in a browser; test upload; warm the models at API start (the first question takes 30-45 s while the
-   embedder / reranker / NLI load; a request that finds the model loading is slow, not broken). UI decision
+DONE 2026-09-30: ingestion frozen (`docs/ingestion_report.md`), SciBERT trained and installed (`docs/stage1_training_report.md`).
+DONE 2026-10-01 (`docs/oct1_fixes_and_metrics.md`): critic, Stage 7 false conflicts, retrieval cards (threshold calibrated: -2.0 stays), joint
+coverage, warm-up, escalation measured, labelling workbooks + scorers built. Left over on purpose: citation-labelled rows ("Devlin et
+al. (2018)" = mBERT needs an alias step), group-label fragments in Llama 2, the two real stacked tables, the team's hand-check (labelling).
+1. **Labelling** (see "Labelling plan"): send `data/labelling/*.xlsx`, collect the `_DONE` files by 3 Oct, `score_labels.py A/B/C`,
+   `eval_questions.py` (Stage 1 on the team's questions + Stage 6 scope warnings; then the same with `--set features.escalation=false` and
+   `--set features.joint_coverage=false` for the paper's ablation), then decide the escalation flag.
+2. Open the UI in a browser (never done); test upload; show the joint-coverage warning and `warm.status` ("warming up") in the page. UI decision
    (user, 2026-09-30): keep it a simple Claude-style chat page for now and polish it late; it must keep showing the
    coverage bar and conflict badges (stage 10 of the doc). The page already sends chat history for follow-ups.
-3. Build the evaluation sets and an ablation runner (flags above, incl. agent vs rules); install RAGAS then (heavy
-   dependencies; dry-run first); calibrate the rerank threshold.
+3. Build the evaluation sets and an ablation runner for the paper (flags above, incl. agent vs rules; `ablate_stage6.py` and
+   `eval_retrieval.py` are the start); install RAGAS then (heavy dependencies; dry-run first).
 4. Decide the final LLM / per-agent models and the machine for final numbers.
