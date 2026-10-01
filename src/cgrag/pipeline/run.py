@@ -12,6 +12,7 @@ from functools import lru_cache
 
 from ..config import Settings, get_settings
 from ..llm import OllamaLLM
+from ..models import rerank_scores
 from ..schemas import ApplicabilityResult, ClaimCheck, ContradictionPair, QueryResponse, RetrievedChunk
 from ..stores.bm25_store import BM25Store
 from ..stores.profile_store import ProfileStore
@@ -30,6 +31,8 @@ from .retrieval import HybridRetriever
 WEAK_EVIDENCE = "No retrieved passage is clearly relevant to the question, so the sources below may not answer it."
 EMPTY_INDEX = "No papers are indexed yet, so there is nothing to answer from. Add papers first."
 TARGETED_SLOTS = 2        # chunks found by the targeted re-search that are always kept
+PROFILE_GUIDED_POOL = 6   # chunks per missing condition that the profile store proposes ...
+PROFILE_GUIDED_SLOTS = 2  # ... of which the best two (by the reranker) are added
 
 
 class _Timer:
@@ -54,10 +57,13 @@ class Pipeline:
         self.retriever = HybridRetriever(self.vectors, BM25Store.load(self.cfg.paths.bm25_path), self.cfg.retrieval)
         self.understand = QueryUnderstanding(self._agent_llm(self.cfg.agents.understanding_model), profiles=self.profiles)
         self.refine_llm = self._agent_llm(self.cfg.agents.refinement_model)
-        self.orchestrator = OrchestratorAgent(self._agent_llm(self.cfg.agents.orchestrator_model), self.cfg.features)
+        orchestrator_llm = self._agent_llm(self.cfg.agents.orchestrator_model)
+        applicability_llm = self._agent_llm(self.cfg.agents.applicability_model) if self.cfg.features.applicability_agent else None
+        self.fallback_llm = self._agent_llm(self.cfg.agents.fallback_model) if self.cfg.features.escalation else None
+        self.orchestrator = OrchestratorAgent(orchestrator_llm, self.cfg.features, self._escalation_target(orchestrator_llm))
         self.applicability = ApplicabilityAgent(
-            self.profiles, self.cfg.applicability.max_reretrieve,
-            llm=self._agent_llm(self.cfg.agents.applicability_model) if self.cfg.features.applicability_agent else None)
+            self.profiles, self.cfg.applicability.max_reretrieve, llm=applicability_llm,
+            fallback=self._escalation_target(applicability_llm))
         self.contradictions = ContradictionResolver(self.profiles, self.cfg.contradiction)
         self.critic = ClaimChecker(self.cfg.critic)
 
@@ -66,6 +72,12 @@ class Pipeline:
         if not model or model == self.llm.cfg.model:
             return self.llm
         return OllamaLLM(self.cfg, model=model)
+
+    def _escalation_target(self, agent_llm: OllamaLLM | None) -> OllamaLLM | None:
+        """The bigger model an agent hands a bad outcome to; None when escalation is off or it would be the same model."""
+        if self.fallback_llm is None or agent_llm is None or agent_llm.cfg.model == self.fallback_llm.cfg.model:
+            return None
+        return self.fallback_llm
 
     def reload_indexes(self) -> None:
         """Pick up papers added since start-up (the keyword index is a file rebuilt after ingestion)."""
@@ -108,9 +120,12 @@ class Pipeline:
         if plan.check_applicability:
             with t("6_applicability"):
                 kept, applicability = self.applicability.run(
-                    analysis.conditions.specified(), kept, self._research(question, queries, analysis.intent, kept), question)
+                    analysis.conditions.specified(), kept,
+                    self._research(question, queries, analysis.intent, kept, analysis.conditions.specified()), question)
             trace.append(f"6 coverage {applicability.coverage:.2f}, missing {applicability.missing or 'none'}"
                          + (", re-retrieved" if applicability.re_retrieved else "")
+                         + (", profile-guided" if applicability.profile_guided else "")
+                         + (f", second opinion by {self.fallback_llm.cfg.model}" if applicability.escalated else "")
                          + (f" | agent: {applicability.reasoning}" if applicability.reasoning else ""))
         elif self.cfg.features.applicability:
             applicability = ApplicabilityResult()
@@ -152,16 +167,40 @@ class Pipeline:
         t.ms["total"] = (time.perf_counter() - t0) * 1000
         return respond(question, answer, sources, analysis, applicability, contradictions, checks, regenerated, trace, t.ms)
 
-    def _research(self, question: str, queries: list[str], intent: str, kept: list[RetrievedChunk]):
-        """Stage 6's re-retrieval: search again with the missing condition values added, keep the best new chunks."""
+    def _research(self, question: str, queries: list[str], intent: str, kept: list[RetrievedChunk],
+                  requested: dict[str, str] | None = None):
+        """Stage 6's re-retrieval: search again with the missing condition values added, keep the best new chunks.
+        With `[features] profile_guided_retrieval` the profile store is also asked which chunks record the missing
+        condition (e.g. language = Kannada together with the question's task), and those are added too."""
         def research(terms: list[str], query: str = "") -> list[RetrievedChunk]:
             extra = " ".join(terms)
             found = self.retriever.retrieve([f"{queries[0]} {extra}", extra, *([query] if query else [])], intent)
             fresh, _ = rerank_filter(question, [rc for rc in found], self.cfg.retrieval)
             have = {rc.chunk.chunk_id for rc in kept}
-            merged = list(kept) + [rc for rc in fresh[:TARGETED_SLOTS] if rc.chunk.chunk_id not in have]
+            guided = self._profile_guided(question, requested or {}, terms, have)
+            research.guided_ids = [rc.chunk.chunk_id for rc in guided]
+            taken = have | set(research.guided_ids)
+            merged = list(kept) + guided + [rc for rc in fresh[:TARGETED_SLOTS] if rc.chunk.chunk_id not in taken]
             return sorted(merged, key=lambda rc: rc.rerank_score if rc.rerank_score is not None else rc.score, reverse=True)
+        research.guided_ids = []
         return research
+
+    def _profile_guided(self, question: str, requested: dict[str, str], terms: list[str], have: set[str]) -> list[RetrievedChunk]:
+        """Chunks the profile store says record a missing condition, scored against the question (not thresholded:
+        the profile is the evidence that the passage is on the condition)."""
+        if not self.cfg.features.profile_guided_retrieval or not requested:
+            return []
+        ids: list[str] = []
+        fields = [f for f, wanted in requested.items() if wanted in terms]
+        for field in fields:
+            ids += [cid for cid in self.profiles.chunks_recording(requested, field, PROFILE_GUIDED_POOL)
+                    if cid not in have and cid not in ids]
+        chunks = self.vectors.get(ids) if ids else []
+        if not chunks:
+            return []
+        scores = rerank_scores(question, [c.text for c in chunks])          # the question settles ties between candidates
+        best = sorted(zip(chunks, scores), key=lambda cs: cs[1], reverse=True)[:PROFILE_GUIDED_SLOTS * len(fields)]
+        return [RetrievedChunk(chunk=c, score=0.0, rerank_score=float(s)) for c, s in best]
 
 
 @lru_cache(maxsize=1)
