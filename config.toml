@@ -18,6 +18,7 @@ generate_temperature = 0.2
 [agents]                     # a different open-weights model per agent (any Ollama tag, e.g. "hf.co/<user>/<repo>")
 orchestrator_model = ""      # empty = [llm].model
 applicability_model = ""
+fallback_model = ""          # the bigger model an agent escalates to on a bad outcome; empty = [llm].model
 
 [models]
 embedder = "BAAI/bge-m3"
@@ -72,3 +73,5 @@ applicability = true
 contradiction = true
 critic = true
 profile_in_context = true
+escalation = true            # a small-model agent hands a bad outcome (unusable output, weak retrieval, "not covered") to fallback_model
+profile_guided_retrieval = true   # Stage 6 also pulls chunks whose profiles record a missing condition
