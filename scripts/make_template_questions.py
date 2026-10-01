@@ -59,6 +59,9 @@ BANK: dict[tuple[str, str], list[str]] = {
         "what do the different {model} sizes get on {dataset}, {dataset_b} and {benchmark}", "What are {model}'s scores on all the {benchmark} tasks?",
         "Report {model}'s {metric} on {dataset} for dev and test in the zero-shot and fine-tuned settings.",
         "How does {model} do on {dataset} in {language}, {language_b} and the other languages?",
+        "List the languages covered by {dataset} and the {metric} of {model} on each.", "Report {model}'s results on the {benchmark} evaluations.",
+        "Show the {metric} of {model}, {model_b} and {model_c} on all {dataset} languages.", "Give me all the reported {metric} numbers for {model}.",
+        "What are all of {model}'s results?", "How do the {model} sizes perform on {dataset} and {dataset_b}?",
     ],
     ("comparison", "complex"): [
         "How does {model} compare with {model_b} on {dataset}?", "Is {model} better than {model_b} on {dataset}?", "{model} vs {model_b}",
@@ -67,6 +70,12 @@ BANK: dict[tuple[str, str], list[str]] = {
         "How much does {model} improve over {model_b} on {dataset}?", "What is the difference between {model} and {model_b}?",
         "{model} or {model_b} for {dataset}", "Do different papers report the same {metric} for {model} on {dataset}?",
         "Is {model} more accurate than {model_b} in the {setting} setting?", "{model} versus {model_b} in {language}",
+        "Which of {model} or {model_b} keeps more of the performance on {dataset}?", "Which one is stronger on {benchmark}: {model} or {model_b}?",
+        "How do {model} and {model_b} differ in {metric} on {dataset}?", "{model} compared to {model_b}", "Does {model} beat {model_b} on {dataset}?",
+        "Do the papers report the same {metric} for {model} on {dataset}, or do they conflict?", "Which has the higher {metric} on {dataset}, {model} or {model_b}?",
+        "Is there a conflict between the papers about {model} on {dataset}?", "Which is smaller and faster, {model} or {model_b}?",
+        "What are the differences between {technique} and {technique_b}?", "{technique} versus {technique_b}", "Which is better, {model} or {model_b}?",
+        "how does {model} stack up against {model_b} on {dataset}", "Are {model} and {model_b} equally good at {dataset}?",
     ],
     ("factual", "simple"): [
         "How many parameters does {model} have?", "What is the vocabulary size of {model}?", "Which optimizer was used to train {model}?",
@@ -80,6 +89,8 @@ BANK: dict[tuple[str, str], list[str]] = {
         "What are the sizes of the train, dev and test sets of {dataset} and how many languages does it cover?",
         "What batch size, learning rate and optimizer did {model} use?", "which datasets make up {benchmark} and what does each one test",
         "What are the number of layers, attention heads and parameters of {model} and {model_b}?",
+        "List the {dataset} languages and how many examples each has.", "What hyperparameters were used to fine-tune {model} on {dataset}?",
+        "Which datasets is {model} evaluated on and how many examples does each have?", "what are the model sizes of {model} and their hidden dimensions",
     ],
     ("method", "simple"): [
         "How does {technique} work in {model}?", "Explain how {model} is trained.", "How is {model} pre-trained?", "Explain {technique}.",
