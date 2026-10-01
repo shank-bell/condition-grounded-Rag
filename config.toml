@@ -45,6 +45,7 @@ rerank_keep = 10
 rerank_threshold = -2.0
 section_boost = 0.15
 generate_top = 5
+use_cards = true
 
 [applicability]
 max_reretrieve = 1
@@ -67,3 +68,4 @@ critic = true
 profile_in_context = true
 escalation = true
 profile_guided_retrieval = true
+joint_coverage = true
