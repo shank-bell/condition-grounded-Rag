@@ -98,6 +98,8 @@ class ApplicabilityResult(BaseModel):
     re_retrieved: bool = False
     warning: str | None = None
     reasoning: str = ""            # the agent's short notes on the conditions the profiles could not settle
+    profile_guided: bool = False   # chunks were added because their profiles record a missing condition
+    escalated: bool = False        # the larger fallback model gave a second opinion on a "not covered" verdict
 
 
 class ContradictionPair(BaseModel):
