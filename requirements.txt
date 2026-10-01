@@ -3,6 +3,7 @@ pymupdf>=1.24
 pymupdf4llm>=1.27
 pymupdf-layout>=1.27
 requests>=2.31
+openpyxl>=3.1
 langchain-text-splitters>=0.3
 sentence-transformers>=3.0
 transformers>=4.44
