@@ -24,6 +24,7 @@ class Chunk(BaseModel):
     page: int
     section: Section = "other"
     text: str
+    card: str = ""
 
 
 class ExtractedProfile(BaseModel):
@@ -97,6 +98,7 @@ class ApplicabilityResult(BaseModel):
     warning: str | None = None
     reasoning: str = ""
     profile_guided: bool = False
+    joint_covered: bool | None = None
     escalated: bool = False
 
 
