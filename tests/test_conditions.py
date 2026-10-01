@@ -64,6 +64,15 @@ def test_a_task_abbreviation_matches_its_long_form_and_short_equal_words_match()
     assert not values_match("dataset", "XNLI", "IndicXNLI")           # different datasets: no loosening for datasets
 
 
+def test_a_benchmark_suite_is_covered_by_results_on_its_member_tasks_but_never_equal_to_them():
+    from cgrag.pipeline.conditions import covers
+    assert covers("dataset", "GLUE", "CoLA") and covers("dataset", "GLUE", "MNLI-m") and covers("dataset", "XTREME", "XNLI")
+    assert covers("dataset", "IndicXTREME", "IndicXNLI") and covers("dataset", "SuperGLUE", "BoolQ")
+    assert not covers("dataset", "GLUE", "XNLI") and not covers("dataset", "XNLI", "IndicXNLI") and not covers("dataset", "XTREME", "IndicXNLI")
+    assert not covers("language", "Hindi", "Tamil") and covers("model", "BERT", "BERT-large")
+    assert not values_match("dataset", "GLUE", "CoLA")           # Stage 7 must never compare a GLUE score with a CoLA score
+
+
 def test_a_translation_direction_is_matched_by_either_of_its_languages():
     from cgrag.pipeline.conditions import values_match
     assert values_match("language", "English-to-German", "German")
