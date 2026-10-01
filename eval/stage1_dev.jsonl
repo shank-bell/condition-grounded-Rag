@@ -105,3 +105,51 @@
 {"question": "Give an overview of benchmarks used to evaluate natural language understanding.", "intent": "survey", "complexity": "complex", "split": "A"}
 {"question": "Overview of retrieval-augmented approaches to question answering.", "intent": "survey", "complexity": "complex", "split": "A"}
 {"question": "What approaches exist for handling long documents with transformers?", "intent": "survey", "complexity": "complex", "split": "A"}
+{"question": "Is DeBERTa better than RoBERTa on MNLI?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "Which is better for Hindi, mBERT or XLM-R?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "How does Llama 2 70B compare with the original LLaMA 65B on MMLU?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "Do the ELECTRA and BERT papers agree on how well BERT-large does on GLUE?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "mT5 vs XLM-R on XNLI zero-shot", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "What is the difference between RAG-Token and RAG-Sequence?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "Compare the pre-training data of RoBERTa and XLNet.", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "Does distillation hurt accuracy more than the pruning approach?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "Which model gets a higher F1 on SQuAD 2.0, ALBERT or XLNet?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "Are the reported SQuAD human performance numbers consistent across papers?", "intent": "comparison", "complexity": "complex", "split": "C"}
+{"question": "What accuracy does XLM-R get on XNLI for Swahili?", "intent": "result", "complexity": "simple", "split": "C"}
+{"question": "What is BERT-large's F1 on SQuAD 1.1?", "intent": "result", "complexity": "simple", "split": "C"}
+{"question": "mT5-XXL score on XQuAD", "intent": "result", "complexity": "simple", "split": "C"}
+{"question": "How well does IndicBERT do on IndicXNLI for Tamil?", "intent": "result", "complexity": "simple", "split": "C"}
+{"question": "What GLUE score does RoBERTa reach?", "intent": "result", "complexity": "simple", "split": "C"}
+{"question": "What is LLaMA-65B's accuracy on MMLU?", "intent": "result", "complexity": "simple", "split": "C"}
+{"question": "Give the XNLI accuracy of XLM-R for every language.", "intent": "result", "complexity": "complex", "split": "C"}
+{"question": "What are BERT's scores on all the GLUE tasks?", "intent": "result", "complexity": "complex", "split": "C"}
+{"question": "List the results of Llama 2 across the safety benchmarks.", "intent": "result", "complexity": "complex", "split": "C"}
+{"question": "How do the different mT5 model sizes perform on XQuAD?", "intent": "result", "complexity": "complex", "split": "C"}
+{"question": "Show the accuracy of MuRIL, mBERT and XLM-R on all IndicXNLI languages.", "intent": "result", "complexity": "complex", "split": "C"}
+{"question": "What are the results of the T5 variants across GLUE, SuperGLUE and SQuAD?", "intent": "result", "complexity": "complex", "split": "C"}
+{"question": "How many attention heads does BERT-large have?", "intent": "factual", "complexity": "simple", "split": "C"}
+{"question": "What is the training corpus of GPT-3?", "intent": "factual", "complexity": "simple", "split": "C"}
+{"question": "Which dataset is used to pre-train MuRIL?", "intent": "factual", "complexity": "simple", "split": "C"}
+{"question": "what is the context window of llama 2", "intent": "factual", "complexity": "simple", "split": "C"}
+{"question": "What is the mask ratio used in BERT's masked language modelling?", "intent": "factual", "complexity": "simple", "split": "C"}
+{"question": "What does the acronym RAG stand for?", "intent": "factual", "complexity": "simple", "split": "C"}
+{"question": "What are the layer counts, hidden sizes and parameter counts of the ALBERT configurations?", "intent": "factual", "complexity": "complex", "split": "C"}
+{"question": "List the pre-training corpora used for XLM-R and their sizes.", "intent": "factual", "complexity": "complex", "split": "C"}
+{"question": "What batch size, learning rate and number of steps were used to pre-train RoBERTa?", "intent": "factual", "complexity": "complex", "split": "C"}
+{"question": "Which languages does MuRIL support and which scripts do they use?", "intent": "factual", "complexity": "complex", "split": "C"}
+{"question": "How does next sentence prediction work in BERT?", "intent": "method", "complexity": "simple", "split": "C"}
+{"question": "Why does ELECTRA train a discriminator instead of a generator?", "intent": "method", "complexity": "simple", "split": "C"}
+{"question": "How does DPR encode passages?", "intent": "method", "complexity": "simple", "split": "C"}
+{"question": "How does SBERT produce sentence embeddings?", "intent": "method", "complexity": "simple", "split": "C"}
+{"question": "explain how disentangled attention works", "intent": "method", "complexity": "simple", "split": "C"}
+{"question": "why does XLNet use permutation language modeling", "intent": "method", "complexity": "simple", "split": "C"}
+{"question": "How does RAG retrieve documents and how does it combine them during generation?", "intent": "method", "complexity": "complex", "split": "C"}
+{"question": "Explain how DistilBERT is trained and why the triple loss is used.", "intent": "method", "complexity": "complex", "split": "C"}
+{"question": "How does mT5 handle so many languages, and how was its vocabulary built?", "intent": "method", "complexity": "complex", "split": "C"}
+{"question": "How were the Llama 2 chat models fine-tuned, and what role did reinforcement learning play?", "intent": "method", "complexity": "complex", "split": "C"}
+{"question": "Give me an overview of multilingual pre-trained language models.", "intent": "survey", "complexity": "complex", "split": "C"}
+{"question": "What are the main approaches to making BERT smaller?", "intent": "survey", "complexity": "complex", "split": "C"}
+{"question": "Summarize what the papers say about evaluating toxicity in language models.", "intent": "survey", "complexity": "complex", "split": "C"}
+{"question": "What is known about cross-lingual transfer for low-resource Indian languages?", "intent": "survey", "complexity": "complex", "split": "C"}
+{"question": "Overview of retrieval-augmented generation", "intent": "survey", "complexity": "complex", "split": "C"}
+{"question": "What are the main pre-training objectives used across these papers?", "intent": "survey", "complexity": "complex", "split": "C"}
