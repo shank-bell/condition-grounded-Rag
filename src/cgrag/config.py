@@ -20,6 +20,7 @@ class LLMConfig(BaseModel):
     extract_temperature: float = 0.0
     generate_temperature: float = 0.2
     parallel: int = 1            # concurrent requests during offline extraction (the Ollama server must allow it)
+    request_timeout: float = 240.0   # seconds; a wedged Ollama runner raises instead of blocking the pipeline forever
 
 
 class ModelsConfig(BaseModel):
@@ -83,6 +84,7 @@ class AgentsConfig(BaseModel):
     understanding_model: str = ""     # Stage 1 (intent, complexity, conditions of the question)
     refinement_model: str = ""        # Stage 3
     extractor_model: str = ""         # Stage C (offline profile extraction)
+    fallback_model: str = ""          # the bigger model an agent escalates to on a bad outcome (empty = [llm].model)
 
 
 class FeaturesConfig(BaseModel):
@@ -92,6 +94,8 @@ class FeaturesConfig(BaseModel):
     contradiction: bool = True
     critic: bool = True
     profile_in_context: bool = True
+    escalation: bool = False          # an agent on a small model hands a bad outcome to the fallback model (see AgentsConfig)
+    profile_guided_retrieval: bool = False   # Stage 6 also pulls chunks whose profiles record a missing condition
 
 
 class Settings(BaseModel):
