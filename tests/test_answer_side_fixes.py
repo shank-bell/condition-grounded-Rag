@@ -66,6 +66,19 @@ def test_conflict_about_another_model_is_left_out_when_the_question_names_a_mode
     assert len(only_bert) == 1 and only_bert[0].value_a == 91.0
 
 
+def test_a_conflict_in_another_language_is_not_about_a_question_that_names_a_language(store):
+    store.add_many([prof("a:1", "a", model="XLM-R", dataset="XNLI", language="Hindi", value=88.7),
+                    prof("b:1", "b", model="XLM-R", dataset="XNLI", language="Swahili", value=66.5),
+                    prof("a:2", "a", model="XLM-R", dataset="XNLI", value=85.0),               # no language recorded: English
+                    prof("b:2", "b", model="XLM-R", dataset="XNLI", value=79.0)])
+    chunks = [rc("a:1", "a"), rc("b:1", "b"), rc("a:2", "a"), rc("b:2", "b")]
+    resolver = ContradictionResolver(store, ContradictionConfig(nli_threshold=1.1), lambda: ContradictingNLI())
+    assert resolver.resolve("q", chunks, {"model": "XLM-R", "language": "Kannada"}) == []
+    assert [(c.value_a, c.value_b) for c in resolver.resolve("q", chunks, {"language": "English"})] == [(85.0, 79.0)]
+    # no language named: every language counts (one conflict per pair of papers and subject: the widest gap, Hindi vs Swahili)
+    assert [(c.value_a, c.value_b) for c in resolver.resolve("q", chunks, {"model": "XLM-R"})] == [(88.7, 66.5)]
+
+
 def test_the_same_conflict_is_reported_once(store):
     kw = dict(model="BERT", dataset="SQuAD", dataset_version="1.1", setting="dev set")
     store.add_many([prof("a:1", "a", value=90.0, **kw), prof("a:2", "a", value=90.0, **kw),
@@ -75,8 +88,8 @@ def test_the_same_conflict_is_reported_once(store):
     assert len(out) == 1
 
 
-TEXT_A = "Human performance on the benchmark reaches high accuracy across annotators."
-TEXT_B = "Human performance on the benchmark stays low across annotators."
+TEXT_A = "Human performance on the benchmark reaches 91.2 accuracy across annotators."
+TEXT_B = "Human performance on the benchmark stays at 80.3 accuracy across annotators."
 
 
 def stub_rerank(score):
@@ -93,6 +106,27 @@ def test_text_only_disagreement_needs_relevance_shared_words_and_both_directions
     monkeypatch.setattr(contradiction_module, "rerank_scores", stub_rerank(2.0))
     unrelated = [rc("a:1", "a", TEXT_A), rc("b:1", "b", "Completely different topic entirely.")]
     assert resolver.resolve("human performance?", unrelated) == []                           # no shared subject words
+
+
+def test_a_year_in_a_citation_is_not_a_result(store, monkeypatch):
+    chunks = [rc("a:1", "a", "We compare TinyBERT with PKD (Sun et al., 2019), BERTSMALL6 and DistilBERT (Sanh et al., 2019)."),
+              rc("b:1", "b", "We compare our MobileBERT with BERTBASE and DistilBERT (Sanh et al., 2019) and DocQA (Clark, 2017).")]
+    resolver = ContradictionResolver(store, ContradictionConfig(), lambda: ContradictingNLI())
+    monkeypatch.setattr(contradiction_module, "rerank_scores", stub_rerank(2.0))
+    assert resolver.resolve("Compare DistilBERT and BERT-base on GLUE.", chunks) == []
+    percent = [rc("a:1", "a", "BERTBASE retains 97% of the performance on the benchmark."),
+               rc("b:1", "b", "BERTBASE retains only 71.2% of the performance on the benchmark.")]
+    assert [c.verdict for c in resolver.resolve("benchmark performance?", percent)] == ["NOT_COMPARABLE"]    # a decimal / percentage counts
+
+
+def test_descriptive_sentences_without_a_number_are_never_a_text_only_conflict(store, monkeypatch):
+    """NLI calls "We compare TinyBERT with ..." and "We compare our MobileBERT with ..." contradictory (different subjects); neither
+    reports a result, so there is nothing to disagree about."""
+    chunks = [rc("a:1", "a", "We compare TinyBERT with BERTTINY, DistilBERT and MobileBERT on the GLUE benchmark."),
+              rc("b:1", "b", "We compare our MobileBERT with BERTBASE, DistilBERT and DocQA on the GLUE benchmark.")]
+    resolver = ContradictionResolver(store, ContradictionConfig(), lambda: ContradictingNLI())
+    monkeypatch.setattr(contradiction_module, "rerank_scores", stub_rerank(2.0))
+    assert resolver.resolve("Compare DistilBERT and BERT-base on GLUE.", chunks) == []
 
 
 # ---------- stage 9 ----------
