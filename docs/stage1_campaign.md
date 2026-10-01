@@ -41,7 +41,10 @@ automatically.
 
 ## Targets and stop rules
 - **Targets:** val_clean intent macro-F1 >= 0.97 and complexity macro-F1 >= 0.95; dev-A intent accuracy >= 0.92 and complexity
-  accuracy >= 0.90. Dev B is reported at the end (it should be within ~5 points of dev A).
+  accuracy >= 0.90. Added after iteration 1 (the template questions repeat their wording and inflate val_clean): the same
+  bars on the LLM-written part of the validation set, `val_llm_intent_f1` >= 0.95 and `val_llm_cx_f1` >= 0.95, and the composite
+  is now computed from val_llm. Dev B is logged but its errors were read once, so **split C** (48 questions written after
+  iteration 1, never used for a decision, not scored by the trainer) is the clean held-out check: `scripts/eval_stage1.py`, at the end.
 - **Monitor stops a run** when the targets are met, or 3 evaluations in a row do not improve the composite, or 6 minutes pass
   without a new metrics line while the process is alive, or the loss is NaN.
 - **Campaign stops** when the targets are met in an iteration >= 2, or after 6 iterations, or after ~4 hours, or when two
@@ -72,4 +75,24 @@ automatically.
 
 ## Iteration log
 (append one line per iteration: date time, data size, clean rate, best epoch, val F1s, dev A / B accuracies, targets met?, next step)
-- iteration 1: pending (data generation was running at 2026-09-30 16:45)
+- iteration 1 (2026-09-30 17:26-17:28): data = 3,351 LLM questions + 1,600 templates + 15 seeds, 4,947 unique after removing dev
+  duplicates; the blind relabel confirmed 3,159 (clean; agreement of the two passes on both heads by class: comparison/complex 0.92,
+  result/simple 0.84, factual/simple 0.52, method/simple 0.56, result/complex 0.34, factual/complex 0.14, method/complex 0.17,
+  survey/complex 0.22 - the writer mixes types in its multi-part questions, e.g. "how does X differ from Y and what ..." is a
+  comparison to the blind pass). train 2,783 (1,394 template / 1,376 LLM / 13 seed), val_clean 376. Training 10 epochs, 1.4 min
+  (the run is shorter than the monitor's 30 s poll, so no monitor agent was spawned for it; the trainer finished by itself).
+  Best epoch 5: composite 0.9867, val F1 intent 0.984 / complexity 0.992, dev A 0.985 / 0.985 (68), dev B 0.974 / 0.974 (39);
+  the targets were met from epoch 1. 8 errors (5 val, 1 dev A, 2 dev B): the real one is "Which of the small BERT variants,
+  TinyBERT or MobileBERT, keeps more of BERT's GLUE performance?" -> factual/simple (a "which of X or Y" comparison), and the rest
+  are boundary cases (survey vs method, result vs factual). Iteration 2 is therefore a robustness pass, not a chase for numbers:
+  more "which of / or / vs" comparison phrasings and multi-part result / factual questions (new templates), targeted LLM questions
+  for the seven classes with weak agreement (informal / terse / multipart styles, seed 22), val_llm reported, dev C written.
+- iteration 2 (17:38-17:55): data = iteration 1 + 2,336 targeted LLM questions (seven classes, informal / terse / multipart, seed 22) + new
+  templates; 7,275 unique, 4,161 clean, train 3,667, val_clean 494 (332 LLM-written). Monitor agent stopped the run after three evaluations
+  without gain (epoch 6-7 of 10). Best epoch 3: composite 0.983, val F1 0.9689 / 0.9876, val_llm 0.9502 / 0.9819, dev A 1.0 / 1.0, dev B
+  0.974 / 1.0; val intent F1 missed the 0.97 bar by 0.0011. Installed for the smoke test; dev C 48/48 (looked at once).
+- iteration 3 (18:00-18:10): same data + `--augment 0.5` (1,490 perturbed train copies, train 5,157, same val). Monitor stopped it after epoch 8
+  (three evaluations without gain). Best epoch 5: composite 0.9825, val F1 0.9751 / 0.9773, val_llm 0.963 / 0.9668, dev A 1.0 / 1.0, dev B
+  0.974 / 1.0 -> ALL TARGETS MET. Composite is 0.0005 below iteration 2 (noise), but on typed-like-a-user dev questions it is better (dev A x3
+  1.000 vs 0.976, dev B 0.974 / 1.000 vs 0.966 / 0.974), so iteration 3 is the installed model. Dev C: 48/48 plain, 240 perturbed 0.983 intent /
+  1.000 complexity. Campaign closed (rule: targets met in an iteration >= 2). Report: `docs/stage1_training_report.md`.
