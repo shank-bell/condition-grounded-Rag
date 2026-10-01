@@ -15,6 +15,10 @@ _SIZE_LABELS = {"base", "large", "small", "tiny", "mini", "medium", "xlarge", "x
 _LANG_ALIASES = {"en": "english", "eng": "english", "hi": "hindi", "kn": "kannada", "ta": "tamil", "te": "telugu",
                  "de": "german", "fr": "french", "es": "spanish", "zh": "chinese", "ru": "russian", "ar": "arabic",
                  "sw": "swahili", "ja": "japanese", "ko": "korean", "mr": "marathi", "bn": "bengali"}
+_TASK_ALIASES = {"nli": "naturallanguageinference", "qa": "questionanswering", "ner": "namedentityrecognition",
+                 "mt": "machinetranslation", "mrc": "readingcomprehension", "sts": "semantictextualsimilarity",
+                 "pos": "partofspeechtagging", "rte": "recognizingtextualentailment"}
+TASK_WORDS = frozenset(_TASK_ALIASES) | frozenset(_TASK_ALIASES.values())     # "nli", "naturallanguageinference", ...
 _METRIC_ALIASES = {"acc": "accuracy", "exactmatch": "em", "f1score": "f1", "fscore": "f1", "rougel": "rougel"}
 _METRIC_NOISE = ("score", "dev", "test", "val", "validation", "avg", "average")
 
@@ -140,6 +144,10 @@ def values_match(field: str, requested: str, observed: str) -> bool:
         if tr and to:
             return tr <= to
     r, o = norm(requested), norm(observed)          # task, setting: free text, so containment either way
+    if field == "task":
+        r, o = _TASK_ALIASES.get(r, r), _TASK_ALIASES.get(o, o)
+    if r and r == o:
+        return True                                 # the same words, however short ("NER" = "NER")
     return len(r) >= 4 and len(o) >= 4 and (r in o or o in r)
 
 
