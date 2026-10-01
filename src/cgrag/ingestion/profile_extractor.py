@@ -166,9 +166,15 @@ def _normalize(p: ExtractedProfile) -> ExtractedProfile:
     return p
 
 
+def _junk_metric(metric: str) -> bool:
+    """A metric that is a run of letters from a mis-read header ('mniorpasasatsdtateuravg'): one token of 20+ letters, or 45+ characters."""
+    m = metric.strip()
+    return len(m) > 45 or any(len(w) > 20 and w.isalpha() for w in m.split())
+
+
 def _is_result(p: ExtractedProfile) -> bool:
     """An evaluation result needs a system that got the score and a metric; dataset statistics have neither."""
-    if not (p.model and p.metric) or _STATISTIC.search(p.metric) or _junk_model(p.model):
+    if not (p.model and p.metric) or _STATISTIC.search(p.metric) or _junk_model(p.model) or _junk_metric(p.metric):
         return False
     return not (p.dataset and norm(p.model) == norm(p.dataset))              # a row that names a dataset, not a system
 
