@@ -72,11 +72,9 @@ class Generated(BaseModel):
 def load_chunks(path: Path) -> list[dict]:
     """Passages as dicts; exported from ChromaDB once so later runs do not touch the index."""
     if not path.exists():
-        from cgrag.stores.vector_store import VectorStore
-        rows = [{"chunk_id": c.chunk_id, "paper_id": c.paper_id, "section": c.section, "text": c.text}
-                for c in VectorStore().all_chunks()]
-        path.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows), encoding="utf-8")
-        print(f"exported {len(rows)} chunks to {path}")
+        from cgrag.labelling.sampling import export_chunks
+        export_chunks(path)
+        print(f"exported the chunks to {path}")
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
