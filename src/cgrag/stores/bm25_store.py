@@ -26,7 +26,8 @@ class BM25Store:
 
     @classmethod
     def build(cls, chunks: list[Chunk]) -> "BM25Store":
-        return cls([c.chunk_id for c in chunks], [tokenize(c.text) for c in chunks])
+        """The keyword index sees the chunk text and, when there is one, its retrieval card (ingestion/cards.py)."""
+        return cls([c.chunk_id for c in chunks], [tokenize(f"{c.card} {c.text}" if c.card else c.text) for c in chunks])
 
     def save(self, path: Path | None = None) -> None:
         path = path or get_settings().paths.bm25_path
