@@ -25,9 +25,12 @@ from pydantic import BaseModel, Field, create_model
 from ..llm import OllamaLLM
 from ..schemas import ApplicabilityResult, ConditionCheck, ConditionProfile, RetrievedChunk
 from ..stores.profile_store import ProfileStore
-from .conditions import norm, observed_values, values_match
+from .conditions import covers, norm, observed_values
 
 MAX_OBSERVED = 6
+JOINT_FIELDS = ("model", "dataset", "language")     # what "X on Y for Z" is made of: they must be recorded TOGETHER by one result
+MAX_JOINT_CHUNKS = 6
+BLAME_ORDER = ("language", "dataset", "model")        # which unsupported combination condition is reported first (most specific first)
 MAX_VALUES_PER_FIELD = 4          # recorded values shown per field and passage in the LLM's evidence
 MAX_VALUES_FOR_JUDGED_FIELD = 12  # ... but the fields under judgement show more so the LLM can see e.g. 'hi', 'sw'
 SNIPPET_CHARS = 80
@@ -78,8 +81,9 @@ class Evidence:
 
 class ApplicabilityAgent:
     def __init__(self, profiles: ProfileStore, max_reretrieve: int = 1, llm: OllamaLLM | None = None,
-                 fallback: OllamaLLM | None = None) -> None:
+                 fallback: OllamaLLM | None = None, joint: bool = False) -> None:
         self.profiles = profiles
+        self.joint = joint            # also require the named model, dataset and language to be recorded together
         self.max_reretrieve = max_reretrieve
         self.llm = llm
         self.fallback = fallback if llm is not None else None    # the bigger model that gives a second opinion (escalation)
@@ -105,7 +109,7 @@ class ApplicabilityAgent:
     @staticmethod
     def _lookup(requested: dict[str, str], evidence: list[Evidence]) -> dict[str, list[str]]:
         """Per condition: the passages whose recorded values satisfy it."""
-        return {f: [e.chunk_id for e in evidence if any(values_match(f, wanted, v) for v in e.recorded.get(f, []))]
+        return {f: [e.chunk_id for e in evidence if any(covers(f, wanted, v) for v in e.recorded.get(f, []))]
                 for f, wanted in requested.items()}
 
     # ---------- agent: judgement ----------
@@ -202,12 +206,70 @@ class ApplicabilityAgent:
         parts.append("Do not assume the findings hold for the missing condition.")
         return " ".join(parts)
 
+    # ---------- guardrail: joint coverage ----------
+
+    def _joint(self, requested: dict[str, str], result: ApplicabilityResult, kept: list[RetrievedChunk],
+               joint_fetch: Callable[[list[RetrievedChunk], list[str]], list[RetrievedChunk]] | None
+               ) -> tuple[list[RetrievedChunk], ApplicabilityResult]:
+        """Each condition can be covered by a different paper while NO paper covers them together: "XLM-R on XNLI for Kannada" has
+        XLM-R (many papers), XNLI (15 languages) and Kannada (IndicXNLI), but no result of XLM-R on XNLI in Kannada. When the question
+        names at least two of model, dataset and language, the profile store must hold a result that records them together.
+        If it does, its chunks are added to the evidence (the per-condition verdict stands). If not, the question is not covered as
+        asked, whatever retrieval happened to find: ONE condition is reported as not covered - the most specific one that the others
+        are recorded without (XLM-R on XNLI exists, in 15 languages, so: language) - and the warning says what IS recorded."""
+        key = {f: requested[f] for f in JOINT_FIELDS if requested.get(f)}
+        if len(key) < 2:
+            return kept, result
+        together = self.profiles.profiles_matching(key, list(key))
+        if together:
+            if joint_fetch is not None:
+                ids = [cid for cid, _ in Counter(p.chunk_id for p in together).most_common(MAX_JOINT_CHUNKS)]
+                kept = joint_fetch(kept, ids)
+            return kept, result.model_copy(update={"joint_covered": True})
+        without = {f: self.profiles.profiles_matching(key, [g for g in key if g != f]) for f in key}
+        # A condition is a candidate when the others ARE recorded together without it. Several can be, so the most specific is
+        # blamed: language, then dataset, then model ("XLM-R on XQuAD for Kannada": XQuAD has no Kannada, though XLM-R has Kannada
+        # results elsewhere). Nothing recorded for any pair: every named condition is reported.
+        candidates = [f for f in BLAME_ORDER if f in key and without[f]]
+        blamed = candidates[:1] if candidates else list(key)
+        checks = []
+        for c in result.checks:
+            if c.condition in key:                    # the joint verdict decides these; retrieval may simply have missed a chunk
+                if c.condition in blamed:
+                    seen = Counter(v for p in without.get(c.condition, []) for v in observed_values(p, c.condition))
+                    c = c.model_copy(update={"covered": False, "chunk_ids": [], "observed": [v for v, _ in seen.most_common(MAX_OBSERVED)]})
+                elif not c.covered:
+                    c = c.model_copy(update={"covered": True})
+            checks.append(c)
+        covered = sum(c.covered for c in checks)
+        note = "Joint check: no source records " + ", ".join(f"{f} = {v}" for f, v in key.items()) + " together."
+        return kept, result.model_copy(update={
+            "checks": checks, "coverage": covered / len(checks), "joint_covered": False,
+            "missing": [f"{c.condition}={c.requested}" for c in checks if not c.covered],
+            "warning": self._joint_warning(checks, key), "reasoning": f"{result.reasoning} {note}".strip()})
+
+    @staticmethod
+    def _joint_warning(checks: list[ConditionCheck], key: dict[str, str]) -> str:
+        covered = sum(c.covered for c in checks)
+        parts = [f"The evidence covers {covered} of {len(checks)} conditions in the question."]
+        for c in checks:
+            if c.covered:
+                continue
+            others = ", ".join(f"{f.replace('_', ' ')} = {v}" for f, v in key.items() if f != c.condition)
+            seen = f" For {others}, the sources record: {', '.join(c.observed)}." if c.observed else ""
+            parts.append(f"No source reports {c.condition.replace('_', ' ')} = {c.requested} together with {others}.{seen}")
+        parts.append("Each condition appears in the sources, but only in different combinations; do not assume the findings hold for this one.")
+        return " ".join(parts)
+
     def run(self, requested: dict[str, str], kept: list[RetrievedChunk],
-            research: Callable[..., list[RetrievedChunk]], question: str = "") -> tuple[list[RetrievedChunk], ApplicabilityResult]:
+            research: Callable[..., list[RetrievedChunk]], question: str = "",
+            joint_fetch: Callable[[list[RetrievedChunk], list[str]], list[RetrievedChunk]] | None = None
+            ) -> tuple[list[RetrievedChunk], ApplicabilityResult]:
         """Check coverage; while conditions are missing and retries remain, search again for the missing ones.
 
         `research(terms[, query])` runs retrieval + rerank with the missing condition values added (and the agent's own
-        search query, when it wrote one) and returns the new kept set.
+        search query, when it wrote one) and returns the new kept set. `joint_fetch(kept, chunk_ids)` adds the chunks that record the
+        named conditions together (joint coverage, see `_joint`).
         """
         result, query = self._assess(requested, kept, question)
         retried = False
@@ -224,6 +286,8 @@ class ApplicabilityAgent:
             # shown, the bigger model judges the same evidence once; its verdict replaces the small model's.
             result, _ = self._assess(requested, kept, question, llm=self.fallback)
             escalated = True
+        if self.joint:
+            kept, result = self._joint(requested, result, kept, joint_fetch)       # the guardrail after every verdict, small or big
         result.re_retrieved = retried
         result.escalated = escalated
         result.profile_guided = bool(getattr(research, "guided_ids", None))
