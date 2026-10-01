@@ -84,6 +84,24 @@ class ProfileStore:
         with self.lock:
             return [self._row(r) for r in self.db.execute("SELECT * FROM profiles ORDER BY profile_id")]
 
+    def _cached(self) -> list[ConditionProfile]:
+        """Every profile, loaded once (the cache is dropped when profiles are added or a paper is deleted)."""
+        with self.lock:
+            if self._cache is None:
+                self._cache = [self._row(r) for r in self.db.execute("SELECT * FROM profiles")]
+            return self._cache
+
+    def profiles_matching(self, requested: dict[str, str], fields: list[str] | tuple[str, ...]) -> list[ConditionProfile]:
+        """Profiles that record ALL of the given conditions together: for each field in `fields` (taken from `requested`) a value
+        that satisfies it (`values_match`: 'mBERT' does not satisfy 'BERT', 'kn' satisfies 'Kannada'). Used by Stage 6's joint
+        coverage check: three conditions can each be covered by a different paper without any paper covering them together."""
+        from ..pipeline.conditions import covers, observed_values
+        wanted = {f: requested[f] for f in fields if requested.get(f)}
+        if not wanted:
+            return []
+        return [p for p in self._cached()
+                if all(any(covers(f, w, v) for v in observed_values(p, f)) for f, w in wanted.items())]
+
     def chunks_recording(self, requested: dict[str, str], missing: str, limit: int = 4) -> list[str]:
         """Chunks whose profiles record the `missing` condition, best first (Stage 6, profile-guided retrieval).
 
@@ -91,20 +109,16 @@ class ProfileStore:
         for {language: Kannada, task: NLI} that is a Kannada NLI result, not a Kannada QA result and not an NLI result in
         Hindi; for {language: Kannada, dataset: XNLI} nothing qualifies (XNLI has no Kannada), so no chunk is added and the
         scope warning stays honest. Ties are ordered by how many matching profiles the chunk holds."""
-        from ..pipeline.conditions import observed_values, values_match
+        from ..pipeline.conditions import covers, observed_values
         wanted = requested.get(missing)
         if not wanted:
             return []
-        with self.lock:
-            if self._cache is None:
-                self._cache = [self._row(r) for r in self.db.execute("SELECT * FROM profiles")]
-            profiles = self._cache
         scores: dict[str, list[int]] = {}                       # chunk_id -> [best score, matching profiles]
-        for p in profiles:
-            if not any(values_match(missing, wanted, v) for v in observed_values(p, missing)):
+        for p in self._cached():
+            if not any(covers(missing, wanted, v) for v in observed_values(p, missing)):
                 continue
             s = 1 + sum(1 for f, w in requested.items()
-                        if f != missing and any(values_match(f, w, v) for v in observed_values(p, f)))
+                        if f != missing and any(covers(f, w, v) for v in observed_values(p, f)))
             entry = scores.setdefault(p.chunk_id, [0, 0])
             entry[0], entry[1] = max(entry[0], s), entry[1] + 1
         every = len(requested)                                   # the missing condition plus all the others
