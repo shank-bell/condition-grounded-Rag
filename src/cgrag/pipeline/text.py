@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import re
 
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\[\(\"'“])")
+_ABBREVIATIONS = ("vs", "al", "e.g", "i.e", "Fig", "Figs", "Eq", "Eqs", "cf", "approx", "No", "Sec", "Tab", "Dr")
+_NOT_AN_ABBREVIATION = "".join(rf"(?<!\b{re.escape(a)}\.)" for a in _ABBREVIATIONS)
+_SENTENCE_END = re.compile(rf"(?<=[.!?]){_NOT_AN_ABBREVIATION}\s+(?=[A-Z0-9\[\(\"'“])")
 _CITATION = re.compile(r"\[(\d+(?:\s*,\s*\d+)*)\]")
 _WORD = re.compile(r"[a-z0-9]+")
 
