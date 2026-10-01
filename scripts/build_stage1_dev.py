@@ -1,7 +1,8 @@
 """Turn eval/stage1_dev_raw.txt (intent|complexity|question per line) into eval/stage1_dev.jsonl with a fixed A / B split.
 
-Split A is used for decisions (stopping, error analysis); split B is never looked at until the final report, so it shows
-whether the classifier generalises beyond what was tuned. Labels are the author's judgement, not gold: they follow
+Split A is used for decisions (stopping, error analysis); split B was meant to stay unseen but its errors were read once after
+iteration 1, so split C (eval/stage1_dev_c_raw.txt, written after that, never used for a decision, not logged by the trainer,
+scored only by scripts/eval_stage1.py at the end) is the clean held-out set. Labels are the author's judgement, not gold: they follow
 the rubric in scripts/make_query_training_data.py (KINDS). The team's own questions replace this set later.
 """
 from __future__ import annotations
@@ -26,6 +27,12 @@ def main() -> None:
         n_b = max(1, round(len(items) * 0.35))
         for j, (intent, cx, q) in enumerate(items):
             out.append({"question": q, "intent": intent, "complexity": cx, "split": "B" if j < n_b else "A"})
+    extra = ROOT / "eval" / "stage1_dev_c_raw.txt"            # split C: written after iteration 1, evaluated only at the very end
+    if extra.exists():
+        for line in extra.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                intent, cx, q = line.split("|", 2)
+                out.append({"question": q, "intent": intent, "complexity": cx, "split": "C"})
     (ROOT / "eval" / "stage1_dev.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in out), encoding="utf-8")
     print(len(out), "questions;", sorted(Counter((r["intent"], r["complexity"]) for r in out).items()))
     print("split:", dict(Counter(r["split"] for r in out)), "| complexity:", dict(Counter(r["complexity"] for r in out)))
