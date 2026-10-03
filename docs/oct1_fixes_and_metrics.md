@@ -1,7 +1,7 @@
 # 1 October 2026: the five open items, what was found, and the numbers
 
 Everything below was measured on this PC (RTX PRO 4000, 24 GB) on the 28-paper corpus (1,385 chunks, 10,275 profiles) with
-`gemma4:12b` for the answer and `gemma4:e2b` for the two agents. Test suite: **165 tests pass**. The measurement scripts are in
+`gemma4:12b` for the answer and `gemma4:e2b` for the two agents. Test suite: **175 tests pass**. The measurement scripts are in
 `scripts/` (named below) so every number can be reproduced.
 
 ## What was asked, in one table
@@ -27,6 +27,11 @@ test each one fails). Root causes, all fixed in `critic.py` / `text.py`, each wi
 3. Short numeric lines ("MuRIL: 67.8", 2 words) were **never checked at all** (a silent gap). They are now checked when they name a
    system; a bare condition value under a model heading ("CoLA: 56.3") has no subject and is skipped.
 4. The sentence splitter broke at "vs." / "et al." / "e.g." / "Fig.", so the critic judged fragments: abbreviations no longer end a sentence.
+5. (evening) A sentence that says a result is **missing** ("No results are reported for Kannada for any of the models.", "GPT-4 was not
+   evaluated on XNLI.") is what the scope warning asks the answer to say, but the critic judged it like a claim, found no source that
+   entails it, and regenerated the whole answer for nothing (+3 s, and the claims panel showed two "unsupported" claims that were
+   correct). Such sentences now join the other "what the sources do not contain" sentences the critic already skipped. **Limit:** a
+   *wrong* absence statement ("no results for X" when X is recorded) is not caught either; Stage 6's coverage is the check for that.
 
 ## 2. Stage 7: the false "conflict" and the wrong-language conflicts
 * Text-only disagreement (no recorded numbers) now needs a **reported result in both sentences**: a decimal or a percentage. A year in a
@@ -103,6 +108,39 @@ The cross-encoder cannot read results tables (even with the card it scores the K
 condition named in the question is recorded in the kept passages, the weak-evidence flag is withdrawn; before, the answer ended with a
 bogus "The SCOPE WARNING indicates ..." line although the numbers were right (IndicBERT+Samanantar 74.7, MuRIL 74.0, XLM-R 71.5, mBERT 58.6).
 
+### 4f. Questions that name several systems or languages (evening; part of `[features] joint_coverage`)
+**Found** while dry-running the labelling scorer on 12 invented questions: "Compare mBERT and GPT-4 on XNLI" got **no scope warning**.
+Stage 1 returned one model (mBERT), so Stage 6 never looked at GPT-4, which no paper reports. Job B has such questions by design
+("partly covered", 10 of 30), so each would have counted as a missed warning.
+**Change.** `QueryConditions` gets `other_models / other_datasets / other_languages` (and `extras()`; `specified()` is unchanged, so no
+other stage is touched). Stage 1 fills them from the LLM and from names found literally in the question (the store's model names, the
+language list); a value must occur in the question. Stage 6 (`_extras`) checks each further value like the joint check: one result must
+record it together with the other named model / dataset / language. Covered ones add their best two chunks to the evidence (every
+compared system gets a source); uncovered ones become "not covered" conditions and the warning names them and says what IS recorded.
+**Three problems the regression run itself exposed (all fixed, each with a unit test):**
+1. With the QA benchmarks (XQuAD, MLQA, TyDi QA) the 12B model files the **only** dataset under `other_datasets` and leaves `dataset`
+   empty: 8 of the 32 ablation questions got the same dataset twice (harmless for the verdict, wrong analysis). Fix: when the plain
+   field is empty, the value named first in the question becomes the first one; the prompt now says a single value never goes in an
+   `other_*` list.
+2. With the new prompt the model abbreviated "TyDi QA GoldP" to "GoldP", which matches nothing in the store (1 false warning, 31/32). A
+   dataset name the LLM cut short is replaced by the full name the question writes when the store has it.
+3. For "mBERT, XLM-R and GPT-4 on XNLI for Hindi and Kannada" the answer rightly said "No results are reported for Kannada ..." and the
+   critic marked it unsupported (section 1, item 5).
+**A validity slip of mine, corrected:** the multi-entity example in the Stage 1 prompt was word for word the question I used to test it,
+so the first end-to-end run proved nothing. The example is now unrelated (ALBERT / ELECTRA on RACE and SQuAD for English and Tamil) and
+the tests use questions that are not in the prompt.
+
+| check (final code) | result |
+|---|---|
+| `ablate_stage6.py --configs "+joint"` (32 questions, one entity of each kind) | **32/32 correct**: 0 of 12 covered wrongly warned, 12 of 12 missing-language questions warned and name the language, 0 of 8 language+task wrongly warned; **0 questions got a further entity**; 3.2 s per question (3.4 s in the run before: no change) |
+| dry run of `eval_questions.py` on 12 invented questions (incl. "Compare mBERT and GPT-4 on XNLI") | intent 12/12, complexity 12/12, scope warning 4 of 4 expected warnings given and **none wrongly**, the right missing condition named 4/4 (before the change: "Compare mBERT and GPT-4 on XNLI" had no warning) |
+| "Compare mBERT, XLM-R and GPT-4 on XNLI for Hindi and Kannada" | further entities found: XLM-R, GPT-4, Kannada; **coverage 67 %** (4 of 6): GPT-4 and Kannada reported missing, warning says what IS recorded; 2/2 claims supported, no regeneration, 11.5 s (before the critic fix: 3/5 claims, 13.7 s) |
+| "How well do models perform on Kannada and Tamil NLI?" | Tamil found as a further language and covered (100 %), 16/16 claims supported |
+| "Does BERT-base or GPT-3 do better on SQuAD v2.0?" | GPT-3 found, covered (100 %), 3/3 claims supported |
+| "How do mT5 and XLM-R compare on XQuAD for Arabic and Thai?" | warns that no source records XLM-R on XQuAD in Arabic (**may be a false warning**: the mT5 paper's per-language XQuAD tables are among the ~15 tables the layout model missed, which is exactly the caveat of 4d); the answer then recites mT5 *ablation* rows (span length, dropout ...) as if they were results and the critic rejects both claims (0/2). An extraction weak spot (ablation-table rows stored as models), not the new code; not investigated further |
+Not covered: a second dataset is found only when the LLM names it ("GLUE and SQuAD" kept SQuAD); the vocabulary route is not used for
+datasets because the store's dataset names are too noisy ("Dev Set SST-2") and would raise false warnings.
+
 ## 5. Start-up and latency (`scripts/measure_first_question.py`, `scripts/prewarm_files.py`)
 * **First question after a restart: 38.8 s -> 10.0 s.** `Pipeline.warm_up()` loads the embedder, reranker, NLI, SciBERT and both Ollama
   models once (19.6 s, torch models one after another, Ollama models in parallel). The API runs it in a background thread at start:
@@ -118,13 +156,17 @@ bogus "The SCOPE WARNING indicates ..." line although the numbers were right (In
   more regenerations by the (now stricter) critic and the larger scope-warning text.
 
 ## 6. End-to-end check of the five key questions (final code)
+Re-run in the evening with the final code (`scripts/smoke_questions.py`, all stages; the model's wording varies from run to run, so claim
+counts move by a sentence or two between runs).
 | Question | Result |
 |---|---|
-| How well do models perform on Kannada NLI? | answered from IndicXNLI (6 models), coverage 100 %, 6/6 claims supported, no stray warning |
-| What accuracy does XLM-R get on XNLI for Kannada? | **warns**: no source records language = Kannada together with XLM-R and XNLI; says what is recorded (English, Spanish, ...) |
-| Compare DistilBERT and BERT-base on GLUE | coverage 100 % (conditions recorded together), no false conflict, 12/12 claims supported, 9.7 s |
-| What F1 does BERT-large get on SQuAD v2.0? | two EXPLAINED conflicts (dataset version), one claim flagged: "89.1 F1" - the store has 89.1 for both XLNet and BERT-large in the ALBERT paper (an extraction error to check in job A) |
-| What accuracy does mBERT get on XNLI for Hindi? | covered, one NOT_COMPARABLE note between two papers' Hindi numbers |
+| How well do models perform on Kannada NLI? | answered from IndicXNLI (6 models), coverage 100 %, 6/6 claims supported, no stray warning, no further entity |
+| What accuracy does XLM-R get on XNLI for Kannada? | **warns**: no source records language = Kannada together with XLM-R and XNLI; says what is recorded (English, Spanish, ...); 5/5 claims supported |
+| Compare DistilBERT and BERT-base on GLUE | BERT-base now recorded as a further model and checked jointly with GLUE: coverage 100 % (3 checks), no false conflict, 8/8 claims supported, 9.3 s (an earlier run of the same code: 6/6 after one regeneration, 17.8 s) |
+| What F1 does BERT-large get on SQuAD v2.0? | two EXPLAINED conflicts (dataset version); two claims flagged (5/7): "89.1 F1" and "83.1 F1" - the store has wrong BERT-large rows in the ALBERT paper (an extraction error to check in job A) |
+| What accuracy does mBERT get on XNLI for Hindi? | covered, one NOT_COMPARABLE note between two papers' Hindi numbers, 3/3 claims, 7.7 s |
+Latency of that run: first question 27.5 s (this script does not call the warm-up; the API does), the other eight questions median
+10.4 s (7.7-21.3 s). The multi-entity questions are in section 4f.
 
 ## 7. Departures from the architecture added today (all behind flags; need the user's OK, delegated to the assistant's judgement)
 1. **Retrieval cards** (`[retrieval] use_cards`): Stage D embeds a second vector per chunk from a card built from its profiles; Stage 4
@@ -134,8 +176,10 @@ bogus "The SCOPE WARNING indicates ..." line although the numbers were right (In
    checks stay as in the doc.
 3. **Weak-evidence flag withdrawn** when Stage 6 covers every named condition by recorded values.
 4. **Stage 7**: language filter for conflicts; text-only conflicts need a reported result in both sentences.
-5. **Stage 9**: the critic changes of section 1.
+5. **Stage 9**: the critic changes of section 1 (including that "no results are reported for X" sentences make no claim).
 6. Escalation + profile-guided retrieval (built 30 Sep) - measured above.
+7. **Several systems / languages in one question** (section 4f; part of `[features] joint_coverage`): Stage 1 may return further models /
+   datasets / languages and Stage 6 checks each one jointly with the other named conditions.
 
 ## 8. Labelling kit (built, tested, not yet used by the team)
 `python scripts/make_label_sheets.py` -> `data/labelling/` (git-ignored): 8 workbooks + private keys; guide `docs/labelling_guide.md`.
