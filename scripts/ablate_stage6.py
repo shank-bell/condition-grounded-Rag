@@ -129,6 +129,7 @@ def main() -> None:
             rows.append({**case, **judge(case, a), "coverage": a.coverage if a else None, "guided": bool(a and a.profile_guided),
                          "escalated": bool(a and a.escalated), "re_retrieved": bool(a and a.re_retrieved),
                          "conditions_found": r.analysis.conditions.specified() if r.analysis else {},
+                         "extras_found": r.analysis.conditions.extras() if r.analysis else {},
                          "seconds": round(r.timings_ms.get("total", 0) / 1000, 2),
                          "applicability_s": round(r.timings_ms.get("6_applicability", 0) / 1000, 2)})
         results[name] = rows
