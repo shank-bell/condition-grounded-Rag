@@ -67,9 +67,19 @@ class QueryConditions(BaseModel):
     model: str | None = None
     model_size: str | None = None
     setting: str | None = None
+    # A question can name several systems, benchmarks or languages ("compare mBERT, XLM-R and GPT-4 on XNLI for Hindi and Kannada").
+    # The first goes in model / dataset / language, the others here; Stage 6 checks each one. specified() ignores them.
+    other_models: list[str] = Field(default_factory=list)
+    other_datasets: list[str] = Field(default_factory=list)
+    other_languages: list[str] = Field(default_factory=list)
 
     def specified(self) -> dict[str, str]:
         return {f: getattr(self, f) for f in QUERY_CONDITION_FIELDS if getattr(self, f)}
+
+    def extras(self) -> dict[str, list[str]]:
+        """The further models / datasets / languages the question names, by field name."""
+        found = {"model": self.other_models, "dataset": self.other_datasets, "language": self.other_languages}
+        return {f: values for f, values in found.items() if values}
 
 
 class QueryAnalysis(BaseModel):
