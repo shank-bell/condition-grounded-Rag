@@ -20,6 +20,7 @@ import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from cgrag.evaluation.freeze import provenance
 from cgrag.labelling.score import prf
 from cgrag.pipeline.conditions import values_match
 from cgrag.pipeline.intent_classifier import COMPLEXITIES, INTENTS
@@ -115,9 +116,10 @@ def main() -> None:
                                  for t, rs in ((t, [r for r in results if r["planned_type"] == t]) for t in sorted({r["planned_type"] for r in results}))}
     scores["seconds_per_question"] = {"median": round(statistics.median(r["seconds"] for r in results), 1),
                                       "max": max(r["seconds"] for r in results)}
+    scores["provenance"] = provenance()                     # which commit and files produced these numbers, and when (the freeze record)
     args.gold.with_suffix(f"{suffix}.scores.json").write_text(json.dumps(scores, indent=1, ensure_ascii=False), encoding="utf-8")
 
-    print(json.dumps({k: v for k, v in scores.items() if k != "conditions"}, indent=1))
+    print(json.dumps({k: v for k, v in scores.items() if k not in ("conditions", "provenance")}, indent=1))
     print("conditions:", {f: (v["precision"], v["recall"]) for f, v in scores["conditions"].items()})
     misses = [r for r in results if r["intent"] != r["pred_intent"] or r["complexity"] != r["pred_complexity"] or r["warned"] != r["expect_warning"]]
     print(f"\n{len(misses)} question(s) with a miss (see {out_jsonl.name}):")
