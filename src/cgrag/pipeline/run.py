@@ -56,7 +56,8 @@ class Pipeline:
         self.vectors = VectorStore(self.cfg.paths.chroma_dir)
         self.profiles = ProfileStore(self.cfg.paths.profile_db)
         self.retriever = HybridRetriever(self.vectors, BM25Store.load(self.cfg.paths.bm25_path), self.cfg.retrieval)
-        self.understand = QueryUnderstanding(self._agent_llm(self.cfg.agents.understanding_model), profiles=self.profiles)
+        self.understand = QueryUnderstanding(self._agent_llm(self.cfg.agents.understanding_model),
+                                             profiles=self.profiles if self.cfg.features.use_profiles else None)
         self.refine_llm = self._agent_llm(self.cfg.agents.refinement_model)
         orchestrator_llm = self._agent_llm(self.cfg.agents.orchestrator_model)
         applicability_llm = self._agent_llm(self.cfg.agents.applicability_model) if self.cfg.features.applicability_agent else None
@@ -186,7 +187,7 @@ class Pipeline:
 
         sources = select_sources(kept, contradictions, self.cfg.retrieval.generate_top,
                                  applicability.checks if applicability else None)
-        profile_map = self.profiles.for_chunks([rc.chunk.chunk_id for rc in sources])
+        profile_map = self.profiles.for_chunks([rc.chunk.chunk_id for rc in sources]) if self.cfg.features.use_profiles else {}
         warning = " ".join(w for w in (applicability.warning if applicability else None, WEAK_EVIDENCE if weak else None) if w) or None
         include = self.cfg.features.profile_in_context
 
