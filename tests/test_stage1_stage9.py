@@ -73,6 +73,45 @@ class StubProfiles:
         return {"model": ["mT5", "mBERT", "XLM-R"], "dataset": ["XQuAD", "XNLI", "TyDi QA GoldP"], "language": [], "task": []}
 
 
+def test_ordinary_words_that_a_table_row_is_labelled_with_are_not_further_models():
+    """"embeddings", "baseline", "memory" are stored as models (row labels); a question using the plain word must not get a fake further model."""
+    from cgrag.pipeline.query_understanding import extras_from_vocabulary
+    vocab = {"model": ["BERT", "Embeddings", "baseline", "memory", "human", "Llama", "mBERT"], "dataset": [], "language": [], "task": []}
+    primary = {"model": "BERT"}
+    assert extras_from_vocabulary("How much memory does BERT need compared with the baseline and human embeddings?", vocab, primary) == {}
+    assert extras_from_vocabulary("Compare BERT and Llama on SQuAD", vocab, primary) == {"other_models": ["Llama"]}        # a capitalised name
+    assert extras_from_vocabulary("Compare BERT and mBERT on SQuAD", vocab, primary) == {"other_models": ["mBERT"]}        # a capital after the first letter
+
+
+def test_the_words_of_the_first_models_own_name_are_not_further_models():
+    from cgrag.pipeline.query_understanding import extras_from_vocabulary
+    vocab = {"model": ["GloVe", "GloVe embeddings", "Embeddings"], "dataset": [], "language": [], "task": []}
+    assert extras_from_vocabulary("What Spearman rank correlation does GloVe embeddings get on SICK-R?", vocab, {"model": "GloVe embeddings"}) == {}
+
+
+def test_a_multi_word_model_name_the_llm_cut_short_is_restored_from_the_question():
+    from cgrag.pipeline.query_understanding import QueryUnderstanding, fuller_model_name
+    names = ["GloVe", "GloVe embeddings", "Avg. GloVe embeddings", "BERT embeddings"]
+    q = "What Spearman rank correlation does GloVe embeddings get on SICK-R?"
+    assert fuller_model_name("GloVe", q, names) == "GloVe embeddings"                  # the longest name the question writes literally
+    assert fuller_model_name("GloVe", "How does GloVe do on SICK-R?", names) is None   # the question does not write the longer name
+    assert fuller_model_name(None, q, names) is None
+    said = QueryAnalysis(intent="result", complexity="simple", conditions=QueryConditions(model="GloVe", dataset="SICK-R"))
+
+    class Profiles(StubProfiles):
+        def vocabulary(self):
+            return {"model": names, "dataset": ["SICK-R"], "language": [], "task": []}
+    got = QueryUnderstanding(StubLLM(said), classifier=None, profiles=Profiles()).analyze(q).conditions
+    assert got.specified() == {"model": "GloVe embeddings", "dataset": "SICK-R"} and got.extras() == {}
+    # the LLM also filed the word "embeddings" under task: it is part of the model's name, and Stage 6 would warn that no source covers such a task
+    said = QueryAnalysis(intent="result", complexity="simple", conditions=QueryConditions(model="GloVe", dataset="SICK-R", task="embeddings"))
+    got = QueryUnderstanding(StubLLM(said), classifier=None, profiles=Profiles()).analyze(q).conditions
+    assert got.specified() == {"model": "GloVe embeddings", "dataset": "SICK-R"}
+    real = QueryAnalysis(intent="result", complexity="simple", conditions=QueryConditions(model="GloVe", dataset="SICK-R", task="semantic textual similarity"))
+    assert QueryUnderstanding(StubLLM(real), classifier=None, profiles=Profiles()).analyze(
+        "What semantic textual similarity does GloVe get on SICK-R?").conditions.task == "semantic textual similarity"          # a real task stays
+
+
 def test_a_question_with_one_of_each_has_no_further_entities_even_when_the_llm_misfiles_one():
     from cgrag.pipeline.query_understanding import QueryUnderstanding
     said = QueryAnalysis(intent="result", complexity="simple",
