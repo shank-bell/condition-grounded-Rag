@@ -95,7 +95,8 @@ class FeaturesConfig(BaseModel):
     contradiction: bool = True
     critic: bool = True
     profile_in_context: bool = True
-    escalation: bool = False          # an agent on a small model hands a bad outcome to the fallback model (see AgentsConfig)
+    use_profiles: bool = True         # False: no Condition Profile is used online (Stage 1's name vocabulary, the answer's recorded results, the critic's check) = "the pipeline without stage C"
+    escalation: bool = False         # an agent on a small model hands a bad outcome to the fallback model (see AgentsConfig)
     profile_guided_retrieval: bool = False   # Stage 6 also pulls chunks whose profiles record a missing condition
     joint_coverage: bool = False      # Stage 6 also requires model, dataset and language to be recorded TOGETHER (see applicability.py)
 
