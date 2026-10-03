@@ -19,9 +19,13 @@ from .conditions import claim_text, metric_key, model_family, norm, setting_tags
 from .text import citations, overlap, plain, split_sentences, strip_citations
 
 _META = re.compile(
-    r"\b(scope warning|not covered|no retrieved source|does not cover|do not cover|cannot be determined|unresolved|"
+    r"\b(scope warning|not covered|does not cover|do not cover|cannot be determined|unresolved|"
     r"(?:do|does|did) not (?:contain|mention|provide|include|report|address|state|specify|cover)|"
-    r"no (?:information|evidence|data|source)|not (?:enough|sufficient)|insufficient|cannot answer|unable to|"
+    r"no (?:(?:retrieved|reported|recorded|available) )?(?:information|evidence|data|sources?|results?|scores?|numbers?|findings?|"
+    r"reports?|studies|papers?)|"
+    r"(?:(?:is|are|was|were) not|(?:has|have) not been) (?:reported|recorded|evaluated|tested|available|included|mentioned|provided|found)|"
+    r"none of the (?:sources|papers|studies)|"
+    r"not (?:enough|sufficient)|insufficient|cannot answer|unable to|"
     r"not reported|do not assume|does not assume)\b", re.I)
 _ECHO = re.compile(r"\bsources?\s*\[\d+\]\s*(?:and|&|,)\s*\[\d+\]", re.I)
 WINDOW = 3
