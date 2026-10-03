@@ -156,7 +156,7 @@ class Pipeline:
                 kept, applicability = self.applicability.run(
                     analysis.conditions.specified(), kept,
                     self._research(question, queries, analysis.intent, kept, analysis.conditions.specified()), question,
-                    joint_fetch=self._joint_fetch(question))
+                    joint_fetch=self._joint_fetch(question), extras=analysis.conditions.extras())
             trace.append(f"6 coverage {applicability.coverage:.2f}, missing {applicability.missing or 'none'}"
                          + (", re-retrieved" if applicability.re_retrieved else "")
                          + (", profile-guided" if applicability.profile_guided else "")
