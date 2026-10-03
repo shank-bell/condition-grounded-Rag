@@ -7,12 +7,14 @@ const VERDICT_LABEL: Record<Verdict, string> = {
   NOT_COMPARABLE: "Not comparable",
 };
 
-/** Render [1] / [2, 3] markers in the answer as links to the source list. */
-function AnswerText({ text, id }: { text: string; id: string }) {
-  const parts = text.split(/(\[\d+(?:\s*,\s*\d+)*\])/g);
+/** One line of the answer: **bold** text, and [1] / [2, 3] markers as links to the source list. */
+function Inline({ text, id }: { text: string; id: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\[\d+(?:\s*,\s*\d+)*\])/g);
   return (
-    <p className="answer-text">
+    <>
       {parts.map((part, i) => {
+        const bold = part.match(/^\*\*([^*]+)\*\*$/);
+        if (bold) return <strong key={i}>{bold[1]}</strong>;
         const m = part.match(/^\[(\d+(?:\s*,\s*\d+)*)\]$/);
         if (!m) return <span key={i}>{part}</span>;
         return (
@@ -25,7 +27,48 @@ function AnswerText({ text, id }: { text: string; id: string }) {
           </sup>
         );
       })}
-    </p>
+    </>
+  );
+}
+
+const BULLET = /^\s*[*-]\s+/;
+
+/** The answer as paragraphs and bullet lists (the model writes light markdown; no library needed for that). */
+function AnswerText({ text, id }: { text: string; id: string }) {
+  const blocks: { bullets: boolean; lines: string[] }[] = [];
+  for (const raw of text.split("\n")) {
+    if (!raw.trim()) {
+      blocks.push({ bullets: false, lines: [] });                       // a blank line ends the current block
+      continue;
+    }
+    const bullet = BULLET.test(raw);
+    const last = blocks[blocks.length - 1];
+    if (last && last.lines.length > 0 && last.bullets === bullet) last.lines.push(raw.replace(BULLET, ""));
+    else blocks.push({ bullets: bullet, lines: [raw.replace(BULLET, "")] });
+  }
+  return (
+    <div className="answer-text">
+      {blocks.filter((b) => b.lines.length > 0).map((b, i) =>
+        b.bullets ? (
+          <ul key={i} className="answer-list">
+            {b.lines.map((l, j) => (
+              <li key={j}>
+                <Inline text={l} id={id} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p key={i}>
+            {b.lines.map((l, j) => (
+              <span key={j}>
+                {j > 0 && <br />}
+                <Inline text={l} id={id} />
+              </span>
+            ))}
+          </p>
+        ),
+      )}
+    </div>
   );
 }
 
@@ -49,7 +92,7 @@ function CoverageBar({ a }: { a: ApplicabilityResult }) {
       </div>
       <ul className="conditions">
         {a.checks.map((c) => (
-          <li key={c.condition} className={c.covered ? "covered" : "missing"}>
+          <li key={`${c.condition}-${c.requested}`} className={c.covered ? "covered" : "missing"}>
             <span className="mark" aria-hidden>{c.covered ? "✓" : "✗"}</span>
             <span className="cond-name">{c.condition.replace("_", " ")}</span>
             <strong>{c.requested}</strong>
@@ -63,6 +106,14 @@ function CoverageBar({ a }: { a: ApplicabilityResult }) {
           </li>
         ))}
       </ul>
+      {a.joint_covered === true && (
+        <p className="muted small">✓ One result records these conditions together.</p>
+      )}
+      {a.joint_covered === false && (
+        <p className="muted small">✗ No single result records these conditions together: each appears in the sources, but in different combinations.</p>
+      )}
+      {a.profile_guided && <p className="muted small">Passages were added through the condition profiles to look for the missing condition.</p>}
+      {a.escalated && <p className="muted small">The larger model gave a second opinion before this warning was shown.</p>}
       {a.reasoning && <p className="muted small">Agent notes: {a.reasoning}</p>}
       {a.warning && <p className="warning" role="alert">{a.warning}</p>}
     </section>
@@ -110,7 +161,7 @@ function Claims({ checks, regenerated }: { checks: ClaimCheck[]; regenerated: bo
       <ul className="claims">
         {checks.map((c, i) => (
           <li key={i} className={c.supported ? "" : "unsupported"}>
-            <span className="mark" aria-hidden>{c.supported ? "✓" : "!"}</span> {c.sentence}
+            <span className="mark" aria-hidden>{c.supported ? "✓" : "!"}</span> {c.sentence.replace(BULLET, "").replace(/\*\*/g, "")}
             <span className="muted small"> ({c.entailment.toFixed(2)})</span>
           </li>
         ))}
