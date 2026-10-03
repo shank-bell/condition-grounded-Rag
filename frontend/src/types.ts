@@ -15,6 +15,9 @@ export interface ApplicabilityResult {
   re_retrieved: boolean;
   warning: string | null;
   reasoning?: string;
+  profile_guided?: boolean;
+  joint_covered?: boolean | null;
+  escalated?: boolean;
 }
 
 export interface ContradictionPair {
@@ -75,11 +78,12 @@ export interface Paper {
 }
 
 export interface Health {
-  status: string;
-  llm: string;
-  chunks: number;
-  profiles: number;
-  papers: number;
+  status: "starting" | "ok" | string;
+  llm?: string;
+  chunks?: number;
+  profiles?: number;
+  papers?: number;
+  warm?: { status: string; seconds: number | null; error: string | null };
 }
 
 export interface Turn {
