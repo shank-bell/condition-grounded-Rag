@@ -64,7 +64,9 @@ def main() -> None:
             continue
         print(f"\n=== Q: {q}\n(total {total:.1f}s)")
         if r.analysis:
-            print(f"ANALYSIS: intent={r.analysis.intent} complexity={r.analysis.complexity} conditions={r.analysis.conditions.specified()}")
+            extras = r.analysis.conditions.extras()
+            print(f"ANALYSIS: intent={r.analysis.intent} complexity={r.analysis.complexity} conditions={r.analysis.conditions.specified()}"
+                  + (f" also named={extras}" if extras else ""))
         print("ANSWER:", r.answer)
         if r.applicability:
             ap_ = r.applicability
