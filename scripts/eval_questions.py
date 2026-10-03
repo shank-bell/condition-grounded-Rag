@@ -44,7 +44,7 @@ def main() -> None:
     ap.add_argument("--set", action="append", default=[], metavar="SECTION.KEY=VALUE", help="override a config value for this run")
     ap.add_argument("--tag", default="", help="suffix for the output files (e.g. no_escalation)")
     args = ap.parse_args()
-    gold = [json.loads(line) for line in args.gold.read_text(encoding="utf-8").splitlines() if line.strip()]
+    gold = [json.loads(line) for line in args.gold.read_text(encoding="utf-8-sig").splitlines() if line.strip()]
 
     from cgrag.config import get_settings
     from cgrag.pipeline.run import Pipeline
@@ -61,7 +61,9 @@ def main() -> None:
     for q in gold:
         r = pipe.run(q["question"], stop_after=None if args.full else "applicability")
         a, app = r.analysis, r.applicability
-        found = a.conditions.specified() if a else {}
+        found = {f: [v] for f, v in a.conditions.specified().items()} if a else {}
+        for f, values in (a.conditions.extras() if a else {}).items():        # the further models / datasets / languages
+            found.setdefault(f, []).extend(values)
         warned = bool(app and app.warning)
         names = [m.split("=")[0] for m in (app.missing if app else [])]
         expected = [m.split("=")[0].strip().lower().replace(" ", "_") for m in q["missing"]]
@@ -83,15 +85,23 @@ def main() -> None:
                     "complexity": {"accuracy": round(acc("complexity", "pred_complexity"), 4),
                                    "macro_f1": round(macro_f1([r["complexity"] for r in results], [r["pred_complexity"] for r in results], COMPLEXITIES), 4)}}
     tp, fp, fn = defaultdict(int), defaultdict(int), defaultdict(int)
+
+    def as_list(v) -> list[str]:
+        return v if isinstance(v, list) else [v]
+
     for r in results:
-        for field, wanted in r["conditions"].items():
-            if field in r["found_conditions"] and values_match(field, wanted, r["found_conditions"][field]):
-                tp[field] += 1
-            else:
-                fn[field] += 1
-        for field, value in r["found_conditions"].items():
-            if field not in r["conditions"] or not values_match(field, r["conditions"][field], value):
-                fp[field] += 1
+        for field, wanted in r["conditions"].items():                       # every labelled value: found by Stage 1, or missed
+            found_values = r["found_conditions"].get(field, [])
+            for w in as_list(wanted):
+                if any(values_match(field, w, f) for f in found_values):
+                    tp[field] += 1
+                else:
+                    fn[field] += 1
+        for field, values in r["found_conditions"].items():                 # every value Stage 1 found: labelled, or invented
+            labelled = as_list(r["conditions"].get(field, []))
+            for f in values:
+                if not any(values_match(field, w, f) for w in labelled):
+                    fp[field] += 1
     scores["conditions"] = {f: prf(tp[f], fp[f], fn[f]) for f in sorted(set(tp) | set(fp) | set(fn))}
     scores["conditions"]["ALL"] = prf(sum(tp.values()), sum(fp.values()), sum(fn.values()))
     warn_tp = sum(r["warned"] and r["expect_warning"] for r in results)
