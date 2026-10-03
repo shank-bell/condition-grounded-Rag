@@ -113,6 +113,15 @@ def job_c(args) -> None:
             print(f"   {c:<15} precision {_pct(v['precision'])}  recall {_pct(v['recall'])}  F1 {_pct(v['f1'])}  (gold support {v['support']})")
         print("   confusion (rows = gold, columns = system):", json.dumps(s["confusion_gold_rows_system_columns"]))
         print("   which condition explains it:", s["condition_attribution"])
+        if args.baselines and Path(args.baselines).exists():           # frozen by scripts/run_pair_baselines.py before any label was known
+            base = json.loads(Path(args.baselines).read_text(encoding="utf-8"))
+            scores = {name: S.score_system_c(gold, preds) for name, preds in base["systems"].items()}
+            result["baselines"] = {"frozen_at_commit": base.get("frozen_at_commit"), "generated_at": base.get("generated_at"), "scores": scores}
+            print(f"\nStage 7 against its baselines (baselines frozen {base.get('generated_at')} at commit {str(base.get('frozen_at_commit'))[:7]}):")
+            print(f"   {'system':<22}{'accuracy':>9}{'macro-F1':>10}   F1 per class")
+            for name, sc in [("stage7 (the key)", s), *scores.items()]:
+                f1s = ", ".join(f"{c} {_pct(v['f1'])}" for c, v in sc["per_class"].items())
+                print(f"   {name:<22}{_pct(sc['accuracy']):>9}{_pct(sc['macro_f1']):>10}   {f1s}")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding="utf-8")
     print("wrote", args.out)
@@ -141,6 +150,7 @@ def main() -> None:
     ap.add_argument("--second", type=Path)
     ap.add_argument("--third", type=Path)
     ap.add_argument("--key", default=str(PRIVATE / "job_C_key.json"))
+    ap.add_argument("--baselines", default=str(PRIVATE / "job_C_baselines.json"), help="Stage 7's baselines, frozen by scripts/run_pair_baselines.py")
     ap.add_argument("--make-adjudication", type=Path)
     ap.add_argument("--out", type=Path)
     args = ap.parse_args()
