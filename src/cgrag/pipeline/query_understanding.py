@@ -143,15 +143,35 @@ def vocabulary_conditions(question: str, vocab: dict[str, list[str]]) -> dict[st
     return found
 
 
+def _name_like(word: str, question: str) -> bool:
+    """Does a word look like a system's name (mBERT, GPT-4, XLM-R, Llama) rather than an ordinary word that a table row happens to be labelled with
+    ("embeddings", "baseline", "human", "memory" are all stored as models)? A digit, a hyphen / underscore / plus, a capital after the first letter,
+    or a capitalised word that is not the first of the question."""
+    if any(c.isdigit() for c in word) or any(c in "-_+" for c in word) or any(c.isupper() for c in word[1:]):
+        return True
+    first = (question.split() or [""])[0].strip("?,.:;!\"'")
+    return word[:1].isupper() and word != first
+
+
+def fuller_model_name(said: str | None, question: str, names: list[str]) -> str | None:
+    """The LLM sometimes keeps only the first word of a multi-word model name ("GloVe" for "GloVe embeddings"), which matches nothing in the store.
+    When the question writes a longer recorded name that contains what the LLM said, that name is the model."""
+    if not said:
+        return None
+    longer = [n for n in names if " " in n and norm(said) in norm(n) and norm(n) != norm(said) and _find(n, question)]
+    return max(longer, key=len) if longer else None
+
+
 def extras_from_vocabulary(question: str, vocab: dict[str, list[str]], primary: dict[str, str]) -> dict[str, list[str]]:
     """Further models and languages written literally in the question (the LLM may name only the first)."""
     out: dict[str, list[str]] = {}
     families = {model_family(m) for m in vocab.get("model", [])} - {""}
     seen = {model_family(primary["model"])} if primary.get("model") else set()
+    own_words = {norm(w) for w in re.findall(r"[A-Za-z][\w+\-]*", primary.get("model") or "")}      # the words of the first model's own name
     models = []
     for word in re.findall(r"[A-Za-z][\w+\-]*", question):
         family = model_family(word)
-        if len(family) >= 3 and family in families and family not in seen:
+        if len(family) >= 3 and family in families and family not in seen and norm(word) not in own_words and _name_like(word, question):
             seen.add(family)
             models.append(word)
     if models:
@@ -195,6 +215,12 @@ class QueryUnderstanding:
                 if field == "dataset" and said != value and norm(said) in norm(value):
                     conditions[field] = value                # ... unless it kept only a part of a name the question writes in full
                                                              # ("GoldP" for "TyDi QA GoldP": the part matches nothing in the store)
+            fuller = fuller_model_name(conditions.get("model"), question, vocab.get("model", []))
+            if fuller:
+                conditions["model"] = fuller                 # same for a model: "GloVe" -> "GloVe embeddings"
+        model, task = conditions.get("model"), conditions.get("task")
+        if model and task and norm(task) != norm(model) and norm(task) in norm(model):
+            del conditions["task"]                           # "embeddings" is part of the model's name "GloVe embeddings", not a task to be covered
             for key, values in extras_from_vocabulary(question, vocab, conditions).items():
                 have = {norm(v) for v in extras.get(key, [])}
                 extras[key] = extras.get(key, []) + [v for v in values if norm(v) not in have]
