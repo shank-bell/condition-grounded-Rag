@@ -74,7 +74,9 @@ button, input { font: inherit; color: inherit; }
 .question { justify-self: end; max-width: 85%; padding: 9px 14px; background: var(--accent); color: var(--surface); border-radius: 12px 12px 2px 12px; }
 .pending { padding-left: 4px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 14px; }
-.answer-text { white-space: pre-wrap; }
+.answer-text { display: grid; gap: 10px; }
+.answer-text p { margin: 0; }
+.answer-list { margin: 0; padding-left: 22px; display: grid; gap: 4px; }
 .cite a { color: var(--accent); text-decoration: none; padding: 0 1px; font-weight: 600; }
 .cite a:hover { text-decoration: underline; }
 
