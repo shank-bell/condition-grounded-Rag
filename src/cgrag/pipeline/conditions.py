@@ -92,6 +92,19 @@ def model_family(model: str | None) -> str:
     return _strip_decor(norm(model))[0]
 
 
+# A table row can label a known system with WHOSE or WHICH version it is: "Our BERT", "Google BERT", "Baseline (mT5-large)", "Avg. GloVe embeddings".
+# 149 of the 10,275 stored results are labelled so, mostly BERT (70) and mT5-large (40): the system people ask about by its plain name. The word must be
+# followed by a separator, so "GoogLeNet" is not "Google" + "Net". Used by `values_match` (coverage) only: `model_family` - and with it which two
+# results Stage 7 pairs - is left as it was.
+_PREFIX_DECOR = re.compile(r"^\s*(?:google|ours?|published|baseline|vanilla|original|proposed|avg\.?|average)[\s:(\-]+", re.I)
+
+
+def _model_core(text: str | None) -> tuple[str, str | None]:
+    """(family, size label) of a model name without a leading whose-version word ('Our BERT' -> 'bert')."""
+    stripped = _PREFIX_DECOR.sub("", text or "", count=1)
+    return _strip_decor(norm(stripped if len(norm(stripped)) >= 2 else text))
+
+
 def model_size_label(p: ConditionProfile) -> str | None:
     """Size recorded for the profile: the explicit field, else a label carried by the model name (BERT-large)."""
     if p.model_size:
@@ -120,8 +133,8 @@ def values_match(field: str, requested: str, observed: str) -> bool:
     if not requested or not observed:
         return False
     if field == "model":
-        rf, rs = _strip_decor(norm(requested))
-        of, os_ = _strip_decor(norm(observed))
+        rf, rs = _model_core(requested)
+        of, os_ = _model_core(observed)
         return rf == of and (rs is None or os_ is None or rs == os_)
     if field == "dataset":
         r, o = norm(requested), norm(observed)
