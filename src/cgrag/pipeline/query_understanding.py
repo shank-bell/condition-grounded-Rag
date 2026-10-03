@@ -29,6 +29,9 @@ SYSTEM = (
     "dataset: the dataset name without its version, e.g. SQuAD. dataset_version: e.g. 2.0. "
     "language: a human language the models are evaluated on. model: e.g. BERT-large. model_size: e.g. 340M. "
     "setting: zero-shot, few-shot, fine-tuned, dev set, test set. "
+    "If the question names several models, datasets or languages, put the first one named in model / dataset / language and the others in "
+    "other_models / other_datasets / other_languages (never repeat the first one). A single one always goes in model / dataset / "
+    "language, never in an other_* list.\n"
     "Use null for anything the question does not state. Never add a condition the question does not mention.\n"
     "Examples (question -> JSON):\n"
     'Does BERT work well for Kannada question answering? -> {"intent":"result","complexity":"simple","conditions":'
@@ -37,7 +40,10 @@ SYSTEM = (
     '{"dataset":"SQuAD","dataset_version":"2.0","model":"BERT-large"}}\n'
     'Compare RoBERTa and XLNet on GLUE and explain what accounts for the gap. -> {"intent":"comparison",'
     '"complexity":"complex","conditions":{"dataset":"GLUE"}}\n'
-    'How does the masked language model objective work? -> {"intent":"method","complexity":"simple","conditions":{}}'
+    'How does the masked language model objective work? -> {"intent":"method","complexity":"simple","conditions":{}}\n'
+    'Compare ALBERT and ELECTRA on RACE and SQuAD for English and Tamil. -> {"intent":"comparison","complexity":"complex","conditions":'
+    '{"model":"ALBERT","other_models":["ELECTRA"],"dataset":"RACE","other_datasets":["SQuAD"],"language":"English",'
+    '"other_languages":["Tamil"]}}'
 )
 
 LANGUAGES = (
@@ -74,9 +80,22 @@ def _in_question(field: str, value: str, question: str) -> bool:
     return all(w in text for w in words)
 
 
+def _position(value: str, question: str) -> int:
+    """Where the question first mentions `value` (a value it does not contain literally sorts last)."""
+    at = question.lower().find(value.lower())
+    return at if at >= 0 else len(question)
+
+
 def clean_conditions(conditions: QueryConditions, question: str) -> QueryConditions:
     """Keep only conditions the question really states, and put each one in its proper field."""
     kept = {f: v for f, v in conditions.specified().items() if _in_question(f, v, question)}
+    further: dict[str, list[str]] = {}
+    for field, values in conditions.extras().items():           # further models / datasets / languages: only what the question really says
+        values = [v for v in values if norm(v) and _in_question(field, v, question)]
+        if values and not kept.get(field):                      # the model listed the only one among "the others" (seen with QA datasets):
+            values.sort(key=lambda v: _position(v, question))   # the one named first is THE one
+            kept[field] = values.pop(0)
+        further[field] = values
     if kept.get("dataset") and norm(kept["dataset"]) in TASK_WORDS:
         kept.setdefault("task", kept.pop("dataset"))           # "NLI" / "question answering" is a task, not a dataset
     dataset = kept.get("dataset")
@@ -89,7 +108,11 @@ def clean_conditions(conditions: QueryConditions, question: str) -> QueryConditi
         del kept["task"]                                        # a task is a kind of problem, not a dataset or model name
     if kept.get("setting") and not setting_tags(kept["setting"]):
         del kept["setting"]                                     # "human" is not an evaluation setting
-    return QueryConditions(**{f: kept.get(f) for f in QUERY_CONDITION_FIELDS})
+    extras = {}
+    for field, values in further.items():
+        seen = {norm(kept.get(field))}
+        extras[f"other_{field}s"] = [v for v in values if not (norm(v) in seen or seen.add(norm(v)))]
+    return QueryConditions(**{f: kept.get(f) for f in QUERY_CONDITION_FIELDS}, **extras)
 
 
 def _find(name: str, text: str) -> re.Match | None:
@@ -120,6 +143,25 @@ def vocabulary_conditions(question: str, vocab: dict[str, list[str]]) -> dict[st
     return found
 
 
+def extras_from_vocabulary(question: str, vocab: dict[str, list[str]], primary: dict[str, str]) -> dict[str, list[str]]:
+    """Further models and languages written literally in the question (the LLM may name only the first)."""
+    out: dict[str, list[str]] = {}
+    families = {model_family(m) for m in vocab.get("model", [])} - {""}
+    seen = {model_family(primary["model"])} if primary.get("model") else set()
+    models = []
+    for word in re.findall(r"[A-Za-z][\w+\-]*", question):
+        family = model_family(word)
+        if len(family) >= 3 and family in families and family not in seen:
+            seen.add(family)
+            models.append(word)
+    if models:
+        out["other_models"] = models
+    languages = [lang for lang in LANGUAGES if _find(lang, question) and lang != primary.get("language")]
+    if languages:
+        out["other_languages"] = languages
+    return out
+
+
 class QueryUnderstanding:
     """SciBERT (intent + complexity) when a trained checkpoint exists, LLM zero-shot otherwise; the LLM always
     supplies the conditions, backed up by names found literally in the question."""
@@ -143,9 +185,18 @@ class QueryUnderstanding:
         if self.classifier:
             pred = self.classifier.predict(question)
             intent, complexity = pred.intent, pred.complexity
-        conditions = clean_conditions(out.conditions, question).specified()
+        cleaned = clean_conditions(out.conditions, question)
+        conditions = cleaned.specified()
+        extras = {f"other_{field}s": list(values) for field, values in cleaned.extras().items()}
         if self.profiles is not None:
-            for field, value in vocabulary_conditions(question, self.profiles.vocabulary()).items():
-                conditions.setdefault(field, value)          # the LLM's reading wins; names it missed are added
+            vocab = self.profiles.vocabulary()
+            for field, value in vocabulary_conditions(question, vocab).items():
+                said = conditions.setdefault(field, value)   # the LLM's reading wins; names it missed are added
+                if field == "dataset" and said != value and norm(said) in norm(value):
+                    conditions[field] = value                # ... unless it kept only a part of a name the question writes in full
+                                                             # ("GoldP" for "TyDi QA GoldP": the part matches nothing in the store)
+            for key, values in extras_from_vocabulary(question, vocab, conditions).items():
+                have = {norm(v) for v in extras.get(key, [])}
+                extras[key] = extras.get(key, []) + [v for v in values if norm(v) not in have]
         return QueryAnalysis(intent=intent, complexity=complexity,
-                             conditions=QueryConditions(**{f: conditions.get(f) for f in QUERY_CONDITION_FIELDS}))
+                             conditions=QueryConditions(**{f: conditions.get(f) for f in QUERY_CONDITION_FIELDS}, **extras))
