@@ -130,3 +130,18 @@ def test_classify_names_model_size_difference():
     b = prof("b:1", "b", model="BERT-base", dataset="SQuAD", value=88.5)
     verdict, differing, _ = classify(a, b)
     assert verdict == "EXPLAINED" and differing == ["model_size"]
+
+
+def test_a_plain_model_name_matches_a_row_labelled_with_whose_version_it_is():
+    """"Our BERT", "Google BERT", "Baseline (mT5-large)" are rows about BERT and mT5-large; a question names them plainly (3 Oct: false scope warnings)."""
+    from cgrag.pipeline.conditions import model_family, values_match
+    for observed in ("Our BERT", "Google BERT", "Published BERT"):
+        assert values_match("model", "BERT", observed)
+    assert values_match("model", "mT5-large", "Baseline (mT5-large)")
+    assert values_match("model", "GloVe embeddings", "Avg. GloVe embeddings")
+    assert values_match("model", "BERT-large", "Our BERT")                  # a size the row does not state is no conflict
+    assert not values_match("model", "BERT", "SpanBERT")                    # another system
+    assert not values_match("model", "BERT", "BERT embeddings")             # BERT used as an embedding extractor is not "BERT"
+    assert not values_match("model", "RoBERTa", "Our BERT")
+    assert not values_match("model", "Net", "GoogLeNet")                    # no separator after "Google": not a prefix
+    assert model_family("Our BERT") == "ourbert"                            # Stage 7 pairs results by this family: deliberately unchanged
