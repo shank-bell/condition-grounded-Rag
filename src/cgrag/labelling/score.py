@@ -16,6 +16,7 @@ Definitions (written down because the paper needs them):
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -31,6 +32,19 @@ SYSTEM_CONDITION = {"dataset_version": "dataset version / split", "model_size": 
 def _clean(v) -> str | None:
     s = "" if v is None else str(v).strip()
     return s or None
+
+
+_LIST_SPLIT = re.compile(r"\s*(?:;|,|\band\b|&)\s*", re.I)
+
+
+def split_values(cell: str | None) -> list[str]:
+    """A condition cell may name several things ("mBERT, XLM-R and GPT-4"): the list of them, in order, without repeats."""
+    out: list[str] = []
+    for part in _LIST_SPLIT.split(cell or ""):
+        part = part.strip()
+        if part and part.lower() not in {p.lower() for p in out}:
+            out.append(part)
+    return out
 
 
 def read_rows(path: Path, sheet: str) -> list[dict]:
@@ -168,7 +182,7 @@ def parse_job_b(path: Path) -> tuple[list[dict], list[str]]:
         for label, value, allowed in (("intent", intent, B_INTENTS), ("complexity", cx, B_COMPLEXITY), ("expected scope warning", warn, ["YES", "NO"])):
             if value not in allowed:
                 problems.append(f"{path.name} row {i} ({_clean(r.get('id'))}): {label} is {value!r}, expected one of {allowed}")
-        conditions = {c: _clean(r.get(c)) for c in B_CONDITIONS if _clean(r.get(c))}
+        conditions = {c: split_values(_clean(r.get(c))) for c in B_CONDITIONS if _clean(r.get(c))}
         missing = [m.strip() for m in (_clean(r.get("missing conditions")) or "").replace(";", ",").split(",") if m.strip()]
         if warn == "YES" and not missing:
             problems.append(f"{path.name} row {i} ({_clean(r.get('id'))}): a scope warning is expected but no missing condition is named")
