@@ -5,36 +5,41 @@ aren't visible from the code alone. The full architecture is in
 `condition_grounded_rag_architecture.html` (git-ignored, kept local/private — read it directly
 for the design; don't re-derive it from here).
 
-## RESUME HERE (rewritten 2026-10-01 ~17:10 after the multi-entity regression check; read this first)
-Day 5 (1 Oct). Standing orders: decide, flag, report, don't stop to ask; labels are an ANSWER KEY, never training data. **When the user
-asks a question, ANSWER IT FIRST and directly, in detail if they ask "what / why" - on 1 Oct they got angry because I started side work
-instead of answering "I have sent them the files... here????" (they meant: what happens now / why do we label).** Plain words, short status lines.
-- **Git:** the user runs commits themselves (one file per commit, no attribution lines, identity `-c user.name=shank-bell -c
-  user.email=shashankbelludi1@gmail.com`). On 1 Oct they said "commit the changes yourself" ONCE: 48 commits, and the user PUSHED them (GitHub =
-  306454b "Docs: state after the 1 October fixes", their screenshot 1 Oct). For later edits: give a block / ask. **Uncommitted since then (176 tests pass,
-  `npm run build` ok), 19 files:** `frontend/src/{App.tsx,types.ts,styles.css,components/AnswerCard.tsx}` (waits for the warm-up, shows joint-coverage notes,
-  renders bullets/bold); multi-entity conditions: `schemas.py` (`QueryConditions.other_models/other_datasets/other_languages`, `extras()`),
-  `query_understanding.py` (LLM prompt + `clean_conditions` + `extras_from_vocabulary` + full dataset name), `applicability.py` (`_extras`,
-  `_scope_warning`, `run(extras=)`), `run.py` (passes extras); Stage 9 `critic.py` ("No results are reported for X" is not a claim);
-  `labelling/score.py` (`split_values`: a cell may name several things), `scripts/eval_questions.py` (list-valued conditions, utf-8-sig),
-  `scripts/smoke_questions.py` (prints further entities), `scripts/ablate_stage6.py` (records `extras_found`); tests in `test_joint_coverage.py`,
-  `test_stage1_stage9.py`, `test_labelling.py`; docs `docs/labelling_guide.md` ("Why we are labelling"), `docs/oct1_fixes_and_metrics.md` (new 4f), this file.
-- **DONE this evening - regression check of the multi-entity change** (numbers: `docs/oct1_fixes_and_metrics.md` 4f and 6): ablation `+joint` **32/32**,
-  0 further entities on the 32 single-entity questions, 3.2 s/question; 9 end-to-end questions (the five key ones + 4 multi-entity); dry run of
-  `eval_questions.py` on 12 invented questions: intent 12/12, complexity 12/12, scope warning 4/4 expected given, 0 wrong. The check exposed three bugs, all fixed
-  with unit tests: the 12B model files the ONLY dataset under `other_datasets` for QA benchmarks (duplicate further entity; now the first-named becomes the
-  dataset); it cut "TyDi QA GoldP" to "GoldP" (31/32, false warning; now the full name from the question is used); the critic called "No results are reported
-  for Kannada ..." unsupported. My first test was INVALID (the Stage 1 prompt example was the test question): example replaced, fresh questions used.
+## RESUME HERE (rewritten 2026-10-03 ~11:40; read this first)
+Day 7 (3 Oct 2026, a Saturday; the labels are due TODAY). Standing orders: decide, flag, report, don't stop to ask; labels are an ANSWER KEY, never training data.
+**What the user demands of me: (1) answer their question FIRST, in plain words (in detail if they ask "what / why"); (2) one short status line after every step;
+(3) NO long blocking waits.** On 3 Oct they interrupted two tool calls (a 2-minute foreground run, a 150 s Wait-Process) and wrote "you are not updating me, obey:
+update me in words and then continue". Run anything over ~30 s in the background, look at it with instant calls, say in a line what is happening. On 1 Oct they got
+angry because I started side work instead of answering "I have sent them the files... here????".
+- **Git:** the user runs commits themselves (one file per commit, no attribution lines, identity `-c user.name=shank-bell -c user.email=shashankbelludi1@gmail.com`).
+  Everything up to HEAD `5c9fc56` "Docs: state after the multi-entity regression check" is PUSHED (48 commits of 1 Oct + 19 of the evening; in sync with origin on 3 Oct 11:11,
+  tree clean). Give a block / ask before committing. **Uncommitted since (3 Oct, 182 tests pass):** the evaluation baselines `src/cgrag/evaluation/{__init__,baselines,freeze}.py`,
+  `scripts/{run_pair_baselines,eval_scope_baselines}.py`, `tests/test_baselines.py`, `docs/evaluation_baselines.md`, plus small edits to `schemas.py` / `pipeline/respond.py` /
+  `pipeline/run.py` (`QueryResponse.retrieval_weak`, additive), `scripts/score_labels.py` (`--baselines`) and this file.
+- **3 Oct work = EVALUATION BASELINES** (the architecture's evaluation plan has four claims; definitions, freeze protocol and results in `docs/evaluation_baselines.md`).
+  Stage 7 baselines (plain NLI; local Gemma 12B on the DRAGged-into-Conflicts taxonomy) ran on the 50 job-C pairs and are FROZEN before any label
+  (`data/labelling/private/job_C_baselines.json`, commit 5c9fc56; verdict counts GENUINE / EXPLAINED / NOT_COMPARABLE: Stage 7 7 / 29 / 14, plain NLI 48 / 0 / 2, LLM 13 / 33 / 4;
+  Stage 7 re-run = the key on 50/50). Stage 6 baselines (plain RAG, abstain on weak retrieval, Sufficient-Context autorater, against three Stage 6 configurations):
+  `python scripts/eval_scope_baselines.py --silver` (truth from the store; ~13 min) ran at 11:29-11:42 on 3 Oct, table in the doc (4b): needed warnings caught of 12 / false alarms of 20 =
+  plain RAG 0 / 0, abstain on weak retrieval 0 / 1, autorater 11 / 12, Stage 6 of 30 Sep 6 / 4, Stage 6 + joint 12 / 0, Stage 6 as shipped 12 / 0. The 100 % is partly BUILT IN (the
+  questions come from the store Stage 6 consults): never quote it as the result; the team's questions decide: `--gold eval/labels/questions_gold.jsonl` (~13 min, stop the API first,
+  the GPU is 98 % full while it runs). NOT built: claim 4 (answer quality; the document says Qasper / SQuAI / RAGAS; my default is a scaled version on our corpus, a departure that needs the
+  user's OK) and the MetaLead-style extraction baseline.
+- **Remote access:** on 3 Oct the user installed Chrome Remote Desktop on this PC (college remote access). The PC has not restarted (last boot 30 Sep). If it ever does: Ollama is
+  started by hand (see gotchas) and `prewarm_files.py` must run first.
+- **Done 1 Oct evening (details `docs/oct1_fixes_and_metrics.md` 4f, 6):** multi-entity conditions regression check passed (ablation `+joint` 32/32, 0 further entities on single-entity
+  questions); it exposed three bugs, all fixed with tests (QA datasets filed under `other_datasets`; "GoldP" for "TyDi QA GoldP"; the critic rejecting "No results are reported for X"); my first test was invalid
+  (the prompt example was the test question).
 - **Seen, not investigated:** "mT5 vs XLM-R on XQuAD for Arabic and Thai" warns that XLM-R has no XQuAD result (possibly a false warning from a missed table) and the
   answer recites mT5 ablation rows (stored as models "Baseline(mT5-large)"), 0/2 claims; a second dataset is only found when the LLM names it ("GLUE and SQuAD" kept
   SQuAD); Stage 1 sometimes puts a metric in `task` ("accuracy"; no effect on warnings); wrong BERT-large rows (89.1 / 83.1 F1) in the ALBERT paper.
-- **Labelling:** the user SENT the 8 workbooks (`data/labelling/`, git-ignored) and the instructions to the team on 1 Oct ~16:40; due **Fri 3 Oct**;
-  nothing has come back (`score_labels.py status` showed 0 everywhere). A: Adarsh, Shashank (170 rows each); B: all four (8, 8, 7, 7 questions, mix 10 covered /
-  10 one missing / 10 partly); C: Aditya, Tarun (the same 50 pairs, independently; a third person settles). Why we label, in detail: `docs/labelling_guide.md`.
-  Tip for the team (not yet sent): write several models / languages in one cell separated by commas. When `_DONE` files return: put them in
-  `data/labelling/done/`, `python scripts/score_labels.py status|A|B|C ...` (see the guide), `scripts/eval_questions.py eval/labels/questions_gold.jsonl`
-  (+ `--set features.escalation=false --tag no_escalation`, `--set features.joint_coverage=false ...` for the ablation), freeze the numbers FIRST, report later
-  fixes separately. Evaluation 4-5 Oct, code freeze day 10 (~8 Oct), paper days 11-13.
+- **Labelling:** the user SENT the 8 workbooks (`data/labelling/`, git-ignored) and the instructions to the team on 1 Oct ~16:40; due **3 Oct (today)**;
+  as of 3 Oct 11:11 no `_DONE` file is on this PC (`data/labelling/done/` does not exist; the 8 workbooks are the untouched originals). A: Adarsh, Shashank (170 rows each); B: all four
+  (8, 8, 7, 7 questions, mix 10 covered / 10 one missing / 10 partly); C: Aditya, Tarun (the same 50 pairs, independently; a third person settles). Why we label, in detail: `docs/labelling_guide.md`.
+  Tip for the team (also in the guide): write several models / languages in one cell separated by commas. When `_DONE` files return: put them in `data/labelling/done/`,
+  `python scripts/score_labels.py status|A|B|C ...` (see the guide; job C also prints the frozen baselines side by side), `scripts/eval_questions.py eval/labels/questions_gold.jsonl`
+  (+ `--set features.escalation=false --tag no_escalation`, `--set features.joint_coverage=false ...` for the ablation), `scripts/eval_scope_baselines.py --gold eval/labels/questions_gold.jsonl`;
+  freeze the numbers FIRST, report later fixes separately. Evaluation 4-5 Oct, code freeze day 10 (~8 Oct), paper days 11-13.
 - **UI:** the Chrome extension was NOT connected (2 attempts failed), so the page was never seen in a browser. Verified instead by `npm run build` (tsc + vite) and a
   server-side render of the answer card with real API responses. Run: `uvicorn cgrag.api.main:app --port 8000` + `cd frontend; npm run dev` (http://localhost:5173);
   both are stopped now. The page now polls `/health` and waits for `warm.status` (the models warm up in the background, ~30 s).
