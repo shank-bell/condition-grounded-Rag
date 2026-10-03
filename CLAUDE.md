@@ -12,10 +12,11 @@ Day 7 (3 Oct 2026, a Saturday; the labels are due TODAY). Standing orders: decid
 update me in words and then continue". Run anything over ~30 s in the background, look at it with instant calls, say in a line what is happening. On 1 Oct they got
 angry because I started side work instead of answering "I have sent them the files... here????".
 - **Git:** the user runs commits themselves (one file per commit, no attribution lines, identity `-c user.name=shank-bell -c user.email=shashankbelludi1@gmail.com`).
-  Everything up to HEAD `5c9fc56` "Docs: state after the multi-entity regression check" is PUSHED (48 commits of 1 Oct + 19 of the evening; in sync with origin on 3 Oct 11:11,
-  tree clean). Give a block / ask before committing. **Uncommitted since (3 Oct, 182 tests pass):** the evaluation baselines `src/cgrag/evaluation/{__init__,baselines,freeze}.py`,
-  `scripts/{run_pair_baselines,eval_scope_baselines}.py`, `tests/test_baselines.py`, `docs/evaluation_baselines.md`, plus small edits to `schemas.py` / `pipeline/respond.py` /
-  `pipeline/run.py` (`QueryResponse.retrieval_weak`, additive), `scripts/score_labels.py` (`--baselines`) and this file.
+  Everything up to HEAD `239bd84` "Docs: state on 3 October" is PUSHED (3 Oct ~12:00 the user said "You only commit and push that": 12 single-file commits, `5c9fc56..239bd84`, nothing else
+  started). "Commit the changes yourself" (1 Oct) meant commit only; "commit and push" means both. Give a block / ask before committing. **Uncommitted since (3 Oct afternoon, 193 tests pass), 12 files:**
+  the answer-quality test (claim 4): `src/cgrag/evaluation/answers.py`, `scripts/eval_answers.py` (`--silver`, `--verified-from`, `--gold-b`), `tests/test_answers.py`, the flag `[features] use_profiles`
+  (`config.py`, two lines in `pipeline/run.py`: no profile is used online); four fixes it exposed: `pipeline/query_understanding.py` (Stage 1), `pipeline/conditions.py` (Stage 6 model matching),
+  `tests/test_stage1_stage9.py`, `tests/test_stage6_stage7.py`; `scripts/eval_questions.py` (freeze record in the scores file); `docs/evaluation_baselines.md` (3b, 4c, 4d) and this file.
 - **3 Oct work = EVALUATION BASELINES** (the architecture's evaluation plan has four claims; definitions, freeze protocol and results in `docs/evaluation_baselines.md`).
   Stage 7 baselines (plain NLI; local Gemma 12B on the DRAGged-into-Conflicts taxonomy) ran on the 50 job-C pairs and are FROZEN before any label
   (`data/labelling/private/job_C_baselines.json`, commit 5c9fc56; verdict counts GENUINE / EXPLAINED / NOT_COMPARABLE: Stage 7 7 / 29 / 14, plain NLI 48 / 0 / 2, LLM 13 / 33 / 4;
@@ -23,8 +24,19 @@ angry because I started side work instead of answering "I have sent them the fil
   `python scripts/eval_scope_baselines.py --silver` (truth from the store; ~13 min) ran at 11:29-11:42 on 3 Oct, table in the doc (4b): needed warnings caught of 12 / false alarms of 20 =
   plain RAG 0 / 0, abstain on weak retrieval 0 / 1, autorater 11 / 12, Stage 6 of 30 Sep 6 / 4, Stage 6 + joint 12 / 0, Stage 6 as shipped 12 / 0. The 100 % is partly BUILT IN (the
   questions come from the store Stage 6 consults): never quote it as the result; the team's questions decide: `--gold eval/labels/questions_gold.jsonl` (~13 min, stop the API first,
-  the GPU is 98 % full while it runs). NOT built: claim 4 (answer quality; the document says Qasper / SQuAI / RAGAS; my default is a scaled version on our corpus, a departure that needs the
-  user's OK) and the MetaLead-style extraction baseline.
+  the GPU is 98 % full while it runs). Claim 4 (answer quality) is built as a scaled version on our own corpus (`scripts/eval_answers.py`; a DEPARTURE from Qasper / SQuAI / RAGAS that needs the
+  user's OK: on 3 Oct they wrote "even with all evaluation ... complete this in 5 days (8 October)", which I took as a go): doc 3b / 4c. NOT built: the MetaLead-style extraction baseline (claim 1).
+  **Answer quality, silver, 40 lookup questions (doc 4c):** full pipeline 40/40, without stages C/6/7 26/40, LLM alone 0/40 (sign test p = 0.0001 full vs without); BIASED in favour of the full pipeline
+  (questions come from rows the extractor read): never quote it as "answer quality is not reduced"; the independent runs are `--gold-b` and `--verified-from` once the labels are in.
+  **It exposed four defects, fixed with tests (doc 4d): scope warnings on answerable questions 8 -> 2 of 40:** Stage 1 took ordinary words stored as models ("embeddings", "baseline", "memory", "human") for
+  further models (a further model must now look like a name); the LLM cut multi-word model names ("GloVe" for "GloVe embeddings", restored from the question + store); a task word inside the model's name is dropped;
+  Stage 6 `values_match` for models now ignores a leading google / our / published / baseline / ... word ("Our BERT" = BERT; 149 stored results, 70 BERT, 40 mT5-large); `model_family` (Stage 7 pairing) is
+  UNCHANGED on purpose (the frozen Stage 7 key re-classifies identically, 50/50). The 4b Stage 6 table predates these fixes: re-run it at the freeze.
+- **Plan to the 8 Oct freeze (the user's target: system + all evaluation done by 8 Oct, the paper in parallel / after):** 3 Oct labels collected (user), answer-quality harness (me); 4 Oct score A / B / C,
+  gold evaluation (`eval_questions.py` x3 with the two `--set` ablations, `eval_scope_baselines.py --gold`, `score_labels.py C` prints the frozen baselines side by side), numbers frozen, the third
+  labeller settles job C; 5 Oct error analysis + fixes (reported separately), answer-quality run on the job-A-verified questions (`eval_answers.py --verified-from`); 6 Oct the ablation table on the frozen
+  code; 7 Oct buffer, UI check in a browser, clean re-run of every table from one commit; 8 Oct code freeze + final numbers. Open for the user: a yes to run the paper's numbers on THIS PC (24 GB, 12B;
+  the document's "6 GB RTX 4050" then needs a footnote), the OK on the departures, the labels. Risks: late labels, kappa < 0.6, a serious finding in the first real results (each fix ~half a day).
 - **Remote access:** on 3 Oct the user installed Chrome Remote Desktop on this PC (college remote access). The PC has not restarted (last boot 30 Sep). If it ever does: Ollama is
   started by hand (see gotchas) and `prewarm_files.py` must run first.
 - **Done 1 Oct evening (details `docs/oct1_fixes_and_metrics.md` 4f, 6):** multi-entity conditions regression check passed (ablation `+joint` 32/32, 0 further entities on single-entity
@@ -176,7 +188,7 @@ React + Vite UI in `frontend/`; `scripts/ask.py` prints everything the pipeline 
   backed by a recorded profile (number + metric + model, dev/test consistent) or whose numbers all occur in the source
   when NLI does not contradict (a claim that names no metric is judged on number + model + setting); skips "the sources do not say" /
   conflict-echo sentences, list lead-ins ending in ":" and bare "CoLA: 56.3" lines; checks short "MuRIL: 67.8" lines; regenerates once.
-**Tests:** 176 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
+**Tests:** 193 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
 API holds the index): `scripts/smoke_questions.py` (5 questions through the whole pipeline, per-stage timings, `--set
 KEY=VALUE` to compare model sizes per use case), `scripts/ingest_metrics.py` (store integrity, fill rates, table-cell recall,
 row-label accuracy), `scripts/audit_sample.py` (random profiles next to their source row, for a hand check),
@@ -287,7 +299,10 @@ older ones marked * further down, and the flagged additions at the end of this l
   checked, abbreviations ("vs.", "et al.") do not end a sentence, a sentence that says a result is not reported ("No results are reported for
   Kannada ...") makes no claim (a WRONG absence statement is therefore not caught). **Warm-up** at API start (`Pipeline.warm_up`), `[llm] keep_alive`
   (machine config) and `[llm] request_timeout`. Escalation is measured (no accuracy gain on Stage 6, +0.4 s per question): still ON.
-  **Multi-entity conditions (1 Oct evening, uncommitted; regression check DONE: 32/32, numbers in `docs/oct1_fixes_and_metrics.md` 4f):** Stage 1 may return further models / datasets / languages
+  **3 Oct (uncommitted; doc `evaluation_baselines.md` 4d):** Stage 1 further models must look like names, a cut-off multi-word model name is restored, a task inside the model's name is dropped;
+  Stage 6 matches a plain model name to rows labelled "Our BERT" / "Google BERT" / "Baseline (mT5-large)" (`values_match` only; `model_family` unchanged); `[features] use_profiles` = the "pipeline without
+  stage C" switch for the answer-quality test (default on, no behaviour change). All are bug fixes found on silver questions before any gold label; the 32-question ablation stays 32/32.
+  **Multi-entity conditions (1 Oct evening, pushed; regression check DONE: 32/32, numbers in `docs/oct1_fixes_and_metrics.md` 4f):** Stage 1 may return further models / datasets / languages
   (`QueryConditions.other_models / other_datasets / other_languages`, LLM + store vocabulary); Stage 6 (`_extras`, part of `joint_coverage`) checks
   each one together with the other named model / dataset / language, so "Compare mBERT and GPT-4 on XNLI" warns about GPT-4. `specified()` is unchanged.
 
