@@ -95,6 +95,7 @@ class FeaturesConfig(BaseModel):
     contradiction: bool = True
     critic: bool = True
     profile_in_context: bool = True
+    use_profiles: bool = True
     escalation: bool = False
     profile_guided_retrieval: bool = False
     joint_coverage: bool = False
