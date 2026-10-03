@@ -39,6 +39,70 @@ def test_a_task_abbreviation_the_llm_put_in_the_dataset_field_is_moved_to_task()
     assert kept == {"task": "natural language inference"}          # an existing task wins, the abbreviation is not a dataset
 
 
+def test_further_models_and_languages_are_kept_only_when_the_question_names_them():
+    q = "Compare mBERT, XLM-R and GPT-4 on XNLI for Hindi and Kannada."
+    said = QueryConditions(model="mBERT", other_models=["XLM-R", "GPT-4", "mBERT", "Llama"], dataset="XNLI", language="Hindi",
+                           other_languages=["Kannada", "Tamil"])
+    got = clean_conditions(said, q)
+    assert got.other_models == ["XLM-R", "GPT-4"] and got.other_languages == ["Kannada"]       # no repeat of the first, nothing invented
+    assert got.extras() == {"model": ["XLM-R", "GPT-4"], "language": ["Kannada"]}
+    assert got.specified() == {"model": "mBERT", "dataset": "XNLI", "language": "Hindi"}      # the single-value view is unchanged
+
+
+def test_the_only_dataset_the_llm_listed_among_the_others_is_the_first_one():
+    """Seen on 1 Oct with the 12B model: "mT5 on XQuAD for Arabic" came back as dataset = null, other_datasets = ["XQuAD"]."""
+    got = clean_conditions(QueryConditions(model="mT5", language="Arabic", other_datasets=["XQuAD"]),
+                           "What accuracy does mT5 get on XQuAD for Arabic?")
+    assert got.specified() == {"model": "mT5", "dataset": "XQuAD", "language": "Arabic"} and got.extras() == {}
+    several = clean_conditions(QueryConditions(model="BERT-base", other_datasets=["MLQA", "SQuAD 2.0"]),
+                               "How does BERT-base do on SQuAD 2.0 and MLQA?")
+    assert several.specified() == {"model": "BERT-base", "dataset": "SQuAD", "dataset_version": "2.0"}   # the one named first, split as usual
+    assert several.other_datasets == ["MLQA"]
+
+
+class StubLLM:
+    def __init__(self, said: QueryAnalysis):
+        self.said = said
+
+    def structured(self, prompt, model_cls, **kwargs):
+        return self.said, None
+
+
+class StubProfiles:
+    def vocabulary(self):
+        return {"model": ["mT5", "mBERT", "XLM-R"], "dataset": ["XQuAD", "XNLI", "TyDi QA GoldP"], "language": [], "task": []}
+
+
+def test_a_question_with_one_of_each_has_no_further_entities_even_when_the_llm_misfiles_one():
+    from cgrag.pipeline.query_understanding import QueryUnderstanding
+    said = QueryAnalysis(intent="result", complexity="simple",
+                         conditions=QueryConditions(model="mT5", language="Arabic", other_datasets=["XQuAD"]))     # dataset left empty
+    got = QueryUnderstanding(StubLLM(said), classifier=None, profiles=StubProfiles()).analyze("What accuracy does mT5 get on XQuAD for Arabic?")
+    assert got.conditions.specified() == {"model": "mT5", "dataset": "XQuAD", "language": "Arabic"}
+    assert got.conditions.extras() == {}
+
+
+def test_a_part_of_a_dataset_name_is_replaced_by_the_full_name_the_question_writes():
+    """With the new prompt the 12B model answered "GoldP" for "TyDi QA GoldP": the part matches nothing in the store (false warning)."""
+    from cgrag.pipeline.query_understanding import QueryUnderstanding
+    said = QueryAnalysis(intent="result", complexity="simple",
+                         conditions=QueryConditions(model="mBERT", language="Swahili", other_datasets=["GoldP"]))
+    qu = QueryUnderstanding(StubLLM(said), classifier=None, profiles=StubProfiles())
+    got = qu.analyze("What accuracy does mBERT get on TyDi QA GoldP for Swahili?").conditions
+    assert got.specified() == {"model": "mBERT", "dataset": "TyDi QA GoldP", "language": "Swahili"} and got.extras() == {}
+    other = QueryAnalysis(intent="result", complexity="simple", conditions=QueryConditions(model="mT5", dataset="XQuAD", language="Arabic"))
+    assert QueryUnderstanding(StubLLM(other), classifier=None, profiles=StubProfiles()).analyze(
+        "What accuracy does mT5 get on XQuAD for Arabic?").conditions.dataset == "XQuAD"          # an equal name is left alone
+
+
+def test_names_written_literally_are_added_as_further_entities():
+    from cgrag.pipeline.query_understanding import extras_from_vocabulary
+    vocab = {"model": ["mBERT", "XLM-R", "BERT-large"], "dataset": ["XNLI"], "language": [], "task": []}
+    got = extras_from_vocabulary("Compare mBERT and XLM-R for Hindi and Kannada", vocab, {"model": "mBERT", "language": "Hindi"})
+    assert got == {"other_models": ["XLM-R"], "other_languages": ["Kannada"]}
+    assert extras_from_vocabulary("How does mBERT do on Hindi?", vocab, {"model": "mBERT", "language": "Hindi"}) == {}
+
+
 def test_version_and_size_must_be_in_the_question():
     q = "What is BERT-large F1 on SQuAD v2.0?"
     got = clean_conditions(QueryConditions(model="BERT-large", dataset="SQuAD", dataset_version="v2.0", model_size="340M"), q)
@@ -117,6 +181,18 @@ def test_unsupported_number_is_caught_and_table_claims_use_profiles():
     checks = ClaimChecker(CriticConfig(), lambda: StubNLI()).check(answer, sources, profiles)
     assert [c.supported for c in checks] == [True, False]         # scope sentence makes no claim and is skipped
     assert ClaimChecker.unsupported(checks)[0].sentence.startswith("It also reaches 95.5")
+
+
+def test_sentences_that_say_a_result_is_missing_make_no_claim():
+    """The scope warning asks the answer to say what is not covered; the critic must not call that unsupported (1 Oct)."""
+    sources = [rc("c1", "Model A reaches 70.5 accuracy on the test set.")]
+    answer = ("Model A reaches 70.5 accuracy on the test set [1]. No results are reported for Kannada for any of the models. "
+              "No results are reported for GPT-4 on the XNLI dataset for any language. GPT-4 was not evaluated on XNLI. "
+              "There are no reported scores for Tamil. None of the sources give a Hindi number.")
+    checks = ClaimChecker(CriticConfig(), lambda: StubNLI()).check(answer, sources, {})
+    assert [c.sentence for c in checks] == ["Model A reaches 70.5 accuracy on the test set [1]."]
+    wrong = ClaimChecker(CriticConfig(), lambda: StubNLI()).check("Model A reaches 95.5 accuracy on the test set [1].", sources, {})
+    assert [c.supported for c in wrong] == [False]                  # a real claim with a wrong number is still caught
 
 
 def test_answer_without_citations_is_checked_against_all_sources():
