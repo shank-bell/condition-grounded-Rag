@@ -98,6 +98,43 @@ def test_a_benchmark_suite_named_in_the_question_is_covered_by_its_member_tasks(
     assert other.joint_covered is False                                                     # a task of another benchmark does not count
 
 
+def test_a_second_model_that_no_paper_records_on_the_dataset_is_reported(store):
+    """"Compare mBERT, XLM-R and GPT-4 on XNLI": mBERT and XLM-R are recorded on XNLI, GPT-4 is in no paper."""
+    requested = {"model": "mBERT", "dataset": "XNLI"}
+    _, result = agent(store).run(requested, [rc("xnli:1")], NONE, "q", extras={"model": ["GPT-4", "XLM-R"]})
+    assert result.missing == ["model=GPT-4"] and result.coverage == pytest.approx(3 / 4)
+    assert [c.requested for c in result.checks if c.condition == "model"] == ["mBERT", "GPT-4", "XLM-R"]
+    assert next(c for c in result.checks if c.requested == "XLM-R").covered is True
+    assert "model = GPT-4 together with dataset = XNLI" in result.warning and "XLM-R" in result.warning
+    assert "model = XLM-R" not in result.warning                                          # the covered one is not blamed
+
+
+def test_a_second_language_is_checked_with_the_model_and_dataset(store):
+    requested = {"model": "XLM-R", "dataset": "XNLI", "language": "Hindi"}
+    _, result = agent(store).run(requested, [rc("xnli:1")], NONE, "q", extras={"language": ["Kannada", "English"]})
+    assert result.missing == ["language=Kannada"] and result.joint_covered is True       # Hindi itself is recorded together
+    assert "English" in result.warning and "language = Kannada together with model = XLM-R, dataset = XNLI" in result.warning
+
+
+def test_covered_extras_add_their_chunks_to_the_evidence_and_the_flag_switches_the_check_off(store):
+    asked = []
+
+    def fetch(kept, ids):
+        asked.append(ids)
+        return kept
+
+    requested = {"model": "mBERT", "dataset": "XNLI"}
+    _, result = agent(store).run(requested, [rc("xnli:1")], NONE, "q", joint_fetch=fetch, extras={"model": ["XLM-R"]})
+    assert result.coverage == 1.0 and result.warning is None and ["xnli:1"] in asked
+    _, off = agent(store, joint=False).run(requested, [rc("xnli:1")], NONE, "q", extras={"model": ["GPT-4"]})
+    assert off.warning is None and len(off.checks) == 2                                   # extras are part of the joint feature
+
+
+def test_an_extra_that_repeats_a_named_condition_is_not_added_twice(store):
+    _, result = agent(store).run({"model": "mBERT", "dataset": "XNLI"}, [rc("xnli:1")], NONE, "q", extras={"model": ["mbert"]})
+    assert len(result.checks) == 2
+
+
 def test_fewer_than_two_named_conditions_are_not_checked_jointly(store):
     _, result = agent(store).run({"language": "Kannada"}, EVIDENCE, NONE, "q")
     assert result.joint_covered is None and result.warning is None
