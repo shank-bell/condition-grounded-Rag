@@ -261,15 +261,78 @@ class ApplicabilityAgent:
         parts.append("Each condition appears in the sources, but only in different combinations; do not assume the findings hold for this one.")
         return " ".join(parts)
 
+    def _extras(self, requested: dict[str, str], extras: dict[str, list[str]], result: ApplicabilityResult,
+                kept: list[RetrievedChunk],
+                joint_fetch: Callable[[list[RetrievedChunk], list[str]], list[RetrievedChunk]] | None
+                ) -> tuple[list[RetrievedChunk], ApplicabilityResult]:
+        """A question can name several systems or languages ("compare mBERT and GPT-4 on XNLI", "for Hindi and Kannada"). The first of
+        each is checked like any condition; every further one is checked here the same way as the joint check: a result must record
+        it together with the other named model / dataset / language. "GPT-4 on XNLI" is in no paper, so the warning names GPT-4 and
+        says what IS recorded on XNLI. Covered ones add their best chunks to the evidence, so each compared system has a source."""
+        key = {f: requested[f] for f in JOINT_FIELDS if requested.get(f)}
+        checks = list(result.checks)
+        extra_missing: set[int] = set()
+        for field, values in extras.items():
+            for value in values:
+                if any(c.condition == field and norm(c.requested) == norm(value) for c in checks):
+                    continue
+                variant = {**key, field: value}
+                together = self.profiles.profiles_matching(variant, list(variant))
+                if together:
+                    ids = [cid for cid, _ in Counter(p.chunk_id for p in together).most_common(2)]
+                    if joint_fetch is not None:
+                        kept = joint_fetch(kept, ids)
+                    checks.append(ConditionCheck(condition=field, requested=value, covered=True, observed=[value], chunk_ids=ids))
+                    continue
+                others = [f for f in variant if f != field]
+                around = self.profiles.profiles_matching(variant, others) if others else []
+                seen = Counter(v for p in around for v in observed_values(p, field))
+                checks.append(ConditionCheck(condition=field, requested=value, covered=False,
+                                             observed=[v for v, _ in seen.most_common(MAX_OBSERVED)], chunk_ids=[]))
+                extra_missing.add(len(checks) - 1)
+        if len(checks) == len(result.checks):
+            return kept, result
+        update: dict = {"checks": checks, "coverage": sum(c.covered for c in checks) / len(checks),
+                        "missing": [f"{c.condition}={c.requested}" for c in checks if not c.covered]}
+        if extra_missing:
+            joint_style = extra_missing | {i for i, c in enumerate(result.checks)
+                                           if not c.covered and c.condition in key and result.joint_covered is False}
+            update["warning"] = self._scope_warning(checks, key, joint_style)
+            update["reasoning"] = (f"{result.reasoning} Also named: " + ", ".join(f"{checks[i].condition} = {checks[i].requested}"
+                                                                                   for i in sorted(extra_missing)) + " - not recorded.").strip()
+        return kept, result.model_copy(update=update)
+
+    @staticmethod
+    def _scope_warning(checks: list[ConditionCheck], key: dict[str, str], joint_style: set[int]) -> str:
+        """The scope warning when some conditions are missing on their own (first style) and others together with the rest (second)."""
+        covered = sum(c.covered for c in checks)
+        parts = [f"The evidence covers {covered} of {len(checks)} conditions in the question."]
+        for i, c in enumerate(checks):
+            if c.covered:
+                continue
+            name = c.condition.replace("_", " ")
+            if i in joint_style:
+                others = ", ".join(f"{f.replace('_', ' ')} = {v}" for f, v in key.items() if f != c.condition)
+                together = f" together with {others}" if others else ""
+                seen = f" For {others}, the sources record: {', '.join(c.observed)}." if others and c.observed else ""
+                parts.append(f"No source reports {name} = {c.requested}{together}.{seen}")
+            else:
+                seen = f" The retrieved sources record: {', '.join(c.observed)}." if c.observed else " No retrieved source states this condition."
+                parts.append(f"No retrieved source reports {name} = {c.requested}.{seen}")
+        parts.append("Do not assume the findings hold for the missing conditions.")
+        return " ".join(parts)
+
     def run(self, requested: dict[str, str], kept: list[RetrievedChunk],
             research: Callable[..., list[RetrievedChunk]], question: str = "",
-            joint_fetch: Callable[[list[RetrievedChunk], list[str]], list[RetrievedChunk]] | None = None
+            joint_fetch: Callable[[list[RetrievedChunk], list[str]], list[RetrievedChunk]] | None = None,
+            extras: dict[str, list[str]] | None = None
             ) -> tuple[list[RetrievedChunk], ApplicabilityResult]:
         """Check coverage; while conditions are missing and retries remain, search again for the missing ones.
 
         `research(terms[, query])` runs retrieval + rerank with the missing condition values added (and the agent's own
         search query, when it wrote one) and returns the new kept set. `joint_fetch(kept, chunk_ids)` adds the chunks that record the
-        named conditions together (joint coverage, see `_joint`).
+        named conditions together (joint coverage, see `_joint`). `extras` are the further models / datasets / languages the
+        question names (see `_extras`).
         """
         result, query = self._assess(requested, kept, question)
         retried = False
@@ -288,6 +351,8 @@ class ApplicabilityAgent:
             escalated = True
         if self.joint:
             kept, result = self._joint(requested, result, kept, joint_fetch)       # the guardrail after every verdict, small or big
+            if extras:
+                kept, result = self._extras(requested, extras, result, kept, joint_fetch)
         result.re_retrieved = retried
         result.escalated = escalated
         result.profile_guided = bool(getattr(research, "guided_ids", None))
