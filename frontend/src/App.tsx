@@ -26,20 +26,36 @@ export default function App() {
   const [uploadNote, setUploadNote] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
+  /** True once the server is ready. While it loads its models /health says "starting" and has no counts yet. */
   const refresh = useCallback(async () => {
     try {
-      const [h, p] = await Promise.all([api.health(), api.papers()]);
+      const h = await api.health();
       setHealth(h);
-      setPapers(p);
       setApiDown(false);
+      if (h.status !== "ok") return false;
+      setPapers(await api.papers());
+      return true;
     } catch {
       setApiDown(true);
+      return false;
     }
   }, []);
 
+  // Ask again every 2 s until the server is up and has warmed its models (also covers an API that starts after the page).
   useEffect(() => {
-    void refresh();
+    let stop = false;
+    void (async () => {
+      while (!stop) {
+        if (await refresh()) break;
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+    })();
+    return () => {
+      stop = true;
+    };
   }, [refresh]);
+
+  const warming = !apiDown && health?.status === "starting";
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -47,7 +63,7 @@ export default function App() {
 
   async function ask(question: string) {
     const q = question.trim();
-    if (q.length < 3 || busy) return;
+    if (q.length < 3 || busy || warming) return;
     const history: Turn[] = exchanges.flatMap((e) =>
       e.response ? [{ role: "user" as const, content: e.question }, { role: "assistant" as const, content: e.response.answer }] : [],
     ).slice(-6);
@@ -110,11 +126,21 @@ export default function App() {
             The API is not reachable. Start it with <code>uvicorn cgrag.api.main:app --port 8000</code>.
           </p>
         )}
+        {warming && (
+          <p className="warning" role="status">
+            Warming up the language models (about 30 seconds). You can ask as soon as this message disappears.
+          </p>
+        )}
+        {health?.warm?.status === "failed" && (
+          <p className="warning" role="alert">
+            Warm-up failed ({health.warm.error}); the first question will be slow while the models load.
+          </p>
+        )}
         {exchanges.length === 0 && (
           <section className="examples">
             <h2>Try a question</h2>
             {EXAMPLES.map((q) => (
-              <button key={q} type="button" className="example" onClick={() => void ask(q)} disabled={busy || apiDown}>
+              <button key={q} type="button" className="example" onClick={() => void ask(q)} disabled={busy || apiDown || warming}>
                 {q}
               </button>
             ))}
@@ -140,14 +166,14 @@ export default function App() {
           maxLength={2000}
           disabled={apiDown}
         />
-        <button type="submit" disabled={busy || apiDown || input.trim().length < 3}>
-          {busy ? "Thinking…" : "Ask"}
+        <button type="submit" disabled={busy || apiDown || warming || input.trim().length < 3}>
+          {busy ? "Thinking…" : warming ? "Warming up…" : "Ask"}
         </button>
       </form>
 
       <aside className="side">
         <h2>Indexed papers</h2>
-        {health && (
+        {health?.status === "ok" && (
           <p className="muted small">
             {health.papers} papers · {health.chunks} passages · {health.profiles} condition profiles · {health.llm}
           </p>
