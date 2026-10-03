@@ -5,49 +5,53 @@ aren't visible from the code alone. The full architecture is in
 `condition_grounded_rag_architecture.html` (git-ignored, kept local/private — read it directly
 for the design; don't re-derive it from here).
 
-## RESUME HERE (rewritten 2026-10-01 ~15:40; read this first)
-Day 5 (1 Oct). Standing orders from the user (do NOT stop to ask them questions; decide, flag, report): fix the five "seen but not
-investigated" items, provide the metrics, build the Excel sheets for the labelling; "you take the pivotal decisions". **All done; the
-numbers and the reasoning are in `docs/oct1_fixes_and_metrics.md` (read it).** Labels are an ANSWER KEY, never training data.
-- **Git:** the user runs the commits themselves in PowerShell, ONE FILE = ONE COMMIT, no attribution lines, identity per command
-  (`$id = '-c','user.name=shank-bell','-c','user.email=shashankbelludi1@gmail.com'`, then `git @id commit -m msg -- file`). Give the
-  block BEFORE starting a session and again at the end (`git status --short` for the exact list). On GitHub: everything up to
-  c5820cf (the 25 files of 30 Sep). **Everything of 1 Oct is uncommitted.** The architecture doc is git-ignored: never commit it.
-- **Machine gotchas found today:** (1) after a reboot / long idle run `python scripts/prewarm_files.py` first (first read of every file costs
-  ~0.25 s on this PC: a cold `import transformers` took ~25 min; prewarmed: 6 s); (2) Ollama can wedge: kill python jobs, kill `ollama.exe`
-  AND the orphan `llama-server.exe`, restart `OLLAMA_NUM_PARALLEL=8 OLLAMA_KEEP_ALIVE=60m OLLAMA_MAX_LOADED_MODELS=2 ollama serve`; every
-  LLM call now times out after 240 s; (3) never run two processes that write the Chroma index; (4) `$env:TEMP` scripts: prefer the Write tool
-  over heredocs with backslashes (they get mangled).
-- **Departures from the architecture** (all behind flags): the five of 30 Sep are approved; the older eight and everything added since
-  (escalation, profile-guided retrieval, retrieval cards, joint coverage, weak-flag withdrawal, Stage 7 language filter, Stage 9 changes,
-  garbled-table skip, Stage 1 training details) are listed under "Departures" and wait for the user's explicit OK (delegated to my judgement).
+## RESUME HERE (rewritten 2026-10-01 ~17:10 after the multi-entity regression check; read this first)
+Day 5 (1 Oct). Standing orders: decide, flag, report, don't stop to ask; labels are an ANSWER KEY, never training data. **When the user
+asks a question, ANSWER IT FIRST and directly, in detail if they ask "what / why" - on 1 Oct they got angry because I started side work
+instead of answering "I have sent them the files... here????" (they meant: what happens now / why do we label).** Plain words, short status lines.
+- **Git:** the user runs commits themselves (one file per commit, no attribution lines, identity `-c user.name=shank-bell -c
+  user.email=shashankbelludi1@gmail.com`). On 1 Oct they said "commit the changes yourself" ONCE: 48 commits, and the user PUSHED them (GitHub =
+  306454b "Docs: state after the 1 October fixes", their screenshot 1 Oct). For later edits: give a block / ask. **Uncommitted since then (176 tests pass,
+  `npm run build` ok), 19 files:** `frontend/src/{App.tsx,types.ts,styles.css,components/AnswerCard.tsx}` (waits for the warm-up, shows joint-coverage notes,
+  renders bullets/bold); multi-entity conditions: `schemas.py` (`QueryConditions.other_models/other_datasets/other_languages`, `extras()`),
+  `query_understanding.py` (LLM prompt + `clean_conditions` + `extras_from_vocabulary` + full dataset name), `applicability.py` (`_extras`,
+  `_scope_warning`, `run(extras=)`), `run.py` (passes extras); Stage 9 `critic.py` ("No results are reported for X" is not a claim);
+  `labelling/score.py` (`split_values`: a cell may name several things), `scripts/eval_questions.py` (list-valued conditions, utf-8-sig),
+  `scripts/smoke_questions.py` (prints further entities), `scripts/ablate_stage6.py` (records `extras_found`); tests in `test_joint_coverage.py`,
+  `test_stage1_stage9.py`, `test_labelling.py`; docs `docs/labelling_guide.md` ("Why we are labelling"), `docs/oct1_fixes_and_metrics.md` (new 4f), this file.
+- **DONE this evening - regression check of the multi-entity change** (numbers: `docs/oct1_fixes_and_metrics.md` 4f and 6): ablation `+joint` **32/32**,
+  0 further entities on the 32 single-entity questions, 3.2 s/question; 9 end-to-end questions (the five key ones + 4 multi-entity); dry run of
+  `eval_questions.py` on 12 invented questions: intent 12/12, complexity 12/12, scope warning 4/4 expected given, 0 wrong. The check exposed three bugs, all fixed
+  with unit tests: the 12B model files the ONLY dataset under `other_datasets` for QA benchmarks (duplicate further entity; now the first-named becomes the
+  dataset); it cut "TyDi QA GoldP" to "GoldP" (31/32, false warning; now the full name from the question is used); the critic called "No results are reported
+  for Kannada ..." unsupported. My first test was INVALID (the Stage 1 prompt example was the test question): example replaced, fresh questions used.
+- **Seen, not investigated:** "mT5 vs XLM-R on XQuAD for Arabic and Thai" warns that XLM-R has no XQuAD result (possibly a false warning from a missed table) and the
+  answer recites mT5 ablation rows (stored as models "Baseline(mT5-large)"), 0/2 claims; a second dataset is only found when the LLM names it ("GLUE and SQuAD" kept
+  SQuAD); Stage 1 sometimes puts a metric in `task` ("accuracy"; no effect on warnings); wrong BERT-large rows (89.1 / 83.1 F1) in the ALBERT paper.
+- **Labelling:** the user SENT the 8 workbooks (`data/labelling/`, git-ignored) and the instructions to the team on 1 Oct ~16:40; due **Fri 3 Oct**;
+  nothing has come back (`score_labels.py status` showed 0 everywhere). A: Adarsh, Shashank (170 rows each); B: all four (8, 8, 7, 7 questions, mix 10 covered /
+  10 one missing / 10 partly); C: Aditya, Tarun (the same 50 pairs, independently; a third person settles). Why we label, in detail: `docs/labelling_guide.md`.
+  Tip for the team (not yet sent): write several models / languages in one cell separated by commas. When `_DONE` files return: put them in
+  `data/labelling/done/`, `python scripts/score_labels.py status|A|B|C ...` (see the guide), `scripts/eval_questions.py eval/labels/questions_gold.jsonl`
+  (+ `--set features.escalation=false --tag no_escalation`, `--set features.joint_coverage=false ...` for the ablation), freeze the numbers FIRST, report later
+  fixes separately. Evaluation 4-5 Oct, code freeze day 10 (~8 Oct), paper days 11-13.
+- **UI:** the Chrome extension was NOT connected (2 attempts failed), so the page was never seen in a browser. Verified instead by `npm run build` (tsc + vite) and a
+  server-side render of the answer card with real API responses. Run: `uvicorn cgrag.api.main:app --port 8000` + `cd frontend; npm run dev` (http://localhost:5173);
+  both are stopped now. The page now polls `/health` and waits for `warm.status` (the models warm up in the background, ~30 s).
+- **Machine gotchas:** after a reboot/long idle run `python scripts/prewarm_files.py` first (first read of any file costs ~0.25 s here; a cold `import transformers` took
+  ~25 min); Ollama can wedge (kill python + `ollama.exe` + orphan `llama-server.exe`, restart `OLLAMA_NUM_PARALLEL=8 OLLAMA_KEEP_ALIVE=60m OLLAMA_MAX_LOADED_MODELS=2 ollama serve`);
+  never two processes writing Chroma; two pipeline processes do not fit in 24 GB VRAM together; PowerShell 5.1 `Set-Content -Encoding utf8` adds a BOM; patch scripts with
+  backslashes in heredocs get mangled (use the Write / Edit tools); `Remove-Item` on a variable path can be blocked by the harness.
+- **Departures from the architecture** (all behind flags; the five of 30 Sep approved, the rest wait for the user's OK, delegated to my judgement): see "Departures";
+  1 Oct additions: retrieval cards, joint coverage (+ suites, + multi-entity extras), weak-flag withdrawal, Stage 7 language filter / decimal rule, Stage 9 changes, warm-up.
 
-What stands (details in the docs named):
-- **Stage 1 SciBERT** trained and installed 30 Sep (`docs/stage1_training_report.md`): dev C (48 held out) 1.000 / 1.000, with typos 0.983 / 1.000.
-- **Ingestion frozen** (`docs/ingestion_report.md`): 28 papers, 1,385 chunks, **10,275 profiles**, cell recall 80.7 %, row label = model 86.4 %.
-- **Critic / Stage 7 / retrieval / Stage 6 fixed 1 Oct** (`docs/oct1_fixes_and_metrics.md`): critic false rejections (Kannada answer 3/5 -> 6/6
-  claims supported); false text-only conflicts (need a decimal / percentage in both sentences; language filter); **retrieval cards**
-  (`ingestion/cards.py`, `[retrieval] use_cards`): hit@5 69 -> 90 %, language + task questions 22.5 -> 60 %; **joint coverage**
-  (`[features] joint_coverage`, `applicability._joint`): correct scope decisions 22 -> 32 of 32 (warning recall 5/12 -> 12/12, 0 false
-  warnings); benchmark suites (GLUE = CoLA, MRPC ...) via `conditions.covers`; weak-evidence flag withdrawn when every named condition
-  is recorded; sentence splitter keeps "vs." / "et al."; junk-metric rule (30 profiles).
-- **Escalation measured: no accuracy gain, +0.4 s per question on average (+3.5 s where it fires, 4 of 32).** Flag still ON (the user's design).
-  Decide after job B: `python scripts/eval_questions.py eval/labels/questions_gold.jsonl --set features.escalation=false --tag no_escalation`.
-- **Start-up:** `Pipeline.warm_up()` (torch models sequentially, Ollama in parallel) runs in a background thread at API start
-  (`/health` shows `warm.status`); first question 38.8 -> 10.0 s; API first query 6.2 s.
-- **Column-wise tables:** only 2 of the "11" are real merges; no un-stacker (ingestion report). My 30 Sep claim that DistilBERT's GLUE table was
-  missed was WRONG (it was extracted; the "profile missing" note was a false NLI conflict, now fixed).
-- **Labelling kit built and tested** (`src/cgrag/labelling/`, `scripts/make_label_sheets.py`, `score_labels.py`, `eval_questions.py`,
-  `docs/labelling_guide.md`): 8 workbooks in `data/labelling/` (git-ignored), private keys in `data/labelling/private/`. NOT yet opened in Excel
-  (no LibreOffice here). Tomorrow/now: send the workbooks, collect `_DONE` files by 3 Oct, score with `score_labels.py`.
-
-Open items / next:
-1. The user's OK on the departures; the escalation decision (above).
-2. Send the sheets; help the team label; then `score_labels.py A/B/C`, `eval_questions.py`, a second ablation on the team's questions.
-3. UI in a browser (never opened), evaluation sets + ablation runner for the paper, RAGAS, final LLM / machine decision (see "Next steps").
-4. Known weak spots to remember: the joint check trusts the profile store (a missed table -> a possible false warning; job B's "covered"
-   questions will measure it); the store has some wrong profiles (e.g. BERT-large 89.1 F1 on SQuAD 2.0 in the ALBERT paper); citation-labelled
-   rows ("Devlin et al." = mBERT) are not resolved.
+What stands (details in the docs): Stage 1 SciBERT trained 30 Sep (`docs/stage1_training_report.md`: dev C 1.000/1.000); ingestion frozen, 10,275 profiles (`docs/ingestion_report.md`);
+1 Oct fixes with all numbers in `docs/oct1_fixes_and_metrics.md` (critic 3/5 -> 6/6 claims; retrieval hit@5 69 -> 90 %; scope decisions 22 -> 32 of 32 with joint coverage;
+escalation: no gain, +0.4 s/question, flag still ON, decide after job B; first question 38.8 -> 10.0 s; column-wise tables: only 2 of 11 real, no un-stacker; my 30 Sep claim that
+DistilBERT's GLUE table was missed was WRONG).
+Open items: the user's OK on the departures; escalation decision; UI in a real browser (needs the extension connected or the user looking); evaluation sets + ablation runner for the
+paper; RAGAS; final LLM / machine; known weak spots: the joint check trusts the profile store (a missed table -> a false warning; job B will measure it), wrong profiles exist
+(e.g. BERT-large 89.1 F1 on SQuAD 2.0 in the ALBERT paper), citation-labelled rows ("Devlin et al." = mBERT) unresolved.
 
 ## What this is
 BE major project, Dept. of ISE, BMSCE. Team: Shashank BU, Adarsh Kumar,Aditya Venkatesh Dhanakshirur, Tarun K.
@@ -130,7 +134,7 @@ profile-extraction call 2.0 / 3.2 / 6-7 s; a 300-token answer ~1.6 / 2.7 / 5.7 s
 parallel slots: ~1-2.5 min. Real pipeline on 12b with every agent on: 4-15 s per question when warm; the first question
 after start is ~30 s while the embedder/reranker/NLI load.
 
-## State of the build (2026-10-01 afternoon, day 5; GitHub = c5820cf; everything of 1 Oct is uncommitted)
+## State of the build (2026-10-01 evening, day 5; GitHub = 306454b; the evening's work is uncommitted, see RESUME HERE)
 **Offline path** (`src/cgrag/ingestion`, `models.py`, `stores`): PDF loader (`pdf_loader.py`: rows merged, headings,
 tables) -> section chunker (`chunker.py`, IMRaD tags, 2000/200) -> `tables.py` (aligns each number with its column
 header) -> Condition Profile Extractor (`profile_extractor.py`, LLM + JSON schema, per-table views, parallel calls,
@@ -167,7 +171,7 @@ React + Vite UI in `frontend/`; `scripts/ask.py` prints everything the pipeline 
   backed by a recorded profile (number + metric + model, dev/test consistent) or whose numbers all occur in the source
   when NLI does not contradict (a claim that names no metric is judged on number + model + setting); skips "the sources do not say" /
   conflict-echo sentences, list lead-ins ending in ":" and bare "CoLA: 56.3" lines; checks short "MuRIL: 67.8" lines; regenerates once.
-**Tests:** 165 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
+**Tests:** 176 unit tests (`python -m pytest`), no GPU or LLM needed. Scripts (all need Ollama; none while an ingest or the
 API holds the index): `scripts/smoke_questions.py` (5 questions through the whole pipeline, per-stage timings, `--set
 KEY=VALUE` to compare model sizes per use case), `scripts/ingest_metrics.py` (store integrity, fill rates, table-cell recall,
 row-label accuracy), `scripts/audit_sample.py` (random profiles next to their source row, for a hand check),
@@ -275,8 +279,12 @@ older ones marked * further down, and the flagged additions at the end of this l
   as not covered. **Weak-evidence flag withdrawn** when Stage 6 covers every named condition by recorded values. **Stage 7**: only conflicts in
   the named language; a text-only conflict needs a decimal / percentage in both sentences. **Stage 9**: list lead-ins and bare
   "label: number" lines are not claims, a claim without a metric is judged on number + model + setting, short "model: number" lines are
-  checked, abbreviations ("vs.", "et al.") do not end a sentence. **Warm-up** at API start (`Pipeline.warm_up`), `[llm] keep_alive`
+  checked, abbreviations ("vs.", "et al.") do not end a sentence, a sentence that says a result is not reported ("No results are reported for
+  Kannada ...") makes no claim (a WRONG absence statement is therefore not caught). **Warm-up** at API start (`Pipeline.warm_up`), `[llm] keep_alive`
   (machine config) and `[llm] request_timeout`. Escalation is measured (no accuracy gain on Stage 6, +0.4 s per question): still ON.
+  **Multi-entity conditions (1 Oct evening, uncommitted; regression check DONE: 32/32, numbers in `docs/oct1_fixes_and_metrics.md` 4f):** Stage 1 may return further models / datasets / languages
+  (`QueryConditions.other_models / other_datasets / other_languages`, LLM + store vocabulary); Stage 6 (`_extras`, part of `joint_coverage`) checks
+  each one together with the other named model / dataset / language, so "Compare mBERT and GPT-4 on XNLI" warns about GPT-4. `specified()` is unchanged.
 
 ## Open questions for the user (recommendation in brackets)
 - A third "middle" complexity level? Doc and schema have two [keep two].
