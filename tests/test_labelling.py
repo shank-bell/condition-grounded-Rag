@@ -185,10 +185,17 @@ def test_job_b_questions_are_parsed_and_checked(tmp_path):
     })
     questions, problems = parse_job_b(path)
     assert [q["intent"] for q in questions] == ["result", "result", "opinion"]
-    assert questions[0]["conditions"] == {"task": "natural language inference", "language": "Kannada"} and questions[0]["expect_warning"] is False
+    assert questions[0]["conditions"] == {"task": ["natural language inference"], "language": ["Kannada"]} and questions[0]["expect_warning"] is False
     assert any("no missing condition is named" in p for p in problems) and any("opinion" in p for p in problems)
     assert any("planned 'one missing'" in p or "planned" in p for p in problems) is True
     assert B_HEADERS.index("question") == 3
+
+
+def test_a_condition_cell_can_name_several_things():
+    from cgrag.labelling.score import split_values
+    assert split_values("mBERT, XLM-R and GPT-4") == ["mBERT", "XLM-R", "GPT-4"]
+    assert split_values("Hindi; Kannada & hindi") == ["Hindi", "Kannada"]
+    assert split_values("SQuAD") == ["SQuAD"] and split_values(None) == [] and split_values("  ") == []
 
 
 # ---------- job C round trip ----------
