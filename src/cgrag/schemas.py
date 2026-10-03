@@ -65,9 +65,17 @@ class QueryConditions(BaseModel):
     model: str | None = None
     model_size: str | None = None
     setting: str | None = None
+    other_models: list[str] = Field(default_factory=list)
+    other_datasets: list[str] = Field(default_factory=list)
+    other_languages: list[str] = Field(default_factory=list)
 
     def specified(self) -> dict[str, str]:
         return {f: getattr(self, f) for f in QUERY_CONDITION_FIELDS if getattr(self, f)}
+
+    def extras(self) -> dict[str, list[str]]:
+        """The further models / datasets / languages the question names, by field name."""
+        found = {"model": self.other_models, "dataset": self.other_datasets, "language": self.other_languages}
+        return {f: values for f, values in found.items() if values}
 
 
 class QueryAnalysis(BaseModel):
