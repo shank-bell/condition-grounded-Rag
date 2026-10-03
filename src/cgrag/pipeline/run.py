@@ -150,6 +150,7 @@ class Pipeline:
             trace.append(f"2 re-plan ({review.reason or 'weak evidence'}): rewrote the question {queries} and searched again "
                          f"-> kept {len(kept)}" + (" (still weak)" if weak else ""))
 
+        retrieval_weak = weak                    # Stage 5's own verdict; Stage 6 may withdraw the flag below (the evaluation's abstention baseline reads this)
         applicability: ApplicabilityResult | None = None
         if plan.check_applicability:
             with t("6_applicability"):
@@ -174,7 +175,8 @@ class Pipeline:
             trace.append("4 weak-evidence flag withdrawn: every condition named in the question is recorded in the kept passages")
         if stop_after == "applicability":
             t.ms["total"] = (time.perf_counter() - t0) * 1000
-            return respond(question, "", kept[: self.cfg.retrieval.generate_top], analysis, applicability, [], [], False, trace, t.ms)
+            return respond(question, "", kept[: self.cfg.retrieval.generate_top], analysis, applicability, [], [], False, trace, t.ms,
+                           retrieval_weak=retrieval_weak)
 
         contradictions: list[ContradictionPair] = []
         if plan.check_contradictions and len(kept) >= 2:
@@ -211,7 +213,8 @@ class Pipeline:
                          + (", regenerated once" if regenerated else ""))
 
         t.ms["total"] = (time.perf_counter() - t0) * 1000
-        return respond(question, answer, sources, analysis, applicability, contradictions, checks, regenerated, trace, t.ms)
+        return respond(question, answer, sources, analysis, applicability, contradictions, checks, regenerated, trace, t.ms,
+                       retrieval_weak=retrieval_weak)
 
     def _research(self, question: str, queries: list[str], intent: str, kept: list[RetrievedChunk],
                   requested: dict[str, str] | None = None):
