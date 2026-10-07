@@ -1,0 +1,123 @@
+{
+ "questions": 30,
+ "intent": {
+  "accuracy": 0.9333,
+  "macro_f1": 0.9693
+ },
+ "complexity": {
+  "accuracy": 1.0,
+  "macro_f1": 1.0
+ },
+ "conditions": {
+  "dataset": {
+   "tp": 26,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.963,
+   "f1": 0.9811
+  },
+  "dataset_version": {
+   "tp": 3,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "language": {
+   "tp": 16,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.9412,
+   "f1": 0.9697
+  },
+  "model": {
+   "tp": 36,
+   "fp": 6,
+   "fn": 6,
+   "precision": 0.8571,
+   "recall": 0.8571,
+   "f1": 0.8571
+  },
+  "model_size": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 6,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "setting": {
+   "tp": 2,
+   "fp": 0,
+   "fn": 3,
+   "precision": 1.0,
+   "recall": 0.4,
+   "f1": 0.5714
+  },
+  "task": {
+   "tp": 0,
+   "fp": 7,
+   "fn": 1,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "ALL": {
+   "tp": 83,
+   "fp": 13,
+   "fn": 18,
+   "precision": 0.8646,
+   "recall": 0.8218,
+   "f1": 0.8426
+  }
+ },
+ "scope_warning": {
+  "tp": 19,
+  "fp": 3,
+  "fn": 0,
+  "precision": 0.8636,
+  "recall": 1.0,
+  "f1": 0.9268,
+  "right_condition_named": 17,
+  "expected_warnings": 19,
+  "accuracy": 0.9
+ },
+ "by_planned_type": {
+  "covered": {
+   "n": 11,
+   "warned": 3,
+   "expected_warning": 0,
+   "warning_correct": 8
+  },
+  "one missing": {
+   "n": 9,
+   "warned": 9,
+   "expected_warning": 9,
+   "warning_correct": 9
+  },
+  "partly covered": {
+   "n": 10,
+   "warned": 10,
+   "expected_warning": 10,
+   "warning_correct": 10
+  }
+ },
+ "seconds_per_question": {
+  "median": 4.1,
+  "max": 10.5
+ },
+ "provenance": {
+  "generated_at": "2026-10-07T18:11:37+00:00",
+  "frozen_at_commit": "ca007a6f45c343913cd4df036a12d92a229756fe",
+  "modified_files_at_that_time": [
+   " M CLAUDE.md",
+   " M docs/evaluation_baselines.md",
+   "?? eval/labels/",
+   "?? scripts/fill_job_a_from_ai.py",
+   "?? scripts/score_ai_gold_c.py"
+  ]
+ }
+}
