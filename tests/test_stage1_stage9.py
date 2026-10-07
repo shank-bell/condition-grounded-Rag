@@ -112,6 +112,17 @@ def test_a_multi_word_model_name_the_llm_cut_short_is_restored_from_the_question
         "What semantic textual similarity does GloVe get on SICK-R?").conditions.task == "semantic textual similarity"          # a real task stays
 
 
+def test_a_metric_word_the_llm_filed_under_task_is_dropped_and_a_real_task_is_kept():
+    # 7 Oct: "Evaluate mBERT's accuracy on the IndicCOPA dataset ..." -> task "accuracy", then Stage 6 reported "task=accuracy" as not covered
+    q = "Evaluate mBERT's accuracy on the IndicCOPA dataset for both Hindi and Tamil."
+    got = clean_conditions(QueryConditions(task="accuracy", dataset="IndicCOPA", model="mBERT", language="Hindi"), q)
+    assert got.task is None and got.dataset == "IndicCOPA" and got.model == "mBERT"
+    got = clean_conditions(QueryConditions(task="F1 score", model="BERT"), "What F1 score does BERT get?")
+    assert got.task is None
+    got = clean_conditions(QueryConditions(task="question answering", model="BERT"), "How does BERT do on question answering?")
+    assert got.task == "question answering"
+
+
 def test_a_question_with_one_of_each_has_no_further_entities_even_when_the_llm_misfiles_one():
     from cgrag.pipeline.query_understanding import QueryUnderstanding
     said = QueryAnalysis(intent="result", complexity="simple",
