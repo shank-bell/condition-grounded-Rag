@@ -1,0 +1,285 @@
+{
+ "all": {
+  "profiles_labelled": 170,
+  "verdicts": {
+   "SOME_WRONG": 99,
+   "ALL_OK": 68,
+   "NOT_A_RESULT": 3
+  },
+  "profile_precision": 0.9824,
+  "fully_correct_of_results": 0.4072,
+  "fully_correct_of_judged": 0.4,
+  "per_field": {
+   "model": {
+    "tp": 128,
+    "fp": 39,
+    "fn": 39,
+    "precision": 0.7665,
+    "recall": 0.7665,
+    "f1": 0.7665
+   },
+   "dataset": {
+    "tp": 135,
+    "fp": 28,
+    "fn": 32,
+    "precision": 0.8282,
+    "recall": 0.8084,
+    "f1": 0.8182
+   },
+   "dataset_version": {
+    "tp": 10,
+    "fp": 0,
+    "fn": 7,
+    "precision": 1.0,
+    "recall": 0.5882,
+    "f1": 0.7407
+   },
+   "metric": {
+    "tp": 161,
+    "fp": 6,
+    "fn": 6,
+    "precision": 0.9641,
+    "recall": 0.9641,
+    "f1": 0.9641
+   },
+   "value": {
+    "tp": 166,
+    "fp": 1,
+    "fn": 1,
+    "precision": 0.994,
+    "recall": 0.994,
+    "f1": 0.994
+   },
+   "language": {
+    "tp": 132,
+    "fp": 3,
+    "fn": 3,
+    "precision": 0.9778,
+    "recall": 0.9778,
+    "f1": 0.9778
+   },
+   "task": {
+    "tp": 128,
+    "fp": 36,
+    "fn": 36,
+    "precision": 0.7805,
+    "recall": 0.7805,
+    "f1": 0.7805
+   },
+   "model_size": {
+    "tp": 53,
+    "fp": 6,
+    "fn": 6,
+    "precision": 0.8983,
+    "recall": 0.8983,
+    "f1": 0.8983
+   },
+   "setting": {
+    "tp": 119,
+    "fp": 46,
+    "fn": 46,
+    "precision": 0.7212,
+    "recall": 0.7212,
+    "f1": 0.7212
+   }
+  },
+  "micro": {
+   "tp": 1032,
+   "fp": 165,
+   "fn": 176,
+   "precision": 0.8622,
+   "recall": 0.8543,
+   "f1": 0.8582
+  }
+ },
+ "easy": {
+  "profiles_labelled": 99,
+  "verdicts": {
+   "SOME_WRONG": 52,
+   "ALL_OK": 45,
+   "NOT_A_RESULT": 2
+  },
+  "profile_precision": 0.9798,
+  "fully_correct_of_results": 0.4639,
+  "fully_correct_of_judged": 0.4545,
+  "per_field": {
+   "model": {
+    "tp": 85,
+    "fp": 12,
+    "fn": 12,
+    "precision": 0.8763,
+    "recall": 0.8763,
+    "f1": 0.8763
+   },
+   "dataset": {
+    "tp": 81,
+    "fp": 12,
+    "fn": 16,
+    "precision": 0.871,
+    "recall": 0.8351,
+    "f1": 0.8526
+   },
+   "dataset_version": {
+    "tp": 10,
+    "fp": 0,
+    "fn": 4,
+    "precision": 1.0,
+    "recall": 0.7143,
+    "f1": 0.8333
+   },
+   "metric": {
+    "tp": 96,
+    "fp": 1,
+    "fn": 1,
+    "precision": 0.9897,
+    "recall": 0.9897,
+    "f1": 0.9897
+   },
+   "value": {
+    "tp": 97,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "language": {
+    "tp": 76,
+    "fp": 3,
+    "fn": 3,
+    "precision": 0.962,
+    "recall": 0.962,
+    "f1": 0.962
+   },
+   "task": {
+    "tp": 79,
+    "fp": 16,
+    "fn": 16,
+    "precision": 0.8316,
+    "recall": 0.8316,
+    "f1": 0.8316
+   },
+   "model_size": {
+    "tp": 20,
+    "fp": 2,
+    "fn": 2,
+    "precision": 0.9091,
+    "recall": 0.9091,
+    "f1": 0.9091
+   },
+   "setting": {
+    "tp": 64,
+    "fp": 31,
+    "fn": 31,
+    "precision": 0.6737,
+    "recall": 0.6737,
+    "f1": 0.6737
+   }
+  },
+  "micro": {
+   "tp": 608,
+   "fp": 77,
+   "fn": 85,
+   "precision": 0.8876,
+   "recall": 0.8773,
+   "f1": 0.8824
+  }
+ },
+ "hard": {
+  "profiles_labelled": 71,
+  "verdicts": {
+   "SOME_WRONG": 47,
+   "ALL_OK": 23,
+   "NOT_A_RESULT": 1
+  },
+  "profile_precision": 0.9859,
+  "fully_correct_of_results": 0.3286,
+  "fully_correct_of_judged": 0.3239,
+  "per_field": {
+   "model": {
+    "tp": 43,
+    "fp": 27,
+    "fn": 27,
+    "precision": 0.6143,
+    "recall": 0.6143,
+    "f1": 0.6143
+   },
+   "dataset": {
+    "tp": 54,
+    "fp": 16,
+    "fn": 16,
+    "precision": 0.7714,
+    "recall": 0.7714,
+    "f1": 0.7714
+   },
+   "dataset_version": {
+    "tp": 0,
+    "fp": 0,
+    "fn": 3,
+    "precision": null,
+    "recall": 0.0,
+    "f1": 0.0
+   },
+   "metric": {
+    "tp": 65,
+    "fp": 5,
+    "fn": 5,
+    "precision": 0.9286,
+    "recall": 0.9286,
+    "f1": 0.9286
+   },
+   "value": {
+    "tp": 69,
+    "fp": 1,
+    "fn": 1,
+    "precision": 0.9857,
+    "recall": 0.9857,
+    "f1": 0.9857
+   },
+   "language": {
+    "tp": 56,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   "task": {
+    "tp": 49,
+    "fp": 20,
+    "fn": 20,
+    "precision": 0.7101,
+    "recall": 0.7101,
+    "f1": 0.7101
+   },
+   "model_size": {
+    "tp": 33,
+    "fp": 4,
+    "fn": 4,
+    "precision": 0.8919,
+    "recall": 0.8919,
+    "f1": 0.8919
+   },
+   "setting": {
+    "tp": 55,
+    "fp": 15,
+    "fn": 15,
+    "precision": 0.7857,
+    "recall": 0.7857,
+    "f1": 0.7857
+   }
+  },
+  "micro": {
+   "tp": 424,
+   "fp": 88,
+   "fn": 91,
+   "precision": 0.8281,
+   "recall": 0.8233,
+   "f1": 0.8257
+  }
+ },
+ "agreement_of_two_labellers": {
+  "shared_profiles": 0
+ },
+ "problems": []
+}
