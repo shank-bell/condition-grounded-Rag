@@ -161,5 +161,9 @@ warnings on the team's questions is what the gold run will show. The Stage 6 tab
 ## 6. Not built yet (and the default I would take)
 * **Answer quality (claim 4):** built as a scaled version on our own corpus (3b); it is a departure from the document (Qasper / RAGAS) and needs the
   user's OK before it is reported. Qasper / SQuAI would need other papers ingested and RAGAS a judge from another model family.
+* **RAGAS:** not installed (checked 3 Oct: `pip show ragas` finds nothing) and never run. The architecture removed it from the runtime (the NLI claim critic replaced it) and kept it for
+  offline evaluation, with "an independent judge". Only Gemma (12B, 4B, 2B) is local and no external API may be called, so a judge from another model family would have to be pulled through Ollama
+  (evaluation only, about 5-9 GB; it is not part of the system). Plan for 6 Oct, if the labels have arrived: (A) install RAGAS and run faithfulness and answer relevancy on the same 40 questions
+  with Gemma 12B as judge, labelled "not independent"; (B) with the user's OK, repeat with a judge of another family. The judge-free number-match test of 3b stays the primary metric.
 * **Extraction baseline (claim 1).** A MetaLead-style extractor (model, dataset, metric, value only, no conditions) on the job-A tables would show
   that the condition fields cannot be filled without the profile extractor. Not built; only worth it if time remains after the scoring.
