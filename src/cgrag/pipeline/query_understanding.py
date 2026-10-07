@@ -18,6 +18,12 @@ from ..stores.profile_store import ProfileStore
 from .conditions import TASK_WORDS, model_family, norm, setting_tags, split_version
 from .intent_classifier import IntentClassifier
 
+# What a result is measured in. The LLM sometimes returns one of these as the "task" ("Evaluate mBERT's accuracy on IndicCOPA" -> task "accuracy") and Stage 6
+# then reports the task as a missing condition (found 7 Oct on the gold questions); a task is a kind of problem, so such a value is dropped.
+_METRIC_WORDS = frozenset({"accuracy", "acc", "f1", "f1score", "fscore", "em", "exactmatch", "bleu", "rouge", "rougel", "perplexity", "ppl", "precision",
+                           "recall", "auc", "mcc", "matthewscorrelation", "pearson", "spearman", "passat1", "passat10", "passat100", "score",
+                           "errorrate"})
+
 SYSTEM = (
     "You analyse a research question about computer-science papers. Return JSON with:\n"
     "intent: factual (a single fact), comparison (compare systems or settings), method (how something works), "
@@ -98,6 +104,8 @@ def clean_conditions(conditions: QueryConditions, question: str) -> QueryConditi
         further[field] = values
     if kept.get("dataset") and norm(kept["dataset"]) in TASK_WORDS:
         kept.setdefault("task", kept.pop("dataset"))           # "NLI" / "question answering" is a task, not a dataset
+    if kept.get("task") and norm(kept["task"]) in _METRIC_WORDS:
+        del kept["task"]                                        # "accuracy" is what a result is measured in, not a kind of problem (found 7 Oct)
     dataset = kept.get("dataset")
     if dataset and "dataset_version" not in kept:              # "SQuAD 2.0" is the dataset SQuAD, version 2.0
         name, version = split_version(dataset)
