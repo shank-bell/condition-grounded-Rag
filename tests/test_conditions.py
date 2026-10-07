@@ -73,6 +73,33 @@ def test_a_benchmark_suite_is_covered_by_results_on_its_member_tasks_but_never_e
     assert not values_match("dataset", "GLUE", "CoLA")           # Stage 7 must never compare a GLUE score with a CoLA score
 
 
+def test_a_parameter_count_after_a_model_name_is_its_size_not_part_of_the_name():
+    from cgrag.pipeline.conditions import _model_core
+    # 7 Oct: "LLaMA 65B" got a false scope warning although the store has LLaMA 65B results
+    assert _model_core("LLaMA 65B") == ("llama", "65b")
+    assert _model_core("T5-11B") == ("t5", "11b") and _model_core("OPT-1.3B") == ("opt", "1.3b") and _model_core("Llama 2-Chat 70B") == ("llama2chat", "70b")
+    assert values_match("model", "LLaMA 65B", "LLaMA")                 # the size is a field of its own in the store
+    assert values_match("model", "LLaMA 65B", "LLaMA-65B") and values_match("model", "LLaMA", "LLaMA 65B")
+    assert not values_match("model", "LLaMA 65B", "LLaMA 7B")          # a different size is a different model
+    assert not values_match("model", "LLaMA 65B", "Llama 2")
+    assert values_match("model", "Llama 2-Chat 70B", "Llama 2-Chat")
+    assert not values_match("model", "OPT-1.3B", "OPT-13B")             # the dot matters: 1.3B is not 13B
+
+
+def test_a_number_that_is_part_of_a_name_is_not_taken_for_a_size():
+    from cgrag.pipeline.conditions import _model_core
+    assert _model_core("Llama 2") == ("llama2", None) and _model_core("GPT-3.5") == ("gpt35", None)
+    assert _model_core("DistilBERT-6L") == ("distilbert6l", None)        # "6L" is a layer count, not a parameter count
+    assert _model_core("BERT-large") == ("bert", "large") and _model_core("Our BERT") == ("bert", None)
+    assert model_family("LLaMA 65B") == "llama65b"                         # Stage 7 pairing is unchanged on purpose
+
+
+def test_the_form_of_a_task_a_question_uses_matches_the_name_the_tables_use():
+    assert values_match("task", "translating", "translation") and values_match("task", "translate", "machine translation")
+    assert values_match("task", "summarizing", "summarization") and values_match("task", "classifying", "classification")
+    assert not values_match("task", "translating", "question answering")
+
+
 def test_a_translation_direction_is_matched_by_either_of_its_languages():
     from cgrag.pipeline.conditions import values_match
     assert values_match("language", "English-to-German", "German")
