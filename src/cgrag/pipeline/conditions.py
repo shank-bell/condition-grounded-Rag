@@ -17,7 +17,9 @@ _LANG_ALIASES = {"en": "english", "eng": "english", "hi": "hindi", "kn": "kannad
                  "sw": "swahili", "ja": "japanese", "ko": "korean", "mr": "marathi", "bn": "bengali"}
 _TASK_ALIASES = {"nli": "naturallanguageinference", "qa": "questionanswering", "ner": "namedentityrecognition",
                  "mt": "machinetranslation", "mrc": "readingcomprehension", "sts": "semantictextualsimilarity",
-                 "pos": "partofspeechtagging", "rte": "recognizingtextualentailment"}
+                 "pos": "partofspeechtagging", "rte": "recognizingtextualentailment",
+                 "translating": "translation", "translate": "translation", "summarizing": "summarization", "summarising": "summarization",
+                 "classifying": "classification"}
 TASK_WORDS = frozenset(_TASK_ALIASES) | frozenset(_TASK_ALIASES.values())
 _METRIC_ALIASES = {"acc": "accuracy", "exactmatch": "em", "f1score": "f1", "fscore": "f1", "rougel": "rougel"}
 _METRIC_NOISE = ("score", "dev", "test", "val", "validation", "avg", "average")
@@ -95,10 +97,20 @@ def model_family(model: str | None) -> str:
 _PREFIX_DECOR = re.compile(r"^\s*(?:google|ours?|published|baseline|vanilla|original|proposed|avg\.?|average)[\s:(\-]+", re.I)
 
 
+_NUMERIC_SIZE = re.compile(r"^(?P<name>.*?[A-Za-z].*?)[\s\-_]*(?P<size>\d+(?:\.\d+)?\s?[MBK])\s*$", re.I)
+
+
 def _model_core(text: str | None) -> tuple[str, str | None]:
-    """(family, size label) of a model name without a leading whose-version word ('Our BERT' -> 'bert')."""
+    """(family, size) of a model name without a leading whose-version word ('Our BERT' -> 'bert') and without a trailing parameter count
+    ('LLaMA 65B' -> ('llama', '65b')); a size label such as 'large' is the size when there is one."""
     stripped = _PREFIX_DECOR.sub("", text or "", count=1)
-    return _strip_decor(norm(stripped if len(norm(stripped)) >= 2 else text))
+    base = stripped if len(norm(stripped)) >= 2 else (text or "")
+    count = None
+    m = _NUMERIC_SIZE.match(base.strip())
+    if m and len(norm(m["name"])) >= 2:
+        base, count = m["name"], re.sub(r"\s", "", m["size"]).lower()
+    family, label = _strip_decor(norm(base))
+    return family, label or count
 
 
 def model_size_label(p: ConditionProfile) -> str | None:
