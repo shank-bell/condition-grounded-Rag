@@ -1,0 +1,249 @@
+{
+ "gold_verdicts": {
+  "EXPLAINED": 41,
+  "NOT COMPARABLE": 9
+ },
+ "labeller": "AI (single), not a human; no kappa",
+ "problems": [],
+ "systems": {
+  "stage7 (the key)": {
+   "pairs": 50,
+   "accuracy": 0.62,
+   "macro_f1": 0.5596,
+   "per_class": {
+    "EXPLAINED": {
+     "tp": 27,
+     "fp": 2,
+     "fn": 14,
+     "precision": 0.931,
+     "recall": 0.6585,
+     "f1": 0.7714,
+     "support": 41
+    },
+    "GENUINE": {
+     "tp": 0,
+     "fp": 7,
+     "fn": 0,
+     "precision": 0.0,
+     "recall": null,
+     "f1": 0.0,
+     "support": 0
+    },
+    "NOT COMPARABLE": {
+     "tp": 4,
+     "fp": 10,
+     "fn": 5,
+     "precision": 0.2857,
+     "recall": 0.4444,
+     "f1": 0.3478,
+     "support": 9
+    }
+   },
+   "confusion_gold_rows_system_columns": {
+    "EXPLAINED": {
+     "EXPLAINED": 27,
+     "GENUINE": 4,
+     "NOT COMPARABLE": 10
+    },
+    "GENUINE": {
+     "EXPLAINED": 0,
+     "GENUINE": 0,
+     "NOT COMPARABLE": 0
+    },
+    "NOT COMPARABLE": {
+     "EXPLAINED": 2,
+     "GENUINE": 3,
+     "NOT COMPARABLE": 4
+    }
+   },
+   "condition_attribution": {
+    "pairs": 27,
+    "exact_match": 0.2593,
+    "mean_jaccard": 0.5062
+   },
+   "extraction_errors_flagged": 7
+  },
+  "stage7_rerun": {
+   "pairs": 50,
+   "accuracy": 0.62,
+   "macro_f1": 0.5596,
+   "per_class": {
+    "EXPLAINED": {
+     "tp": 27,
+     "fp": 2,
+     "fn": 14,
+     "precision": 0.931,
+     "recall": 0.6585,
+     "f1": 0.7714,
+     "support": 41
+    },
+    "GENUINE": {
+     "tp": 0,
+     "fp": 7,
+     "fn": 0,
+     "precision": 0.0,
+     "recall": null,
+     "f1": 0.0,
+     "support": 0
+    },
+    "NOT COMPARABLE": {
+     "tp": 4,
+     "fp": 10,
+     "fn": 5,
+     "precision": 0.2857,
+     "recall": 0.4444,
+     "f1": 0.3478,
+     "support": 9
+    }
+   },
+   "confusion_gold_rows_system_columns": {
+    "EXPLAINED": {
+     "EXPLAINED": 27,
+     "GENUINE": 4,
+     "NOT COMPARABLE": 10
+    },
+    "GENUINE": {
+     "EXPLAINED": 0,
+     "GENUINE": 0,
+     "NOT COMPARABLE": 0
+    },
+    "NOT COMPARABLE": {
+     "EXPLAINED": 2,
+     "GENUINE": 3,
+     "NOT COMPARABLE": 4
+    }
+   },
+   "condition_attribution": {
+    "pairs": 27,
+    "exact_match": 0.2593,
+    "mean_jaccard": 0.5062
+   },
+   "extraction_errors_flagged": 7
+  },
+  "plain_nli": {
+   "pairs": 50,
+   "accuracy": 0.0,
+   "macro_f1": 0.0,
+   "per_class": {
+    "EXPLAINED": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 41,
+     "precision": null,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 41
+    },
+    "GENUINE": {
+     "tp": 0,
+     "fp": 48,
+     "fn": 0,
+     "precision": 0.0,
+     "recall": null,
+     "f1": 0.0,
+     "support": 0
+    },
+    "NOT COMPARABLE": {
+     "tp": 0,
+     "fp": 2,
+     "fn": 9,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 9
+    }
+   },
+   "confusion_gold_rows_system_columns": {
+    "EXPLAINED": {
+     "EXPLAINED": 0,
+     "GENUINE": 39,
+     "NOT COMPARABLE": 2
+    },
+    "GENUINE": {
+     "EXPLAINED": 0,
+     "GENUINE": 0,
+     "NOT COMPARABLE": 0
+    },
+    "NOT COMPARABLE": {
+     "EXPLAINED": 0,
+     "GENUINE": 9,
+     "NOT COMPARABLE": 0
+    }
+   },
+   "condition_attribution": {
+    "pairs": 0,
+    "exact_match": null,
+    "mean_jaccard": null
+   },
+   "extraction_errors_flagged": 7
+  },
+  "llm_taxonomy": {
+   "pairs": 50,
+   "accuracy": 0.6,
+   "macro_f1": 0.4054,
+   "per_class": {
+    "EXPLAINED": {
+     "tp": 30,
+     "fp": 3,
+     "fn": 11,
+     "precision": 0.9091,
+     "recall": 0.7317,
+     "f1": 0.8108,
+     "support": 41
+    },
+    "GENUINE": {
+     "tp": 0,
+     "fp": 13,
+     "fn": 0,
+     "precision": 0.0,
+     "recall": null,
+     "f1": 0.0,
+     "support": 0
+    },
+    "NOT COMPARABLE": {
+     "tp": 0,
+     "fp": 4,
+     "fn": 9,
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 9
+    }
+   },
+   "confusion_gold_rows_system_columns": {
+    "EXPLAINED": {
+     "EXPLAINED": 30,
+     "GENUINE": 7,
+     "NOT COMPARABLE": 4
+    },
+    "GENUINE": {
+     "EXPLAINED": 0,
+     "GENUINE": 0,
+     "NOT COMPARABLE": 0
+    },
+    "NOT COMPARABLE": {
+     "EXPLAINED": 3,
+     "GENUINE": 6,
+     "NOT COMPARABLE": 0
+    }
+   },
+   "condition_attribution": {
+    "pairs": 30,
+    "exact_match": 0.1333,
+    "mean_jaccard": 0.3333
+   },
+   "extraction_errors_flagged": 7
+  }
+ },
+ "freeze_record": {
+  "generated_at": "2026-10-07T17:32:48+00:00",
+  "frozen_at_commit": "ca007a6f45c343913cd4df036a12d92a229756fe",
+  "modified_files_at_that_time": [
+   " M CLAUDE.md",
+   " M docs/evaluation_baselines.md",
+   "?? eval/labels/",
+   "?? scripts/fill_job_a_from_ai.py",
+   "?? scripts/score_ai_gold_c.py"
+  ]
+ }
+}
