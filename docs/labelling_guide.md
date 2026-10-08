@@ -1,5 +1,8 @@
 # Labelling guide (1 October 2026, due 3 October)
 
+> **Status, 8 October 2026:** no human label files arrived. With the project lead's approval the answer keys (jobs A, B and C) were made by an AI assistant that read the PDFs: one labeller, no kappa, and the labeller also helped build the system.
+> The results and their limits are in `docs/evaluation_ai_annotated.md`. The rest of this guide is the original plan; it still describes how real human labels would be collected and scored (the same scoring scripts take them unchanged).
+
 The labels are the **answer key for the evaluation**. Nothing is trained on them. They tell us how good the finished system is:
 how often the extractor is right (job A), whether the system warns when the papers do not cover a question (job B), and whether it
 tells a real conflict between two papers from a difference that conditions explain (job C).
