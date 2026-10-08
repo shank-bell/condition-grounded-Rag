@@ -1,0 +1,852 @@
+{
+ "configs": {
+  "baseline": {
+   "cards": false,
+   "guided": false,
+   "joint": false,
+   "escalation": false
+  },
+  "+cards": {
+   "cards": true,
+   "guided": false,
+   "joint": false,
+   "escalation": false
+  },
+  "+guided": {
+   "cards": true,
+   "guided": true,
+   "joint": false,
+   "escalation": false
+  },
+  "+joint": {
+   "cards": true,
+   "guided": true,
+   "joint": true,
+   "escalation": false
+  },
+  "+escalation": {
+   "cards": true,
+   "guided": true,
+   "joint": true,
+   "escalation": true
+  }
+ },
+ "results": {
+  "+escalation": [
+   {
+    "family": "covered",
+    "question": "What accuracy does mT5 get on XNLI for Hindi?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "XNLI",
+     "language": "Hindi"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Hindi",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 8.4,
+    "applicability_s": 0.25
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mT5 get on TyDi QA GoldP for Russian?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "TyDi QA GoldP",
+     "language": "Russian"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "TyDi QA GoldP",
+     "language": "Russian",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 2.98,
+    "applicability_s": 0.17
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mBERT get on XNLI for English?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "XNLI",
+     "language": "English"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "English",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 2.8,
+    "applicability_s": 0.15
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mT5 get on XQuAD for Arabic?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "XQuAD",
+     "language": "Arabic"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XQuAD",
+     "language": "Arabic",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 3.06,
+    "applicability_s": 0.18
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mT5 get on MLQA for English?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "MLQA",
+     "language": "English"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "English",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 3.02,
+    "applicability_s": 0.17
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mBERT get on TyDi QA GoldP for Swahili?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "TyDi QA GoldP",
+     "language": "Swahili"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "TyDi QA GoldP",
+     "language": "Swahili",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 3.09,
+    "applicability_s": 0.17
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mT5 get on XNLI for Chinese?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "XNLI",
+     "language": "Chinese"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Chinese",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 3.14,
+    "applicability_s": 0.18
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mT5 get on XNLI for Turkish?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "XNLI",
+     "language": "Turkish"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Turkish",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 2.82,
+    "applicability_s": 0.18
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mT5 get on TyDi QA GoldP for Hindi?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "TyDi QA GoldP",
+     "language": "Hindi"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "TyDi QA GoldP",
+     "language": "Hindi",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 3.91,
+    "applicability_s": 0.17
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mBERT get on XNLI for Greek?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "XNLI",
+     "language": "Greek"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Greek",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 3.25,
+    "applicability_s": 0.15
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mBERT get on XNLI for Urdu?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "XNLI",
+     "language": "Urdu"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Urdu",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 3.03,
+    "applicability_s": 0.15
+   },
+   {
+    "family": "covered",
+    "question": "What accuracy does mBERT get on XNLI for Vietnamese?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "XNLI",
+     "language": "Vietnamese"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Vietnamese",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 3.04,
+    "applicability_s": 0.16
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does XLM-R get on XNLI for Marathi?",
+    "conditions": {
+     "model": "XLM-R",
+     "dataset": "XNLI",
+     "language": "Marathi"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Marathi"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Marathi",
+     "model": "XLM-R"
+    },
+    "extras_found": {},
+    "seconds": 3.42,
+    "applicability_s": 0.47
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does mT5 get on XNLI for Malayalam?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "XNLI",
+     "language": "Malayalam"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Malayalam"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": true,
+    "re_retrieved": true,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Malayalam",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 7.02,
+    "applicability_s": 4.27
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does mBERT get on XNLI for Marathi?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "XNLI",
+     "language": "Marathi"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Marathi"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "XNLI",
+     "language": "Marathi",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 3.27,
+    "applicability_s": 0.46
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does XLM-R get on XQuAD for Kannada?",
+    "conditions": {
+     "model": "XLM-R",
+     "dataset": "XQuAD",
+     "language": "Kannada"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Kannada"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": true,
+    "re_retrieved": true,
+    "conditions_found": {
+     "dataset": "XQuAD",
+     "language": "Kannada",
+     "model": "XLM-R"
+    },
+    "extras_found": {},
+    "seconds": 7.18,
+    "applicability_s": 4.4
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does mBERT get on MLQA for Marathi?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "MLQA",
+     "language": "Marathi"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Marathi"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "Marathi",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 3.22,
+    "applicability_s": 0.5
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does mT5 get on XQuAD for Marathi?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "XQuAD",
+     "language": "Marathi"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Marathi"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": true,
+    "re_retrieved": true,
+    "conditions_found": {
+     "dataset": "XQuAD",
+     "language": "Marathi",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 8.3,
+    "applicability_s": 4.96
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does mBERT get on MLQA for Malayalam?",
+    "conditions": {
+     "model": "mBERT",
+     "dataset": "MLQA",
+     "language": "Malayalam"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Malayalam"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "Malayalam",
+     "model": "mBERT"
+    },
+    "extras_found": {},
+    "seconds": 3.41,
+    "applicability_s": 0.46
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does XLM-R get on MLQA for Marathi?",
+    "conditions": {
+     "model": "XLM-R",
+     "dataset": "MLQA",
+     "language": "Marathi"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Marathi"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "Marathi",
+     "model": "XLM-R"
+    },
+    "extras_found": {},
+    "seconds": 3.18,
+    "applicability_s": 0.48
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does XLM-R get on MLQA for Kannada?",
+    "conditions": {
+     "model": "XLM-R",
+     "dataset": "MLQA",
+     "language": "Kannada"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Kannada"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "Kannada",
+     "model": "XLM-R"
+    },
+    "extras_found": {},
+    "seconds": 3.18,
+    "applicability_s": 0.47
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does XLM-R get on MLQA for Tamil?",
+    "conditions": {
+     "model": "XLM-R",
+     "dataset": "MLQA",
+     "language": "Tamil"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Tamil"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "Tamil",
+     "model": "XLM-R"
+    },
+    "extras_found": {},
+    "seconds": 3.19,
+    "applicability_s": 0.47
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does mT5 get on MLQA for Tamil?",
+    "conditions": {
+     "model": "mT5",
+     "dataset": "MLQA",
+     "language": "Tamil"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Tamil"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": true,
+    "re_retrieved": true,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "Tamil",
+     "model": "mT5"
+    },
+    "extras_found": {},
+    "seconds": 6.82,
+    "applicability_s": 4.2
+   },
+   {
+    "family": "missing",
+    "question": "What accuracy does XLM-R get on MLQA for Malayalam?",
+    "conditions": {
+     "model": "XLM-R",
+     "dataset": "MLQA",
+     "language": "Malayalam"
+    },
+    "expect_warning": true,
+    "expect_missing": "language",
+    "warned": true,
+    "missing": [
+     "language=Malayalam"
+    ],
+    "correct": true,
+    "coverage": 0.6666666666666666,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "dataset": "MLQA",
+     "language": "Malayalam",
+     "model": "XLM-R"
+    },
+    "extras_found": {},
+    "seconds": 3.26,
+    "applicability_s": 0.47
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Hindi NER?",
+    "conditions": {
+     "language": "Hindi",
+     "task": "named entity recognition"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "task": "NER",
+     "language": "Hindi"
+    },
+    "extras_found": {},
+    "seconds": 3.46,
+    "applicability_s": 0.0
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Bengali QA?",
+    "conditions": {
+     "language": "Bengali",
+     "task": "question answering"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "language": "Bengali"
+    },
+    "extras_found": {},
+    "seconds": 3.41,
+    "applicability_s": 0.0
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Tamil QA?",
+    "conditions": {
+     "language": "Tamil",
+     "task": "question answering"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": true,
+    "escalated": false,
+    "re_retrieved": true,
+    "conditions_found": {
+     "language": "Tamil"
+    },
+    "extras_found": {},
+    "seconds": 4.94,
+    "applicability_s": 0.59
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Malayalam NLI?",
+    "conditions": {
+     "language": "Malayalam",
+     "task": "natural language inference"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": true,
+    "escalated": false,
+    "re_retrieved": true,
+    "conditions_found": {
+     "task": "NLI",
+     "language": "Malayalam"
+    },
+    "extras_found": {},
+    "seconds": 3.66,
+    "applicability_s": 0.49
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Bengali NLI?",
+    "conditions": {
+     "language": "Bengali",
+     "task": "natural language inference"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": true,
+    "escalated": false,
+    "re_retrieved": true,
+    "conditions_found": {
+     "language": "Bengali"
+    },
+    "extras_found": {},
+    "seconds": 4.27,
+    "applicability_s": 0.62
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Malayalam QA?",
+    "conditions": {
+     "language": "Malayalam",
+     "task": "question answering"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": true,
+    "escalated": false,
+    "re_retrieved": true,
+    "conditions_found": {
+     "language": "Malayalam"
+    },
+    "extras_found": {},
+    "seconds": 3.89,
+    "applicability_s": 0.53
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Hindi QA?",
+    "conditions": {
+     "language": "Hindi",
+     "task": "question answering"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "language": "Hindi"
+    },
+    "extras_found": {},
+    "seconds": 3.14,
+    "applicability_s": 0.01
+   },
+   {
+    "family": "language_task",
+    "question": "How well do models perform on Kannada NLI?",
+    "conditions": {
+     "language": "Kannada",
+     "task": "natural language inference"
+    },
+    "expect_warning": false,
+    "warned": false,
+    "missing": [],
+    "correct": true,
+    "coverage": 1.0,
+    "guided": false,
+    "escalated": false,
+    "re_retrieved": false,
+    "conditions_found": {
+     "language": "Kannada"
+    },
+    "extras_found": {},
+    "seconds": 3.7,
+    "applicability_s": 0.0
+   }
+  ]
+ }
+}
