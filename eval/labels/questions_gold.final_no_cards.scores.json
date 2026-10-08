@@ -1,0 +1,137 @@
+{
+ "questions": 30,
+ "intent": {
+  "accuracy": 0.9333,
+  "macro_f1": 0.9693
+ },
+ "complexity": {
+  "accuracy": 1.0,
+  "macro_f1": 1.0
+ },
+ "conditions": {
+  "dataset": {
+   "tp": 26,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.963,
+   "f1": 0.9811
+  },
+  "dataset_version": {
+   "tp": 3,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "language": {
+   "tp": 16,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.9412,
+   "f1": 0.9697
+  },
+  "model": {
+   "tp": 42,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "model_size": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 6,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "setting": {
+   "tp": 2,
+   "fp": 0,
+   "fn": 3,
+   "precision": 1.0,
+   "recall": 0.4,
+   "f1": 0.5714
+  },
+  "task": {
+   "tp": 1,
+   "fp": 4,
+   "fn": 0,
+   "precision": 0.2,
+   "recall": 1.0,
+   "f1": 0.3333
+  },
+  "ALL": {
+   "tp": 90,
+   "fp": 4,
+   "fn": 11,
+   "precision": 0.9574,
+   "recall": 0.8911,
+   "f1": 0.9231
+  }
+ },
+ "scope_warning": {
+  "tp": 19,
+  "fp": 1,
+  "fn": 0,
+  "precision": 0.95,
+  "recall": 1.0,
+  "f1": 0.9744,
+  "right_condition_named": 17,
+  "expected_warnings": 19,
+  "accuracy": 0.9667
+ },
+ "by_planned_type": {
+  "covered": {
+   "n": 11,
+   "warned": 1,
+   "expected_warning": 0,
+   "warning_correct": 10
+  },
+  "one missing": {
+   "n": 9,
+   "warned": 9,
+   "expected_warning": 9,
+   "warning_correct": 9
+  },
+  "partly covered": {
+   "n": 10,
+   "warned": 10,
+   "expected_warning": 10,
+   "warning_correct": 10
+  }
+ },
+ "seconds_per_question": {
+  "median": 4.4,
+  "max": 10.4
+ },
+ "provenance": {
+  "generated_at": "2026-10-07T19:25:10+00:00",
+  "frozen_at_commit": "4d06f848c555a4c239a044b336b6e6f6674e6847",
+  "modified_files_at_that_time": [
+   " M CLAUDE.md",
+   "?? docs/evaluation_ai_annotated.md",
+   "?? eval/labels/answer_quality_gold_b.final.json",
+   "?? eval/labels/answer_quality_gold_b.frozen_ca007a6.json",
+   "?? eval/labels/questions_gold.final_main.results.jsonl",
+   "?? eval/labels/questions_gold.final_main.scores.json",
+   "?? eval/labels/questions_gold.final_no_appl_agent.results.jsonl",
+   "?? eval/labels/questions_gold.final_no_appl_agent.scores.json",
+   "?? eval/labels/questions_gold.final_no_cards.results.jsonl",
+   "?? eval/labels/questions_gold.final_no_escalation.results.jsonl",
+   "?? eval/labels/questions_gold.final_no_escalation.scores.json",
+   "?? eval/labels/questions_gold.final_no_joint.results.jsonl",
+   "?? eval/labels/questions_gold.final_no_joint.scores.json",
+   "?? eval/labels/questions_gold.final_no_orch_agent.results.jsonl",
+   "?? eval/labels/questions_gold.final_no_orch_agent.scores.json",
+   "?? eval/labels/questions_gold.results.jsonl",
+   "?? eval/labels/questions_gold.scores.json",
+   "?? eval/labels/scope_baselines_gold.final.json",
+   "?? eval/labels/scope_baselines_gold.frozen_ca007a6.json"
+  ]
+ }
+}
