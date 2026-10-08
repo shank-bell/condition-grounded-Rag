@@ -5,6 +5,19 @@ aren't visible from the code alone. The full architecture is in
 `condition_grounded_rag_architecture.html` (git-ignored, kept local/private — read it directly
 for the design; don't re-derive it from here).
 
+## LATEST 8 Oct 2026 ~01:35 (newest; the block below is from 00:30)
+- The clean re-run of every table is DONE from commit `4d06f84` (and repeated undisturbed after the queue was started twice by accident at 00:30): results in `eval/labels/*final*`, regressions OK (Stage 7 0/50 changed, silver 32/32, 197 tests). The results document `docs/evaluation_ai_annotated.md` is written (summary, method, corrections log, results, limits, reproduction).
+- Final numbers (AI-annotated keys): Stage 6 F1 97.4 after fixes / 92.7 frozen, tied with an LLM judge (91.4, p = 0.63); only the joint check matters (48.0 without it); Stage 7 62 % vs Gemma baseline 60 % vs "always explained" 82 % (7 / 13 / 48 of 50 pairs called GENUINE, the key has none); answers 5/9 = 5/9 vs 0/9 LLM alone; extraction field F1 90.5 lenient / 85.8 strict.
+- Left: the user commits and pushes the new files (one file per commit); read-through of the document; the user tells the guide the keys are AI-made; optional extras (Adarsh's job A sheet, the stacked-table fix, RAGAS). Details: memory note `project-state-2026-09-29`.
+
+## UPDATE 8 Oct 2026 ~00:30 (READ THIS FIRST; the "RESUME HERE" text below was written on 3 Oct and is partly stale; the bullet "7 Oct night" further down has the details)
+- Everything up to commit `4d06f84` is pushed (the user pushed on 8 Oct at 00:03 and 00:07). The research-paper deadline is now **16 Oct**. 197 unit tests pass.
+- The teammates' labels never arrived; the user approved (7 Oct) that the assistant builds AI-annotated answer keys (job A 170 rows, B 30 questions, C 50 pairs). Every result must say "against an AI-annotated key, one labeller, no kappa". The user still has to tell their guide.
+- Headline numbers on the frozen code (`ca007a6`): Stage 6 scope warning F1 92.7 (precision 86.4, recall 100) = TIED with a simple LLM-judge baseline (F1 91.4, precision 100, recall 84); ONLY the joint-coverage check matters (F1 55.2 without it; escalation, both LLM agents, retrieval cards and profile-guided retrieval change nothing on 30 questions);
+  Stage 7 62 % against the key (Gemma baseline 60 %, plain NLI 0 %; the system calls 7 pairs GENUINE where the key has none); extraction field F1 90.5 % lenient / 85.8 % strict (values 99.4 %, names weak: task 78.7, model 84.4, dataset 85.5); answers 5 / 9 with and without the profile parts, 0 / 9 for the LLM alone.
+- After three general fixes (a parameter count after a model name is its size, task gerunds, a metric word is not a task; Stage 7 unchanged on 50 / 50 pairs): Stage 6 F1 97.4 (one false alarm left = a real extractor failure: the stacked IndicCOPA table, Table 17 of 2212.05409, was stored with the wrong header). Report this as "after error analysis, not held-out".
+- NEXT: (1) a clean re-run of every table from one commit + the silver regression `scripts/ablate_stage6.py` (must stay 32 / 32); (2) the results write-up `docs/evaluation_ai_annotated.md` and update `docs/labelling_guide.md`; (3) optional: the stacked-table extractor fix; (4) the user tells the guide. Files, rebuild commands and the disclosed corrections: memory notes `project-state-2026-09-29` and `ai-annotated-answer-keys`.
+
 ## RESUME HERE (rewritten 2026-10-03 ~16:40 because the context window was 82 % full; read this first)
 **Where we are:** day 7 of 13 (Sat 3 Oct 2026). The user's target (their words, 3 Oct): "even with all evaluation ... we will complete this in 5 days (on 8th October)" = system + ALL evaluation
 done and code frozen by Thu 8 Oct; the paper in parallel / after. Progress without the paper, my answer when they asked (twice): **about 68 %** (weights 40 system : 35 proof; system ~91 % built, proof ~42 %);
