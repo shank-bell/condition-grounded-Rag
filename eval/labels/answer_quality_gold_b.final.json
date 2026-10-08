@@ -1,0 +1,498 @@
+{
+ "generated_at": "2026-10-07T19:11:38+00:00",
+ "frozen_at_commit": "4d06f848c555a4c239a044b336b6e6f6674e6847",
+ "modified_files_at_that_time": [
+  " M CLAUDE.md",
+  "?? docs/evaluation_ai_annotated.md",
+  "?? eval/labels/answer_quality_gold_b.frozen_ca007a6.json",
+  "?? eval/labels/questions_gold.final_main.results.jsonl",
+  "?? eval/labels/questions_gold.final_main.scores.json",
+  "?? eval/labels/questions_gold.results.jsonl",
+  "?? eval/labels/questions_gold.scores.json",
+  "?? eval/labels/scope_baselines_gold.final.json",
+  "?? eval/labels/scope_baselines_gold.frozen_ca007a6.json"
+ ],
+ "truth": "gold_b",
+ "questions": 9,
+ "scores": {
+  "full": {
+   "questions": 9,
+   "correct": 5,
+   "accuracy": 0.5556,
+   "numbers_per_answer": 6.78,
+   "claims_supported": 0.8519,
+   "warned": 1,
+   "seconds_per_question": 10.44
+  },
+  "no_stage_c67": {
+   "questions": 9,
+   "correct": 5,
+   "accuracy": 0.5556,
+   "numbers_per_answer": 4.0,
+   "claims_supported": 0.9167,
+   "warned": null,
+   "seconds_per_question": 7.39
+  },
+  "llm_only": {
+   "questions": 9,
+   "correct": 0,
+   "accuracy": 0.0,
+   "numbers_per_answer": 0.67,
+   "claims_supported": null,
+   "warned": null,
+   "seconds_per_question": 0.94
+  }
+ },
+ "paired": {
+  "full_vs_no_stage_c67": {
+   "both_right": 4,
+   "only_a": 1,
+   "only_b": 1,
+   "both_wrong": 3,
+   "sign_test_p": 1.0
+  },
+  "full_vs_llm_only": {
+   "both_right": 0,
+   "only_a": 5,
+   "only_b": 0,
+   "both_wrong": 4,
+   "sign_test_p": 0.0625
+  },
+  "no_stage_c67_vs_llm_only": {
+   "both_right": 0,
+   "only_a": 5,
+   "only_b": 0,
+   "both_wrong": 4,
+   "sign_test_p": 0.0625
+  }
+ },
+ "rows": [
+  {
+   "id": "B-AI-01",
+   "question": "How well does BERT perform on the SQuAD 2.0 dataset?",
+   "gold_values": [
+    78.7,
+    80.0,
+    81.9,
+    83.1
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "BERT performance on the SQuAD 2.0 dataset varies depending on the specific model and evaluation setting:\n\n*   **Google BERT** obtains 83.3 F1 on the SQuAD 2.0 test set (single model, English) [4].\n*   **Our BERT** (a reimplementation) obtains 85.9 F1 on the SQuAD 2.0 test set (single model, English) [4].\n*   **BERT-large** obtains 81.9 F1 on SQuAD 2.0 (single, English, large) [5].\n*   **BERT-large** also obtains 81.8 F1 on SQuAD 2.0 dev (single model, English, large) [6].\n*   **BERT-large** obtains 89.1 F1 on SQuAD 2.0 test (single model, English, large) [6].\n\nNote: The 90.9 F1 score reported in source [6] is for SQuAD 1.1, not SQuAD 2.0.",
+     "correct": false,
+     "recall": 0.25,
+     "numbers": 14,
+     "supported": 1.0,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 15.09
+    },
+    "no_stage_c67": {
+     "answer": "On the SQuAD 2.0 dataset, the BERT-large (Single) model achieves an EM of 80.0 and an F1 of 83.1 [4]. In comparison to the BERT baseline, SpanBERT exceeds the BERT baseline by 2.8% F1 on SQuAD 2.0 [2].",
+     "correct": true,
+     "recall": 0.5,
+     "numbers": 5,
+     "supported": 1.0,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 5.66
+    },
+    "llm_only": {
+     "answer": "BERT achieves an F1 score of approximately 81.1 on the SQuAD 2.0 dataset.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 2,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 0.84
+    }
+   }
+  },
+  {
+   "id": "B-AI-02",
+   "question": "How well does XLM-R do on MLQA for Hindi?",
+   "gold_values": [
+    51.6,
+    53.1,
+    69.2,
+    70.6
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "On the MLQA benchmark for Hindi, the performance of XLM-R models is as follows:\n\n*   **XLM-R**: Achieves 69.2 F1 and 51.6 EM [2].\n*   **XLM-RBase**: Achieves 59.4 F1 and 42.9 EM [2].\n\nIn comparison, mBERT (large) achieves 43.8 F1 and 29.7 EM on the same task [2]. XLM-R outperforms mBERT by 13.0% in F1-score and 11.1% in accuracy [4].\n\nNote: These results are for the zero-shot setting where models are fine-tuned on the English SQuAD dataset and evaluated on the 7 languages of MLQA [2, 4].",
+     "correct": true,
+     "recall": 0.5,
+     "numbers": 9,
+     "supported": 1.0,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 8.79
+    },
+    "no_stage_c67": {
+     "answer": "On the MLQA dataset, the XLM-R model achieves an F1 score of 51.6 and an Exact Match (EM) score of 69.2 for the Hindi (hi) language [5]. This result was obtained in a zero-shot setting where the model was fine-tuned on the English Squad dataset and evaluated on the 7 languages of MLQA [5]. The XLM-R model used for this evaluation was trained on 100 languages [3].",
+     "correct": true,
+     "recall": 0.5,
+     "numbers": 4,
+     "supported": 1.0,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 6.68
+    },
+    "llm_only": {
+     "answer": "I do not have the specific numerical score for XLM-R on the MLQA dataset for Hindi in my memory.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 0,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 0.68
+    }
+   }
+  },
+  {
+   "id": "B-AI-03",
+   "question": "What exact match does LLaMA 65B get on NaturalQuestions with the 5-shot setting?",
+   "gold_values": [
+    23.8,
+    31.0,
+    35.0,
+    39.9
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "LLaMA 65B obtains a 35.0 exact match on NaturalQuestions in the 5-shot setting [1, 2].",
+     "correct": false,
+     "recall": 0.25,
+     "numbers": 2,
+     "supported": 1.0,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 7.51
+    },
+    "no_stage_c67": {
+     "answer": "LLaMA 65B achieves an exact match of 35.0 on the NaturalQuestions dataset in the 5-shot setting [1]. This result is reported for the closed-book setting where models do not have access to documents containing evidence to answer the question [2].",
+     "correct": false,
+     "recall": 0.25,
+     "numbers": 2,
+     "supported": 1.0,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 6.33
+    },
+    "llm_only": {
+     "answer": "I do not have the specific exact match score for LLaMA 65B on the NaturalQuestions dataset in a 5-shot setting.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 1,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 0.76
+    }
+   }
+  },
+  {
+   "id": "B-AI-04",
+   "question": "What BLEU does GPT-3 get translating German into English in the zero-shot setting?",
+   "gold_values": [
+    27.2,
+    30.4,
+    40.6
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "GPT-3 obtains 27.2 BLEU on the WMT'16 De ↔ En (zero-shot, German) dataset [2].",
+     "correct": false,
+     "recall": 0.333,
+     "numbers": 3,
+     "supported": 1.0,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 5.4
+    },
+    "no_stage_c67": {
+     "answer": "In the zero-shot setting, GPT-3 achieves a BLEU score of 27.2 when translating German into English [1]. This result was measured on the WMT’16 De ↔ En dataset using the `multi-bleu.perl` tool with XLM’s tokenization [1].",
+     "correct": false,
+     "recall": 0.333,
+     "numbers": 3,
+     "supported": 1.0,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 5.56
+    },
+    "llm_only": {
+     "answer": "The original GPT-3 paper does not provide a specific BLEU score for German-to-English translation in a zero-shot setting.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 1,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 0.74
+    }
+   }
+  },
+  {
+   "id": "B-AI-05",
+   "question": "Compare MuRIL and mBERT on XNLI for Hindi.",
+   "gold_values": [
+    60.5,
+    70.7
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "Performance results for MuRIL and mBERT on the XNLI task for Hindi vary across different evaluation settings:\n\n*   **XTREME (IN) dataset:** MuRIL achieves 74.1% accuracy, while mBERT achieves 66.8% accuracy [1].\n*   **XNLI (hi-tr) transliterated setting:** MuRIL achieves 68.2% accuracy, while mBERT achieves 39.6% accuracy [2].\n*   **XNLI (hi) standard setting:** MuRIL achieves 70.7% accuracy, while mBERT achieves 60.5% accuracy [3].\n*   **IndicXNLI task:** MuRIL achieves 76.3% accuracy, while mBERT achieves 63.9% accuracy [5].\n\nNote: The results in [4] provide an average accuracy of 64.7% for MuRIL and 39.2% for mBERT across all transliterated Indian languages on the XNLI test set.",
+     "correct": true,
+     "recall": 1.0,
+     "numbers": 10,
+     "supported": 1.0,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 15.41
+    },
+    "no_stage_c67": {
+     "answer": "On the XNLI dataset for Hindi (hi), MuRIL achieves 70.7% accuracy, while mBERT achieves 60.5% accuracy [5]. In the XTREME (IN) benchmark, which includes results for Indian languages supported by MuRIL, MuRIL achieves 74.1% accuracy on XNLI, while mBERT achieves 66.8% [1]. On transliterated test sets (native $\\rightarrow$ Latin), MuRIL achieves 64.7% accuracy on XNLI, while mBERT achieves 39.2% [2]. MuRIL significantly outperforms mBERT on all tasks in the XTREME benchmark [4].",
+     "correct": true,
+     "recall": 1.0,
+     "numbers": 6,
+     "supported": 0.75,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 10.76
+    },
+    "llm_only": {
+     "answer": "MuRIL outperforms mBERT on the XNLI task for Hindi because it was specifically pre-trained on a large-scale multilingual corpus including high-resource Indian languages. While mBERT is a general multilingual model, MuRIL's specialized training on Indian languages provides it with better linguistic nuances and performance in the Hindi subset.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 0,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 1.66
+    }
+   }
+  },
+  {
+   "id": "B-AI-06",
+   "question": "Compare the performance of mT5-Large and XLM-R on the TyDi QA GoldP dataset for Swahili.",
+   "gold_values": [
+    45.3,
+    48.1,
+    65.7,
+    66.1
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "On the TyDi QA GoldP dataset for Swahili, the performance of the models is as follows:\n\n*   **mT5-Large**:\n    *   **Zero-shot**: 65.7 F1 and 45.3 EM [1].\n    *   **Translate-train**: 74.0 F1 and 56.7 EM [1].\n    *   **In-language multitask**: 87.4 F1 and 79.6 EM [1].\n    *   **Alternative reporting**: One source records 69.9 F1 and 52.2 EM for zero-shot, 71.1 F1 and 54.9 EM for translate-train, and 85.5 F1 and 75.3 EM for in-language multitask [3].\n\n*   **XLM-R**:\n    *   **Cross-lingual zero-shot**: 65.1 F1 and 45.0 EM [1].\n    *   **Translate-train**: 66.5 F1 and 47.7 EM [3].\n\nNote: The values for mT5-Large vary between sources [1] and [3].",
+     "correct": true,
+     "recall": 0.5,
+     "numbers": 16,
+     "supported": 0.6666666666666666,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 18.64
+    },
+    "no_stage_c67": {
+     "answer": "The provided sources do not contain a direct performance comparison between mT5-Large and XLM-R specifically on the TyDi QA GoldP dataset for Swahili.\n\nThe sources provide the following related information:\n*   **mT5 Performance:** Figure 2 in [1] and [4] shows that for the TyDi QA GoldP task, performance improves with model capacity, and the gap between \"zero-shot\" and \"translate-train\" settings decreases as model size increases [1, 4].\n*   **XLM-R Performance:** XLM-R is noted to outperform XLM-100 and mBERT on Swahili and Urdu in the context of the XNLI benchmark [2]. Additionally, XLM-R shows improved performance on Swahili when pre-trained on CC data compared to Wikipedia [5].\n*   **Model Comparison:** mT5-Large (approximately 1 billion parameters) is noted to be roughly twice the size of the XLM-R \"Large\" variant (550 million parameters) [3].\n\nNote: The specific cross-model comparison for Swahili on TyDi QA GoldP is not recorded in the provided text.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 4,
+     "supported": 1.0,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 10.04
+    },
+    "llm_only": {
+     "answer": "I do not have the specific performance numbers for mT5-Large and XLM-R on the TyDi QA GoldP dataset for Swahili in my memory.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 0,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 1.0
+    }
+   }
+  },
+  {
+   "id": "B-AI-07",
+   "question": "Evaluate mBERT's accuracy on the IndicCOPA dataset for both Hindi and Tamil.",
+   "gold_values": [
+    49.2,
+    51.8
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "On the IndicCOPA dataset, mBERT achieves 49.2 accuracy for Hindi [3]. No results are reported for mBERT on the IndicCOPA dataset for Tamil [3].\n\nNote: The evidence for mBERT on the IndicCOPA dataset does not cover the condition of language = Tamil.",
+     "correct": true,
+     "recall": 0.5,
+     "numbers": 1,
+     "supported": 1.0,
+     "warned": true,
+     "warning": "The evidence covers 3 of 4 conditions in the question. No source reports language = Tamil together with model = mBERT, dataset = IndicCOPA. For model = mBERT, dataset = IndicCOPA, the sources record: Bengali, Dogri, Gujarati, Hindi, Kannada, Maithili. Do not assume the findings hold for the missing conditions.",
+     "missing": [
+      "language=Tamil"
+     ],
+     "seconds": 7.75
+    },
+    "no_stage_c67": {
+     "answer": "On the IndicCOPA dataset, mBERT achieves an accuracy of 49.2% for Hindi (hi) [2]. For Tamil (ta), mBERT achieves an accuracy of 51.8% [2].",
+     "correct": true,
+     "recall": 1.0,
+     "numbers": 2,
+     "supported": 1.0,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 7.48
+    },
+    "llm_only": {
+     "answer": "I do not have the specific accuracy numbers for mBERT on the IndicCOPA dataset for Hindi and Tamil in my memory.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 0,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 0.81
+    }
+   }
+  },
+  {
+   "id": "B-AI-08",
+   "question": "How many parameters does mT5-XL have?",
+   "gold_values": [
+    1.2,
+    3.7
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "The mT5-XL model has 3.7 billion parameters [1].",
+     "correct": true,
+     "recall": 0.5,
+     "numbers": 1,
+     "supported": 1.0,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 5.62
+    },
+    "no_stage_c67": {
+     "answer": "The mT5-XL model has 3.7 billion parameters [1].",
+     "correct": true,
+     "recall": 0.5,
+     "numbers": 1,
+     "supported": 1.0,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 3.36
+    },
+    "llm_only": {
+     "answer": "mT5-XL has approximately 300 million parameters.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 1,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 0.5
+    }
+   }
+  },
+  {
+   "id": "B-AI-17",
+   "question": "What is DistilBERT's F1 on SQuAD 2.0?",
+   "gold_values": [
+    60.6,
+    64.1,
+    66.0,
+    69.5
+   ],
+   "mode": "all",
+   "paper": "",
+   "profile_ids": [],
+   "systems": {
+    "full": {
+     "answer": "DistilBERT (specifically the DistilBERTBASE-6L model) obtained 69.5 F1 on SQuAD 2.0 (dev set, English) when using results from Jiao et al. (2019) [2]. In a different reported setting, DistilBERTBASE-6L obtained 68.8 F1 on SQuAD 2.0 (dev set, English) [2].",
+     "correct": false,
+     "recall": 0.25,
+     "numbers": 5,
+     "supported": 0.0,
+     "warned": false,
+     "warning": null,
+     "missing": [],
+     "seconds": 9.71
+    },
+    "no_stage_c67": {
+     "answer": "DistilBERT achieves an F1 score of 85.8 on the SQuAD 1.1 dev set [1]. Additionally, a version of the model identified as DistilBERT (D) achieves an F1 score of 86.9 on the SQuAD 1.1 dev set [1].\n\nRegarding SQuAD 2.0, the following results are reported:\n- DistilBERTBASE-6L: 69.5 F1 on the SQuAD 2.0 dev set (reported as DistilBERTBASE-6L‡) [4].\n- DistilBERTBASE-4L: 68.8 F1 on the SQuAD 2.0 dev set (reported as DistilBERTBASE-4L‡) [4].",
+     "correct": false,
+     "recall": 0.25,
+     "numbers": 9,
+     "supported": 0.5,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 10.63
+    },
+    "llm_only": {
+     "answer": "I do not have the specific F1 score for DistilBERT on the SQuAD 2.0 dataset in my records.",
+     "correct": false,
+     "recall": 0.0,
+     "numbers": 1,
+     "supported": null,
+     "warned": null,
+     "warning": null,
+     "missing": [],
+     "seconds": 1.43
+    }
+   }
+  }
+ ]
+}
