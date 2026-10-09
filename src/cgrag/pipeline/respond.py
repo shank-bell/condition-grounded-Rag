@@ -24,8 +24,9 @@ def source_ref(rc: RetrievedChunk) -> SourceRef:
 def respond(question: str, answer: str, sources: list[RetrievedChunk], analysis: QueryAnalysis | None,
             applicability: ApplicabilityResult | None, contradictions: list[ContradictionPair],
             claim_checks: list[ClaimCheck], regenerated: bool, trace: list[str], timings_ms: dict[str, float],
-            retrieval_weak: bool = False) -> QueryResponse:
+            retrieval_weak: bool = False, faithfulness: float | None = None) -> QueryResponse:
     return QueryResponse(
         question=question, answer=answer, sources=[source_ref(rc) for rc in sources], analysis=analysis,
         applicability=applicability, contradictions=contradictions, claim_checks=claim_checks,
-        regenerated=regenerated, retrieval_weak=retrieval_weak, trace=trace, timings_ms={k: round(v, 1) for k, v in timings_ms.items()})
+        regenerated=regenerated, retrieval_weak=retrieval_weak, faithfulness=faithfulness, trace=trace,
+        timings_ms={k: round(v, 1) for k, v in timings_ms.items()})
