@@ -62,6 +62,12 @@ mnli_split_tags = true
 entail_threshold = 0.50
 max_regenerate = 1
 
+[ragas]
+threshold = 0.80
+max_retries = 3
+judge_model = ""
+max_context_chars = 16000
+
 [features]
 orchestrator_agent = true
 applicability_agent = true
@@ -72,3 +78,4 @@ profile_in_context = true
 escalation = true
 profile_guided_retrieval = true
 joint_coverage = true
+ragas_loop = false
