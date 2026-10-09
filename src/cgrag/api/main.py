@@ -4,6 +4,9 @@
 """
 from __future__ import annotations
 
+import asyncio
+import json
+import queue
 import threading
 import time
 import uuid
@@ -12,6 +15,7 @@ from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from ..config import get_settings
@@ -39,7 +43,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Condition-Grounded Scientific RAG", lifespan=lifespan)
 app.add_middleware(
-    CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
     allow_methods=["*"], allow_headers=["*"])
 
 _run_lock = threading.Lock()        # one question at a time: the local models share one GPU
@@ -86,6 +90,39 @@ def health() -> dict:
 def query(req: QueryRequest) -> QueryResponse:
     with _run_lock:
         return _pipeline().run(req.question, [t.model_dump() for t in req.history] or None)
+
+
+@app.post("/query/stream")
+async def query_stream(req: QueryRequest) -> StreamingResponse:
+    """The same answer as POST /query, as server-sent events so the page can show which component is working while it works:
+    `queued` (another question is running), `step` (a component starts / ends / is skipped), `note` (a stage's result line), then exactly
+    one `result` (the QueryResponse JSON) or an `error`. Each message is `event: <type>` + `data: <json>` + a blank line."""
+    events: queue.Queue = queue.Queue()
+    history = [t.model_dump() for t in req.history] or None
+
+    def work() -> None:
+        try:
+            if _run_lock.locked():
+                events.put({"type": "queued"})
+            with _run_lock:
+                response = _pipeline().run(req.question, history, progress=events.put)
+            events.put({"type": "result", "response": response.model_dump(mode="json")})
+        except Exception as err:                              # the page shows the message instead of a dead stream
+            events.put({"type": "error", "message": f"{type(err).__name__}: {err}"})
+        finally:
+            events.put(None)
+
+    threading.Thread(target=work, daemon=True, name="query-stream").start()
+
+    async def stream():
+        while True:
+            event = await asyncio.to_thread(events.get)
+            if event is None:
+                break
+            yield f"event: {event['type']}\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 def _paper_rows() -> list[dict]:
