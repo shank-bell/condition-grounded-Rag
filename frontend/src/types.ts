@@ -51,10 +51,12 @@ export interface SourceRef {
   preview: string;
 }
 
+export type QueryConditions = Record<string, string | string[] | null>;
+
 export interface QueryAnalysis {
   intent: string;
   complexity: string;
-  conditions: Record<string, string | null>;
+  conditions: QueryConditions;
 }
 
 export interface QueryResponse {
@@ -66,6 +68,7 @@ export interface QueryResponse {
   contradictions: ContradictionPair[];
   claim_checks: ClaimCheck[];
   regenerated: boolean;
+  retrieval_weak?: boolean;
   trace: string[];
   timings_ms: Record<string, number>;
 }
@@ -89,4 +92,84 @@ export interface Health {
 export interface Turn {
   role: "user" | "assistant";
   content: string;
+}
+
+export interface UploadJob {
+  status: string;
+  error?: string;
+  chunks?: number;
+  profiles?: number;
+  title?: string;
+  paper_id?: string;
+}
+
+
+export type StepStatus = "running" | "done" | "skipped";
+
+export interface StepEvent {
+  type: "step";
+  id: string;
+  stage: number;
+  component: string;
+  blurb?: string;
+  status: StepStatus;
+  ms?: number;
+  reason?: string;
+  t_ms: number;
+}
+
+export interface NoteEvent {
+  type: "note";
+  stage: number;
+  text: string;
+  t_ms: number;
+}
+
+export type StreamEvent =
+  | { type: "queued" }
+  | StepEvent
+  | NoteEvent
+  | { type: "result"; response: QueryResponse }
+  | { type: "error"; message: string };
+
+
+export interface StepState {
+  id: string;
+  stage: number;
+  component: string;
+  blurb: string;
+  status: StepStatus;
+  start: number;
+  seenAt?: number;
+  ms?: number;
+  reason?: string;
+  notes: string[];
+}
+
+export interface RunState {
+  mode: "stream" | "replay";
+  steps: StepState[];
+  orphanNotes: string[];
+  queued: boolean;
+  startedAt: number;
+  endedAt?: number;
+  totalMs?: number;
+  outcome?: "done" | "stopped" | "error";
+}
+
+export interface Exchange {
+  id: string;
+  question: string;
+  response?: QueryResponse;
+  error?: string;
+  stopped?: boolean;
+  run?: RunState;
+}
+
+export interface Chat {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  exchanges: Exchange[];
 }
