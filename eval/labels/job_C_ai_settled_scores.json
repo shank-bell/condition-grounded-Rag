@@ -1,0 +1,256 @@
+{
+ "agreement": {
+  "pairs_labelled_by_both": 50,
+  "percent_agreement": 0.8,
+  "kappa": 0.3969,
+  "meets_target_0.6": false,
+  "both_say_explained": 36,
+  "same_conditions_ticked": 20,
+  "verdicts_first": {
+   "EXPLAINED": 41,
+   "NOT COMPARABLE": 9
+  },
+  "verdicts_second": {
+   "EXPLAINED": 39,
+   "NOT COMPARABLE": 8,
+   "GENUINE": 3
+  },
+  "n_disagreements": 10
+ },
+ "problems": [],
+ "system": {
+  "pairs": 50,
+  "accuracy": 0.58,
+  "macro_f1": 0.5019,
+  "per_class": {
+   "EXPLAINED": {
+    "tp": 26,
+    "fp": 3,
+    "fn": 15,
+    "precision": 0.8966,
+    "recall": 0.6341,
+    "f1": 0.7429,
+    "support": 41
+   },
+   "GENUINE": {
+    "tp": 0,
+    "fp": 7,
+    "fn": 0,
+    "precision": 0.0,
+    "recall": null,
+    "f1": 0.0,
+    "support": 0
+   },
+   "NOT COMPARABLE": {
+    "tp": 3,
+    "fp": 11,
+    "fn": 6,
+    "precision": 0.2143,
+    "recall": 0.3333,
+    "f1": 0.2609,
+    "support": 9
+   }
+  },
+  "confusion_gold_rows_system_columns": {
+   "EXPLAINED": {
+    "EXPLAINED": 26,
+    "GENUINE": 4,
+    "NOT COMPARABLE": 11
+   },
+   "GENUINE": {
+    "EXPLAINED": 0,
+    "GENUINE": 0,
+    "NOT COMPARABLE": 0
+   },
+   "NOT COMPARABLE": {
+    "EXPLAINED": 3,
+    "GENUINE": 3,
+    "NOT COMPARABLE": 3
+   }
+  },
+  "condition_attribution": {
+   "pairs": 26,
+   "exact_match": 0.3462,
+   "mean_jaccard": 0.5321
+  },
+  "extraction_errors_flagged": 17
+ },
+ "baselines": {
+  "frozen_at_commit": "5c9fc56e428ab0b2ddc081526f448c480c62f321",
+  "generated_at": "2026-10-03T05:52:12+00:00",
+  "scores": {
+   "stage7_rerun": {
+    "pairs": 50,
+    "accuracy": 0.58,
+    "macro_f1": 0.5019,
+    "per_class": {
+     "EXPLAINED": {
+      "tp": 26,
+      "fp": 3,
+      "fn": 15,
+      "precision": 0.8966,
+      "recall": 0.6341,
+      "f1": 0.7429,
+      "support": 41
+     },
+     "GENUINE": {
+      "tp": 0,
+      "fp": 7,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f1": 0.0,
+      "support": 0
+     },
+     "NOT COMPARABLE": {
+      "tp": 3,
+      "fp": 11,
+      "fn": 6,
+      "precision": 0.2143,
+      "recall": 0.3333,
+      "f1": 0.2609,
+      "support": 9
+     }
+    },
+    "confusion_gold_rows_system_columns": {
+     "EXPLAINED": {
+      "EXPLAINED": 26,
+      "GENUINE": 4,
+      "NOT COMPARABLE": 11
+     },
+     "GENUINE": {
+      "EXPLAINED": 0,
+      "GENUINE": 0,
+      "NOT COMPARABLE": 0
+     },
+     "NOT COMPARABLE": {
+      "EXPLAINED": 3,
+      "GENUINE": 3,
+      "NOT COMPARABLE": 3
+     }
+    },
+    "condition_attribution": {
+     "pairs": 26,
+     "exact_match": 0.3462,
+     "mean_jaccard": 0.5321
+    },
+    "extraction_errors_flagged": 17
+   },
+   "plain_nli": {
+    "pairs": 50,
+    "accuracy": 0.0,
+    "macro_f1": 0.0,
+    "per_class": {
+     "EXPLAINED": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 41,
+      "precision": null,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 41
+     },
+     "GENUINE": {
+      "tp": 0,
+      "fp": 48,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f1": 0.0,
+      "support": 0
+     },
+     "NOT COMPARABLE": {
+      "tp": 0,
+      "fp": 2,
+      "fn": 9,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 9
+     }
+    },
+    "confusion_gold_rows_system_columns": {
+     "EXPLAINED": {
+      "EXPLAINED": 0,
+      "GENUINE": 39,
+      "NOT COMPARABLE": 2
+     },
+     "GENUINE": {
+      "EXPLAINED": 0,
+      "GENUINE": 0,
+      "NOT COMPARABLE": 0
+     },
+     "NOT COMPARABLE": {
+      "EXPLAINED": 0,
+      "GENUINE": 9,
+      "NOT COMPARABLE": 0
+     }
+    },
+    "condition_attribution": {
+     "pairs": 0,
+     "exact_match": null,
+     "mean_jaccard": null
+    },
+    "extraction_errors_flagged": 17
+   },
+   "llm_taxonomy": {
+    "pairs": 50,
+    "accuracy": 0.6,
+    "macro_f1": 0.4054,
+    "per_class": {
+     "EXPLAINED": {
+      "tp": 30,
+      "fp": 3,
+      "fn": 11,
+      "precision": 0.9091,
+      "recall": 0.7317,
+      "f1": 0.8108,
+      "support": 41
+     },
+     "GENUINE": {
+      "tp": 0,
+      "fp": 13,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": null,
+      "f1": 0.0,
+      "support": 0
+     },
+     "NOT COMPARABLE": {
+      "tp": 0,
+      "fp": 4,
+      "fn": 9,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 9
+     }
+    },
+    "confusion_gold_rows_system_columns": {
+     "EXPLAINED": {
+      "EXPLAINED": 30,
+      "GENUINE": 7,
+      "NOT COMPARABLE": 4
+     },
+     "GENUINE": {
+      "EXPLAINED": 0,
+      "GENUINE": 0,
+      "NOT COMPARABLE": 0
+     },
+     "NOT COMPARABLE": {
+      "EXPLAINED": 3,
+      "GENUINE": 6,
+      "NOT COMPARABLE": 0
+     }
+    },
+    "condition_attribution": {
+     "pairs": 30,
+     "exact_match": 0.2667,
+     "mean_jaccard": 0.3944
+    },
+    "extraction_errors_flagged": 17
+   }
+  }
+ },
+ "note": "Aggregates only. The per-pair settled labels and the list of disagreeing pairs are an answer key and stay private (data/labelling/private/job_C_ai_settled_scores.full.json); the counts are in agreement.* and system.*"
+}
