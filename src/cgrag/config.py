@@ -70,6 +70,10 @@ class ContradictionConfig(BaseModel):
     nli_threshold: float = 0.70
     numeric_rel_diff: float = 0.02
     max_pairs: int = 45
+    # Fix A (8 Oct 2026, after error analysis on the 50 AI-annotated pairs; each rule has its own switch for the ablation):
+    human_rows_not_comparable: bool = True    # a "Human" row is a study of people, not a model result: never GENUINE / EXPLAINED
+    two_metric_tasks_no_genuine: bool = True  # MRPC / QQP / STS-B: one number may be acc, F1 or their mean -> never GENUINE
+    mnli_split_tags: bool = True              # MNLI matched / mismatched is a split, like dev / test
 
 
 class CriticConfig(BaseModel):
