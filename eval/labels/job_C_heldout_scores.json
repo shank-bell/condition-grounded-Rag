@@ -84,6 +84,12 @@
     "exact_match": 0.25,
     "mean_jaccard": 0.506
    },
+   "condition_attribution_merged": {
+    "pairs": 28,
+    "note": "'dataset version / split' and 'setting' counted as one name (dev vs test is listed under both)",
+    "exact_match": 0.6071,
+    "mean_jaccard": 0.744
+   },
    "extraction_errors_flagged": 6,
    "right": 29,
    "accuracy_ci95": [
@@ -152,6 +158,12 @@
     "exact_match": 0.25,
     "mean_jaccard": 0.506
    },
+   "condition_attribution_merged": {
+    "pairs": 28,
+    "note": "'dataset version / split' and 'setting' counted as one name (dev vs test is listed under both)",
+    "exact_match": 0.6071,
+    "mean_jaccard": 0.744
+   },
    "extraction_errors_flagged": 6,
    "right": 29,
    "accuracy_ci95": [
@@ -217,6 +229,12 @@
    },
    "condition_attribution": {
     "pairs": 0,
+    "exact_match": null,
+    "mean_jaccard": null
+   },
+   "condition_attribution_merged": {
+    "pairs": 0,
+    "note": "'dataset version / split' and 'setting' counted as one name (dev vs test is listed under both)",
     "exact_match": null,
     "mean_jaccard": null
    },
@@ -288,6 +306,12 @@
     "exact_match": 0.3548,
     "mean_jaccard": 0.5054
    },
+   "condition_attribution_merged": {
+    "pairs": 31,
+    "note": "'dataset version / split' and 'setting' counted as one name (dev vs test is listed under both)",
+    "exact_match": 0.4516,
+    "mean_jaccard": 0.5806
+   },
    "extraction_errors_flagged": 6,
    "right": 33,
    "accuracy_ci95": [
@@ -353,6 +377,12 @@
    },
    "condition_attribution": {
     "pairs": 41,
+    "exact_match": 0.0244,
+    "mean_jaccard": 0.0244
+   },
+   "condition_attribution_merged": {
+    "pairs": 41,
+    "note": "'dataset version / split' and 'setting' counted as one name (dev vs test is listed under both)",
     "exact_match": 0.0244,
     "mean_jaccard": 0.0244
    },
@@ -446,26 +476,23 @@
   }
  },
  "freeze_record": {
-  "generated_at": "2026-10-09T08:53:34+00:00",
-  "frozen_at_commit": "d87bf5fad0b71ed8f7afeb40ceb703921eace4fa",
+  "generated_at": "2026-10-09T10:16:27+00:00",
+  "frozen_at_commit": "aabcc92f20e915ec0dba69ea4b7db9b802a53f62",
   "modified_files_at_that_time": [
-   " M CLAUDE.md",
-   " M config.toml",
-   " M docs/evaluation_ai_annotated.md",
-   " M src/cgrag/config.py",
-   " M src/cgrag/pipeline/contradiction.py",
-   "?? eval/labels/answer_quality_gold_b.corrected_key.json",
-   "?? eval/labels/job_A_ai_both_lenient.json",
-   "?? eval/labels/job_A_ai_both_strict.json",
-   "?? eval/labels/job_C_ai_settled_scores.json",
-   "?? eval/labels/job_C_heldout_scores.json",
+   " M frontend/src/api.ts",
+   " M frontend/src/types.ts",
+   " M src/cgrag/api/main.py",
+   " M src/cgrag/labelling/score.py",
+   " M src/cgrag/pipeline/run.py",
    "?? eval/labels/questions_gold.results.jsonl",
    "?? eval/labels/questions_gold.scores.json",
-   "?? scripts/fill_job_c_from_ai.py",
-   "?? scripts/make_heldout_pairs.py",
-   "?? scripts/rescore_answers_gold_b.py",
-   "?? scripts/score_heldout_c.py",
-   "?? tests/test_stage7_fix_a.py"
+   "?? eval/labels/retrieval_gold.json",
+   "?? frontend/src/lib/",
+   "?? frontend/src/mock/",
+   "?? scripts/eval_absent_flagged.py",
+   "?? scripts/eval_retrieval_gold.py",
+   "?? scripts/eval_sources_gold.py",
+   "?? tests/test_live_steps.py"
   ]
  }
 }
