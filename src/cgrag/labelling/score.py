@@ -27,6 +27,7 @@ from .sheets import A_FIELDS, A_FLAGS, A_VERDICTS, B_COMPLEXITY, B_CONDITIONS, B
 SYSTEM_VERDICT = {"GENUINE": "GENUINE", "EXPLAINED": "EXPLAINED", "NOT_COMPARABLE": "NOT COMPARABLE"}
 SYSTEM_CONDITION = {"dataset_version": "dataset version / split", "model_size": "model size", "language": "language", "setting": "setting",
                     "task": "other"}
+SPLIT_OR_SETTING = "split or setting"
 
 
 def _clean(v) -> str | None:
@@ -279,14 +280,23 @@ def score_system_c(gold: dict[str, dict], key: dict[str, dict]) -> dict:
         fn = sum(confusion[c][s] for s in classes if s != c)
         per_class[c] = {**prf(tp, fp, fn), "support": sum(confusion[c].values())}
     f1s = [v["f1"] for v in per_class.values() if v["f1"] is not None and v["support"]]
-    attribution = []
+    attribution, attribution_merged = [], []
+    # The labelling instructions list "dev vs test" under two names ("dataset version / split" and "setting"), so two labellers (or a labeller
+    # and the system) can name the same difference differently without either being wrong. The merged reading treats the two names as one.
+    merge = lambda names: {SPLIT_OR_SETTING if n in ("dataset version / split", "setting") else n for n in names}
     for i in ids:
         if gold[i]["verdict"] == "EXPLAINED" and SYSTEM_VERDICT[key[i]["system_verdict"]] == "EXPLAINED":
             sys_set = {SYSTEM_CONDITION.get(d, "other") for d in key[i]["system_differing"]}
             gold_set = set(gold[i]["differs"])
             attribution.append((sys_set == gold_set, len(sys_set & gold_set) / len(sys_set | gold_set) if sys_set | gold_set else 1.0))
+            m_sys, m_gold = merge(sys_set), merge(gold_set)
+            attribution_merged.append((m_sys == m_gold, len(m_sys & m_gold) / len(m_sys | m_gold) if m_sys | m_gold else 1.0))
     return {"pairs": len(ids), "accuracy": round(sum(confusion[c][c] for c in classes) / len(ids), 4) if ids else None,
             "macro_f1": round(sum(f1s) / len(f1s), 4) if f1s else None, "per_class": per_class, "confusion_gold_rows_system_columns": confusion,
             "condition_attribution": {"pairs": len(attribution), "exact_match": round(sum(a for a, _ in attribution) / len(attribution), 4) if attribution else None,
                                       "mean_jaccard": round(sum(j for _, j in attribution) / len(attribution), 4) if attribution else None},
+            "condition_attribution_merged": {
+                "pairs": len(attribution_merged), "note": "'dataset version / split' and 'setting' counted as one name (dev vs test is listed under both)",
+                "exact_match": round(sum(a for a, _ in attribution_merged) / len(attribution_merged), 4) if attribution_merged else None,
+                "mean_jaccard": round(sum(j for _, j in attribution_merged) / len(attribution_merged), 4) if attribution_merged else None},
             "extraction_errors_flagged": sum(gold[i]["extraction_error"] for i in ids)}
