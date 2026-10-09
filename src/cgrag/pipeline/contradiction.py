@@ -73,10 +73,35 @@ def relevant(x: ConditionProfile, y: ConditionProfile, requested: dict[str, str]
     return True
 
 
-def classify(a: ConditionProfile, b: ConditionProfile) -> tuple[str, list[str], str]:
+# Fix A (8 Oct 2026, found by error analysis on the 50 AI-annotated pairs, so "after error analysis, not held-out"):
+# - a "Human" row reports a study of people (inter-annotator agreement, an error analysis, a leaderboard figure), and papers
+#   measure it in different ways: two such numbers are not two results of one system;
+# - GLUE's MRPC / QQP / STS-B have two official metrics, and a paper that prints one number per task may print accuracy, F1
+#   or their mean (DistilBERT's 86.2 for ELMo on QQP is the mean of GLUE's 88.0 / 84.3): the same name is no proof of the
+#   same quantity, so such a pair is never called a genuine contradiction;
+# - MNLI matched / mismatched are two evaluation sets, a split difference like dev / test.
+_HUMAN = frozenset({"human", "humans", "humanperformance"})
+_TWO_METRIC_TASKS = frozenset({"mrpc", "qqp", "stsb"})
+_SPLIT = re.compile(r"\b(?:dev|development|validation|test|matched|mismatched)\b")
+
+
+def _split_words(p: ConditionProfile) -> frozenset[str]:
+    words = set(_SPLIT.findall((p.setting or "").lower()))
+    return frozenset({"dev" if w in ("development", "validation") else w for w in words})
+
+
+def classify(a: ConditionProfile, b: ConditionProfile, cfg: ContradictionConfig | None = None) -> tuple[str, list[str], str]:
     """(verdict, differing condition names, reason) for two profiles of the same subject with different values."""
+    cfg = cfg or get_settings().contradiction
     values = f"{a.value:g} vs {b.value:g} {a.metric or ''}".strip()
+    if cfg.human_rows_not_comparable and (norm(a.model) in _HUMAN or norm(b.model) in _HUMAN):
+        return "NOT_COMPARABLE", [], (f"The results differ ({values}) but they are human performance figures, which papers "
+                                      f"measure in different ways, not results of one system.")
     differing = differing_conditions(a, b)
+    if cfg.mnli_split_tags and "setting" not in differing:
+        sa, sb = _split_words(a), _split_words(b)
+        if sa and sb and sa != sb and {"matched", "mismatched"} & (sa | sb):
+            differing = differing + ["setting"]
     if differing:
         detail = "; ".join(f"{_LABEL[f]} ({_val(a, f)} vs {_val(b, f)})" for f in differing)
         return "EXPLAINED", differing, f"Explained difference ({values}): {detail}."
@@ -85,6 +110,9 @@ def classify(a: ConditionProfile, b: ConditionProfile) -> tuple[str, list[str], 
         names = ", ".join(_LABEL[f] for f in missing)
         return "NOT_COMPARABLE", [], (f"The results differ ({values}) but {names} is recorded for only one of the two "
                                       f"papers, so it cannot be shown that the conditions are the same.")
+    if cfg.two_metric_tasks_no_genuine and (norm(a.dataset) in _TWO_METRIC_TASKS or norm(b.dataset) in _TWO_METRIC_TASKS):
+        return "NOT_COMPARABLE", [], (f"The results differ ({values}) but {a.dataset} has two official metrics (accuracy and "
+                                      f"F1) and papers that print one number may print either or their mean.")
     return "GENUINE", [], f"Same model, dataset, metric and recorded conditions, but different results ({values})."
 
 
@@ -133,7 +161,7 @@ class ContradictionResolver:
         found: list[ContradictionPair] = []
         probs = self._both_directions([(claim_text(x), claim_text(y)) for _, _, x, y in flagged])
         for (a, b, x, y), (fw, bw) in zip(flagged, probs):
-            verdict, differing, reason = classify(x, y)
+            verdict, differing, reason = classify(x, y, self.cfg)
             found.append(ContradictionPair(
                 verdict=verdict, chunk_a=a.chunk.chunk_id, chunk_b=b.chunk.chunk_id, paper_a=a.chunk.paper_id,
                 paper_b=b.chunk.paper_id, metric=x.metric, value_a=x.value, value_b=y.value, differing=differing,
