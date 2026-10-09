@@ -70,6 +70,9 @@ class ContradictionConfig(BaseModel):
     nli_threshold: float = 0.70
     numeric_rel_diff: float = 0.02
     max_pairs: int = 45
+    human_rows_not_comparable: bool = True
+    two_metric_tasks_no_genuine: bool = True
+    mnli_split_tags: bool = True
 
 
 class CriticConfig(BaseModel):
