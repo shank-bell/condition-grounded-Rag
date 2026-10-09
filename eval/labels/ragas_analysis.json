@@ -1,0 +1,229 @@
+{
+ "note": "RAGAS-style metrics re-implemented in src/cgrag/pipeline/faithfulness.py (the ragas package is not installed), not comparable with published RAGAS numbers. 30 gold questions, one run per set. Aggregates only.",
+ "judges": {
+  "llama3.1:8b": {
+   "judge": "Llama 3.1 8B (Meta; not the writer's family)",
+   "tags": {
+    "loop_off": {
+     "questions": 30,
+     "scored": 28,
+     "faithfulness_mean": 0.6,
+     "faithfulness_median": 0.667,
+     "share_at_or_above_0.80": 0.393,
+     "answers_at_or_above_0.80": 11,
+     "answers_fully_faithful": 8,
+     "statements_per_answer": 4.18,
+     "unsupported_per_answer": 1.93,
+     "by_type": {
+      "covered": 0.573,
+      "one missing": 0.531,
+      "partly covered": 0.681
+     },
+     "answer_relevancy_mean": 0.687,
+     "answer_relevancy_zero_answers": 4
+    },
+    "loop_same": {
+     "questions": 30,
+     "scored": 29,
+     "faithfulness_mean": 0.663,
+     "faithfulness_median": 0.75,
+     "share_at_or_above_0.80": 0.414,
+     "answers_at_or_above_0.80": 12,
+     "answers_fully_faithful": 10,
+     "statements_per_answer": 4.52,
+     "unsupported_per_answer": 1.38,
+     "by_type": {
+      "covered": 0.54,
+      "one missing": 0.714,
+      "partly covered": 0.756
+     },
+     "answer_relevancy_mean": 0.728,
+     "answer_relevancy_zero_answers": 3,
+     "against_loop_off": {
+      "paired_questions": 28,
+      "higher": 8,
+      "lower": 7,
+      "equal": 13,
+      "sign_test_p": 1.0,
+      "mean_difference": 0.051,
+      "bootstrap_ci95": [
+       -0.039,
+       0.148
+      ],
+      "kind": "cross-judge: the loop used Gemma"
+     }
+    },
+    "loop_llama": {
+     "questions": 30,
+     "scored": 30,
+     "faithfulness_mean": 0.818,
+     "faithfulness_median": 0.9,
+     "share_at_or_above_0.80": 0.733,
+     "answers_at_or_above_0.80": 22,
+     "answers_fully_faithful": 14,
+     "statements_per_answer": 4.53,
+     "unsupported_per_answer": 0.73,
+     "by_type": {
+      "covered": 0.8,
+      "one missing": 0.83,
+      "partly covered": 0.828
+     },
+     "answer_relevancy_mean": 0.715,
+     "answer_relevancy_zero_answers": 3,
+     "against_loop_off": {
+      "paired_questions": 28,
+      "higher": 14,
+      "lower": 4,
+      "equal": 10,
+      "sign_test_p": 0.0309,
+      "mean_difference": 0.206,
+      "bootstrap_ci95": [
+       0.086,
+       0.341
+      ],
+      "kind": "circular: the loop used this judge"
+     }
+    }
+   }
+  },
+  "gemma4:12b": {
+   "judge": "Gemma 4 12B (the writer's own family)",
+   "tags": {
+    "loop_off": {
+     "questions": 30,
+     "scored": 27,
+     "faithfulness_mean": 0.904,
+     "faithfulness_median": 1.0,
+     "share_at_or_above_0.80": 0.778,
+     "answers_at_or_above_0.80": 21,
+     "answers_fully_faithful": 18,
+     "statements_per_answer": 5.19,
+     "unsupported_per_answer": 0.56,
+     "by_type": {
+      "covered": 0.941,
+      "one missing": 0.958,
+      "partly covered": 0.831
+     },
+     "answer_relevancy_mean": 0.493,
+     "answer_relevancy_zero_answers": 11
+    },
+    "loop_same": {
+     "questions": 30,
+     "scored": 28,
+     "faithfulness_mean": 0.956,
+     "faithfulness_median": 1.0,
+     "share_at_or_above_0.80": 0.964,
+     "answers_at_or_above_0.80": 27,
+     "answers_fully_faithful": 21,
+     "statements_per_answer": 5.46,
+     "unsupported_per_answer": 0.29,
+     "by_type": {
+      "covered": 0.974,
+      "one missing": 0.984,
+      "partly covered": 0.918
+     },
+     "answer_relevancy_mean": 0.481,
+     "answer_relevancy_zero_answers": 12,
+     "against_loop_off": {
+      "paired_questions": 27,
+      "higher": 8,
+      "lower": 4,
+      "equal": 15,
+      "sign_test_p": 0.3877,
+      "mean_difference": 0.051,
+      "bootstrap_ci95": [
+       0.003,
+       0.103
+      ],
+      "kind": "circular: the loop used this judge"
+     }
+    },
+    "loop_llama": {
+     "questions": 30,
+     "scored": 28,
+     "faithfulness_mean": 0.904,
+     "faithfulness_median": 1.0,
+     "share_at_or_above_0.80": 0.786,
+     "answers_at_or_above_0.80": 22,
+     "answers_fully_faithful": 18,
+     "statements_per_answer": 5.14,
+     "unsupported_per_answer": 0.54,
+     "by_type": {
+      "covered": 0.937,
+      "one missing": 0.893,
+      "partly covered": 0.876
+     },
+     "answer_relevancy_mean": 0.555,
+     "answer_relevancy_zero_answers": 9,
+     "against_loop_off": {
+      "paired_questions": 26,
+      "higher": 7,
+      "lower": 6,
+      "equal": 13,
+      "sign_test_p": 1.0,
+      "mean_difference": 0.006,
+      "bootstrap_ci95": [
+       -0.068,
+       0.08
+      ],
+      "kind": "cross-judge: the loop used Llama"
+     }
+    }
+   }
+  }
+ },
+ "cost": {
+  "loop_off": {
+   "seconds_median": 10.1,
+   "seconds_p90": 14.1,
+   "seconds_mean": 10.2,
+   "answers_rewritten": 0,
+   "rewrites_in_all": 0,
+   "questions": 30
+  },
+  "loop_same": {
+   "seconds_median": 21.1,
+   "seconds_p90": 39.5,
+   "seconds_mean": 23.4,
+   "answers_rewritten": 3,
+   "rewrites_in_all": 6,
+   "questions": 30
+  },
+  "loop_llama": {
+   "seconds_median": 21.8,
+   "seconds_p90": 43.8,
+   "seconds_mean": 25.1,
+   "answers_rewritten": 15,
+   "rewrites_in_all": 34,
+   "questions": 30
+  }
+ },
+ "gold_numbers": {
+  "loop_off": {
+   "correct": 8,
+   "of": 9
+  },
+  "loop_same": {
+   "correct": 9,
+   "of": 9,
+   "against_loop_off": {
+    "both_right": 8,
+    "only_a": 1,
+    "only_b": 0,
+    "both_wrong": 0,
+    "sign_test_p": 1.0
+   }
+  },
+  "loop_llama": {
+   "correct": 9,
+   "of": 9,
+   "against_loop_off": {
+    "both_right": 8,
+    "only_a": 1,
+    "only_b": 0,
+    "both_wrong": 0,
+    "sign_test_p": 1.0
+   }
+  }
+ }
+}
