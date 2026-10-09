@@ -1,0 +1,86 @@
+{
+ "source": "eval\\labels\\answer_quality_gold_b.final.json",
+ "frozen_at_commit": "4d06f848c555a4c239a044b336b6e6f6674e6847",
+ "questions": 9,
+ "note": "key corrected AFTER the first scoring (error analysis): three questions asked for one cell but the key listed the whole row; same correction for all systems; not held-out; n = 9",
+ "corrections": {
+  "B-AI-03": {
+   "expected_values": [
+    35.0
+   ],
+   "mode": "any"
+  },
+  "B-AI-04": {
+   "expected_values": [
+    27.2
+   ],
+   "mode": "any"
+  },
+  "B-AI-17": {
+   "expected_values": [
+    64.1,
+    69.5
+   ],
+   "mode": "any"
+  }
+ },
+ "original": {
+  "full": {
+   "correct": 5,
+   "of": 9
+  },
+  "no_stage_c67": {
+   "correct": 5,
+   "of": 9
+  },
+  "llm_only": {
+   "correct": 0,
+   "of": 9
+  }
+ },
+ "corrected": {
+  "full": {
+   "correct": 8,
+   "of": 9,
+   "accuracy": 0.8889,
+   "ci95": [
+    0.565,
+    0.9801
+   ]
+  },
+  "no_stage_c67": {
+   "correct": 8,
+   "of": 9,
+   "accuracy": 0.8889,
+   "ci95": [
+    0.565,
+    0.9801
+   ]
+  },
+  "llm_only": {
+   "correct": 0,
+   "of": 9,
+   "accuracy": 0.0,
+   "ci95": [
+    0.0,
+    0.2992
+   ]
+  }
+ },
+ "paired_corrected": {
+  "full_vs_no_stage_c67": {
+   "both_right": 7,
+   "only_a": 1,
+   "only_b": 1,
+   "both_wrong": 0,
+   "sign_test_p": 1.0
+  },
+  "full_vs_llm_only": {
+   "both_right": 0,
+   "only_a": 8,
+   "only_b": 0,
+   "both_wrong": 1,
+   "sign_test_p": 0.0078
+  }
+ }
+}
