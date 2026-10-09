@@ -54,6 +54,9 @@ max_reretrieve = 1
 nli_threshold = 0.70
 numeric_rel_diff = 0.02
 max_pairs = 45
+human_rows_not_comparable = true
+two_metric_tasks_no_genuine = true
+mnli_split_tags = true
 
 [critic]
 entail_threshold = 0.50
