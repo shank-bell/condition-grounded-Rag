@@ -81,6 +81,16 @@ class CriticConfig(BaseModel):
     max_regenerate: int = 1
 
 
+class RagasConfig(BaseModel):
+    """The original design's runtime check (`[features] ragas_loop`, off by default; the design replaced it by the NLI critic with one retry):
+    a judge splits the answer into statements and checks each against the passages; the answer is written again while the share of supported
+    statements is below `threshold`. See pipeline/faithfulness.py."""
+    threshold: float = 0.80
+    max_retries: int = 3
+    judge_model: str = ""             # empty = the answer model (the same family as the writer); an Ollama tag of another family for an independent judge
+    max_context_chars: int = 16000
+
+
 class AgentsConfig(BaseModel):
     """A different open-weights model per LLM use case (any Ollama tag, e.g. hf.co/<user>/<repo>). Empty = [llm].model,
     which is also the model that writes the answer (Stage 8)."""
@@ -103,6 +113,7 @@ class FeaturesConfig(BaseModel):
     escalation: bool = False         # an agent on a small model hands a bad outcome to the fallback model (see AgentsConfig)
     profile_guided_retrieval: bool = False   # Stage 6 also pulls chunks whose profiles record a missing condition
     joint_coverage: bool = False      # Stage 6 also requires model, dataset and language to be recorded TOGETHER (see applicability.py)
+    ragas_loop: bool = False          # the original design's runtime loop: rewrite the answer while its RAGAS-style faithfulness is below [ragas].threshold
 
 
 class Settings(BaseModel):
@@ -116,6 +127,7 @@ class Settings(BaseModel):
     applicability: ApplicabilityConfig = ApplicabilityConfig()
     contradiction: ContradictionConfig = ContradictionConfig()
     critic: CriticConfig = CriticConfig()
+    ragas: RagasConfig = RagasConfig()
     features: FeaturesConfig = FeaturesConfig()
 
 
