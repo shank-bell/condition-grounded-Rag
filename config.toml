@@ -61,6 +61,9 @@ max_reretrieve = 1
 nli_threshold = 0.70         # contradiction probability that flags a candidate pair
 numeric_rel_diff = 0.02      # same-metric values differing by more than this flag a pair
 max_pairs = 45
+human_rows_not_comparable = true    # fix A (8 Oct): a "Human" row is never compared as a model result
+two_metric_tasks_no_genuine = true  # fix A: MRPC / QQP / STS-B single numbers can be acc, F1 or their mean -> no GENUINE
+mnli_split_tags = true              # fix A: MNLI matched / mismatched counts as a split difference
 
 [critic]
 entail_threshold = 0.50
