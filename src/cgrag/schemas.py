@@ -155,5 +155,6 @@ class QueryResponse(BaseModel):
     claim_checks: list[ClaimCheck] = Field(default_factory=list)
     regenerated: bool = False
     retrieval_weak: bool = False     # Stage 5's own verdict (no passage above the threshold), before Stage 6 may withdraw it: the evaluation's abstention baseline
+    faithfulness: float | None = None   # RAGAS-style score of the final answer, only when [features] ragas_loop is on (pipeline/faithfulness.py)
     trace: list[str] = Field(default_factory=list)
     timings_ms: dict[str, float] = Field(default_factory=dict)
