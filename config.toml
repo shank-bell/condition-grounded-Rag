@@ -69,6 +69,12 @@ mnli_split_tags = true              # fix A: MNLI matched / mismatched counts as
 entail_threshold = 0.50
 max_regenerate = 1
 
+[ragas]                      # only used when [features] ragas_loop = true (off: the design replaced the runtime RAGAS loop by the NLI critic above)
+threshold = 0.80             # share of the answer's statements the passages must support
+max_retries = 3              # the original design: up to 3 rewrites
+judge_model = ""             # empty = the answer model (same family as the writer); "llama3.1:8b" = an independent judge (needs ~5 GB more GPU memory)
+max_context_chars = 16000
+
 # Ablation switches (used by the evaluation)
 [features]
 orchestrator_agent = true    # false: fixed rules decide the path instead of the planner agent
@@ -80,3 +86,4 @@ profile_in_context = true
 escalation = true            # a small-model agent hands a bad outcome (unusable output, weak retrieval, "not covered") to fallback_model
 profile_guided_retrieval = true   # Stage 6 also pulls chunks whose profiles record a missing condition
 joint_coverage = true        # Stage 6 also requires the named model, dataset and language to be recorded TOGETHER by one result (see docs/oct1_fixes_and_metrics.md)
+ragas_loop = false           # the original design's runtime loop (rewrite the answer while its RAGAS-style faithfulness is below [ragas].threshold): +14-22 s per question
