@@ -155,3 +155,51 @@ def test_the_joint_verdict_overrides_what_retrieval_happened_to_miss(store):
     assert result.missing == ["language=Kannada"] and result.joint_covered is False
     assert next(c for c in result.checks if c.condition == "dataset").covered is True
     assert "English" in result.warning
+
+
+def test_a_named_setting_must_be_recorded_together_with_the_model_and_the_dataset(tmp_path):
+    """Found 11 Oct: "LLaMA 65B on HellaSwag in the 5-shot setting" was covered by any passage that says 5-shot (the paper has 5-shot MMLU), though the
+    model's HellaSwag results are zero-shot only."""
+    s = ProfileStore(tmp_path / "s.sqlite")
+    s.add_many([prof("llama:1", 1, model="LLaMA 65B", dataset="HellaSwag", setting="zero-shot"),
+                prof("llama:1", 2, model="LLaMA 65B", dataset="NaturalQuestions", setting="5-shot"),
+                prof("bert:1", 3, model="BERT-base", dataset="MNLI", setting="fine-tuned")])
+    evidence = [rc("llama:1"), rc("bert:1")]
+    asked = {"model": "LLaMA 65B", "dataset": "HellaSwag", "setting": "5-shot"}
+    _, result = ApplicabilityAgent(s, 0, llm=None, joint=True).run(asked, evidence, NONE, "q")
+    assert result.joint_covered is False and result.missing == ["setting=5-shot"]
+    assert "setting = 5-shot together with model = LLaMA 65B, dataset = HellaSwag" in result.warning and "zero-shot" in result.warning
+    _, ok = ApplicabilityAgent(s, 0, llm=None, joint=True).run({**asked, "dataset": "NaturalQuestions"}, evidence, NONE, "q")
+    assert ok.joint_covered is True and ok.warning is None
+    _, zero = ApplicabilityAgent(s, 0, llm=None, joint=True).run({**asked, "setting": "zero-shot"}, evidence, NONE, "q")
+    assert zero.joint_covered is True
+    _, off = ApplicabilityAgent(s, 0, llm=None, joint=True, joint_setting=False).run(asked, evidence, NONE, "q")
+    assert off.joint_covered is True and off.warning is None          # the switch restores the 10 Oct behaviour
+    _, bert = ApplicabilityAgent(s, 0, llm=None, joint=True).run({"model": "BERT-base", "dataset": "MNLI", "setting": "zero-shot"}, evidence, NONE, "q")
+    assert bert.joint_covered is False and bert.missing == ["setting=zero-shot"]
+
+
+def test_only_a_regime_setting_joins_the_key_a_split_is_left_to_the_per_condition_check(tmp_path):
+    """Probed 11 Oct: "MuRIL on IndicXNLI for Kannada on the test set" has a stored result without a setting; a split is unrecorded in many tables."""
+    from cgrag.pipeline.conditions import is_regime_setting
+    assert all(is_regime_setting(x) for x in ("zero-shot", "5-shot", "few-shot", "fine-tuned", "translate-train", "five shot"))
+    assert not any(is_regime_setting(x) for x in ("test set", "dev set", "single model", "ensemble", None, ""))
+    s = ProfileStore(tmp_path / "s.sqlite")
+    s.add_many([prof("indic:1", 1, model="MuRIL", dataset="IndicXNLI", language="Kannada")])             # no setting recorded
+    _, result = ApplicabilityAgent(s, 0, llm=None, joint=True).run(
+        {"model": "MuRIL", "dataset": "IndicXNLI", "language": "Kannada", "setting": "test set"}, [rc("indic:1")], NONE, "q")
+    assert result.joint_covered is True                                                              # the setting is not part of the joint key
+    _, strict = ApplicabilityAgent(s, 0, llm=None, joint=True).run(
+        {"model": "MuRIL", "dataset": "IndicXNLI", "language": "Kannada", "setting": "zero-shot"}, [rc("indic:1")], NONE, "q")
+    assert strict.joint_covered is False and strict.missing == ["setting=zero-shot"]
+
+
+def test_cross_lingual_transfer_is_zero_shot_for_matching_but_not_a_stage_7_tag():
+    """Probed 11 Oct: mBERT on XNLI for Hindi "in the zero-shot setting" was reported as not recorded; the XLM-R paper's block heading is "Cross-lingual Transfer"."""
+    from cgrag.pipeline.conditions import setting_tags, values_match
+    assert values_match("setting", "zero-shot", "Cross-lingual Transfer")
+    assert values_match("setting", "zero-shot", "zero-shot cross-lingual transfer")
+    assert not values_match("setting", "zero-shot", "translate-train cross-lingual transfer")
+    assert not values_match("setting", "zero-shot", "fine-tuned dev set")
+    assert not setting_tags("Cross-lingual Transfer")          # Stage 7 compares tags: an unrecorded setting stays unrecorded there
+
