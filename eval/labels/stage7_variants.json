@@ -1,0 +1,1202 @@
+{
+ "note": "development numbers (policy B was found by reading the mistakes of both sets); aggregates only",
+ "sets": {
+  "first 50 pairs": {
+   "frozen (every switch off)": {
+    "accuracy": 0.58,
+    "right": 29,
+    "pairs": 50,
+    "macro_f1": 0.5019,
+    "genuine_calls": 7,
+    "not_comparable_found": "3/9",
+    "verdicts": {
+     "GENUINE": 7,
+     "EXPLAINED": 29,
+     "NOT_COMPARABLE": 14
+    },
+    "condition_attribution_merged_exact": 0.5,
+    "condition_attribution_merged_pairs": 26,
+    "per_class_f1": {
+     "EXPLAINED": 0.7429,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.2609
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.7,
+    "right": 35,
+    "pairs": 50,
+    "macro_f1": 0.677,
+    "genuine_calls": 3,
+    "not_comparable_found": "8/9",
+    "verdicts": {
+     "GENUINE": 3,
+     "EXPLAINED": 28,
+     "NOT_COMPARABLE": 19
+    },
+    "condition_attribution_merged_exact": 0.5185,
+    "condition_attribution_merged_pairs": 27,
+    "per_class_f1": {
+     "EXPLAINED": 0.7826,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5714
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.74,
+    "right": 37,
+    "pairs": 50,
+    "macro_f1": 0.4405,
+    "genuine_calls": 7,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "GENUINE": 7,
+     "EXPLAINED": 43
+    },
+    "condition_attribution_merged_exact": 0.4324,
+    "condition_attribution_merged_pairs": 37,
+    "per_class_f1": {
+     "EXPLAINED": 0.881,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.9128,
+    "genuine_calls": 3,
+    "not_comparable_found": "8/9",
+    "verdicts": {
+     "GENUINE": 3,
+     "EXPLAINED": 38,
+     "NOT_COMPARABLE": 9
+    },
+    "condition_attribution_merged_exact": 0.4324,
+    "condition_attribution_merged_pairs": 37,
+    "per_class_f1": {
+     "EXPLAINED": 0.9367,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.8889
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.7984,
+    "genuine_calls": 2,
+    "not_comparable_found": "9/9",
+    "verdicts": {
+     "GENUINE": 2,
+     "EXPLAINED": 32,
+     "NOT_COMPARABLE": 16
+    },
+    "condition_attribution_merged_exact": 0.625,
+    "condition_attribution_merged_pairs": 32,
+    "per_class_f1": {
+     "EXPLAINED": 0.8767,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.72
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.92,
+    "right": 46,
+    "pairs": 50,
+    "macro_f1": 0.9244,
+    "genuine_calls": 2,
+    "not_comparable_found": "9/9",
+    "verdicts": {
+     "GENUINE": 2,
+     "EXPLAINED": 37,
+     "NOT_COMPARABLE": 11
+    },
+    "condition_attribution_merged_exact": 0.5946,
+    "condition_attribution_merged_pairs": 37,
+    "per_class_f1": {
+     "EXPLAINED": 0.9487,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.9
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.0,
+    "right": 0,
+    "pairs": 50,
+    "macro_f1": 0.0,
+    "genuine_calls": 48,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "GENUINE": 48,
+     "NOT_COMPARABLE": 2
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.6,
+    "right": 30,
+    "pairs": 50,
+    "macro_f1": 0.4054,
+    "genuine_calls": 13,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "GENUINE": 13,
+     "NOT_COMPARABLE": 4,
+     "EXPLAINED": 33
+    },
+    "condition_attribution_merged_exact": 0.4,
+    "condition_attribution_merged_pairs": 30,
+    "per_class_f1": {
+     "EXPLAINED": 0.8108,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.4506,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0488,
+    "condition_attribution_merged_pairs": 41,
+    "per_class_f1": {
+     "EXPLAINED": 0.9011,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "held-out 50 pairs": {
+   "frozen (every switch off)": {
+    "accuracy": 0.58,
+    "right": 29,
+    "pairs": 50,
+    "macro_f1": 0.2742,
+    "genuine_calls": 0,
+    "not_comparable_found": "1/7",
+    "verdicts": {
+     "EXPLAINED": 36,
+     "NOT_COMPARABLE": 14
+    },
+    "condition_attribution_merged_exact": 0.6071,
+    "condition_attribution_merged_pairs": 28,
+    "per_class_f1": {
+     "EXPLAINED": 0.7273,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0952
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.58,
+    "right": 29,
+    "pairs": 50,
+    "macro_f1": 0.2742,
+    "genuine_calls": 0,
+    "not_comparable_found": "1/7",
+    "verdicts": {
+     "EXPLAINED": 36,
+     "NOT_COMPARABLE": 14
+    },
+    "condition_attribution_merged_exact": 0.6071,
+    "condition_attribution_merged_pairs": 28,
+    "per_class_f1": {
+     "EXPLAINED": 0.7273,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0952
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3004,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.5366,
+    "condition_attribution_merged_pairs": 41,
+    "per_class_f1": {
+     "EXPLAINED": 0.9011,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3004,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.5366,
+    "condition_attribution_merged_pairs": 41,
+    "per_class_f1": {
+     "EXPLAINED": 0.9011,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.78,
+    "right": 39,
+    "pairs": 50,
+    "macro_f1": 0.3518,
+    "genuine_calls": 0,
+    "not_comparable_found": "1/7",
+    "verdicts": {
+     "EXPLAINED": 46,
+     "NOT_COMPARABLE": 4
+    },
+    "condition_attribution_merged_exact": 0.6842,
+    "condition_attribution_merged_pairs": 38,
+    "per_class_f1": {
+     "EXPLAINED": 0.8736,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.1818
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3004,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.6829,
+    "condition_attribution_merged_pairs": 41,
+    "per_class_f1": {
+     "EXPLAINED": 0.9011,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.04,
+    "right": 2,
+    "pairs": 50,
+    "macro_f1": 0.0261,
+    "genuine_calls": 49,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "GENUINE": 49,
+     "NOT_COMPARABLE": 1
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0784,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.66,
+    "right": 33,
+    "pairs": 50,
+    "macro_f1": 0.3862,
+    "genuine_calls": 9,
+    "not_comparable_found": "1/7",
+    "verdicts": {
+     "GENUINE": 9,
+     "EXPLAINED": 37,
+     "NOT_COMPARABLE": 4
+    },
+    "condition_attribution_merged_exact": 0.4516,
+    "condition_attribution_merged_pairs": 31,
+    "per_class_f1": {
+     "EXPLAINED": 0.7949,
+     "GENUINE": 0.1818,
+     "NOT COMPARABLE": 0.1818
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3004,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0244,
+    "condition_attribution_merged_pairs": 41,
+    "per_class_f1": {
+     "EXPLAINED": 0.9011,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "fresh 50 pairs (clean test)": {
+   "frozen (every switch off)": {
+    "accuracy": 0.66,
+    "right": 33,
+    "pairs": 50,
+    "macro_f1": 0.5687,
+    "genuine_calls": 0,
+    "not_comparable_found": "5/15",
+    "verdicts": {
+     "EXPLAINED": 38,
+     "NOT_COMPARABLE": 12
+    },
+    "condition_attribution_merged_exact": 0.6786,
+    "condition_attribution_merged_pairs": 28,
+    "per_class_f1": {
+     "EXPLAINED": 0.7671,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.3704
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.66,
+    "right": 33,
+    "pairs": 50,
+    "macro_f1": 0.5687,
+    "genuine_calls": 0,
+    "not_comparable_found": "5/15",
+    "verdicts": {
+     "EXPLAINED": 38,
+     "NOT_COMPARABLE": 12
+    },
+    "condition_attribution_merged_exact": 0.6786,
+    "condition_attribution_merged_pairs": 28,
+    "per_class_f1": {
+     "EXPLAINED": 0.7671,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.3704
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.7,
+    "right": 35,
+    "pairs": 50,
+    "macro_f1": 0.4118,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.6286,
+    "condition_attribution_merged_pairs": 35,
+    "per_class_f1": {
+     "EXPLAINED": 0.8235,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.7,
+    "right": 35,
+    "pairs": 50,
+    "macro_f1": 0.4118,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.6286,
+    "condition_attribution_merged_pairs": 35,
+    "per_class_f1": {
+     "EXPLAINED": 0.8235,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.7793,
+    "genuine_calls": 2,
+    "not_comparable_found": "8/15",
+    "verdicts": {
+     "EXPLAINED": 39,
+     "NOT_COMPARABLE": 9,
+     "GENUINE": 2
+    },
+    "condition_attribution_merged_exact": 0.6061,
+    "condition_attribution_merged_pairs": 33,
+    "per_class_f1": {
+     "EXPLAINED": 0.8919,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.6667
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.8,
+    "right": 40,
+    "pairs": 50,
+    "macro_f1": 0.7272,
+    "genuine_calls": 2,
+    "not_comparable_found": "6/15",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 6,
+     "GENUINE": 2
+    },
+    "condition_attribution_merged_exact": 0.5882,
+    "condition_attribution_merged_pairs": 34,
+    "per_class_f1": {
+     "EXPLAINED": 0.8831,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5714
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.02,
+    "right": 1,
+    "pairs": 50,
+    "macro_f1": 0.05,
+    "genuine_calls": 45,
+    "not_comparable_found": "1/15",
+    "verdicts": {
+     "GENUINE": 45,
+     "NOT_COMPARABLE": 5
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.1
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.64,
+    "right": 32,
+    "pairs": 50,
+    "macro_f1": 0.4051,
+    "genuine_calls": 6,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 44,
+     "GENUINE": 6
+    },
+    "condition_attribution_merged_exact": 0.375,
+    "condition_attribution_merged_pairs": 32,
+    "per_class_f1": {
+     "EXPLAINED": 0.8101,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.7,
+    "right": 35,
+    "pairs": 50,
+    "macro_f1": 0.4118,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0,
+    "condition_attribution_merged_pairs": 35,
+    "per_class_f1": {
+     "EXPLAINED": 0.8235,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "frozen (every switch off)": {
+    "accuracy": 0.62,
+    "right": 31,
+    "pairs": 50,
+    "macro_f1": 0.4934,
+    "genuine_calls": 0,
+    "not_comparable_found": "3/11",
+    "verdicts": {
+     "EXPLAINED": 36,
+     "NOT_COMPARABLE": 14
+    },
+    "condition_attribution_merged_exact": 0.5,
+    "condition_attribution_merged_pairs": 28,
+    "per_class_f1": {
+     "EXPLAINED": 0.7467,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.24
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.68,
+    "right": 34,
+    "pairs": 50,
+    "macro_f1": 0.6032,
+    "genuine_calls": 0,
+    "not_comparable_found": "6/11",
+    "verdicts": {
+     "EXPLAINED": 33,
+     "NOT_COMPARABLE": 17
+    },
+    "condition_attribution_merged_exact": 0.5,
+    "condition_attribution_merged_pairs": 28,
+    "per_class_f1": {
+     "EXPLAINED": 0.7778,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.4286
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.78,
+    "right": 39,
+    "pairs": 50,
+    "macro_f1": 0.4382,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/11",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.4872,
+    "condition_attribution_merged_pairs": 39,
+    "per_class_f1": {
+     "EXPLAINED": 0.8764,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.8228,
+    "genuine_calls": 0,
+    "not_comparable_found": "6/11",
+    "verdicts": {
+     "EXPLAINED": 44,
+     "NOT_COMPARABLE": 6
+    },
+    "condition_attribution_merged_exact": 0.4872,
+    "condition_attribution_merged_pairs": 39,
+    "per_class_f1": {
+     "EXPLAINED": 0.9398,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.7059
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.8252,
+    "genuine_calls": 0,
+    "not_comparable_found": "8/11",
+    "verdicts": {
+     "EXPLAINED": 39,
+     "NOT_COMPARABLE": 11
+    },
+    "condition_attribution_merged_exact": 0.4444,
+    "condition_attribution_merged_pairs": 36,
+    "per_class_f1": {
+     "EXPLAINED": 0.9231,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.7273
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.94,
+    "right": 47,
+    "pairs": 50,
+    "macro_f1": 0.9025,
+    "genuine_calls": 0,
+    "not_comparable_found": "8/11",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 8
+    },
+    "condition_attribution_merged_exact": 0.4615,
+    "condition_attribution_merged_pairs": 39,
+    "per_class_f1": {
+     "EXPLAINED": 0.963,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.8421
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.02,
+    "right": 1,
+    "pairs": 50,
+    "macro_f1": 0.0625,
+    "genuine_calls": 45,
+    "not_comparable_found": "1/11",
+    "verdicts": {
+     "GENUINE": 45,
+     "NOT_COMPARABLE": 5
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.125
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.68,
+    "right": 34,
+    "pairs": 50,
+    "macro_f1": 0.4198,
+    "genuine_calls": 6,
+    "not_comparable_found": "0/11",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "GENUINE": 6,
+     "NOT_COMPARABLE": 2
+    },
+    "condition_attribution_merged_exact": 0.2647,
+    "condition_attribution_merged_pairs": 34,
+    "per_class_f1": {
+     "EXPLAINED": 0.8395,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.78,
+    "right": 39,
+    "pairs": 50,
+    "macro_f1": 0.4382,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/11",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0,
+    "condition_attribution_merged_pairs": 39,
+    "per_class_f1": {
+     "EXPLAINED": 0.8764,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "frozen (every switch off)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.4409,
+    "genuine_calls": 0,
+    "not_comparable_found": "3/4",
+    "verdicts": {
+     "NOT_COMPARABLE": 10,
+     "EXPLAINED": 40
+    },
+    "condition_attribution_merged_exact": 0.4474,
+    "condition_attribution_merged_pairs": 38,
+    "per_class_f1": {
+     "EXPLAINED": 0.8941,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.4286
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.4409,
+    "genuine_calls": 0,
+    "not_comparable_found": "3/4",
+    "verdicts": {
+     "NOT_COMPARABLE": 10,
+     "EXPLAINED": 40
+    },
+    "condition_attribution_merged_exact": 0.4474,
+    "condition_attribution_merged_pairs": 38,
+    "per_class_f1": {
+     "EXPLAINED": 0.8941,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.4286
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.3158,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.4222,
+    "condition_attribution_merged_pairs": 45,
+    "per_class_f1": {
+     "EXPLAINED": 0.9474,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.3158,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.4222,
+    "condition_attribution_merged_pairs": 45,
+    "per_class_f1": {
+     "EXPLAINED": 0.9474,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.4924,
+    "genuine_calls": 0,
+    "not_comparable_found": "3/4",
+    "verdicts": {
+     "EXPLAINED": 43,
+     "NOT_COMPARABLE": 7
+    },
+    "condition_attribution_merged_exact": 0.5854,
+    "condition_attribution_merged_pairs": 41,
+    "per_class_f1": {
+     "EXPLAINED": 0.9318,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5455
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.92,
+    "right": 46,
+    "pairs": 50,
+    "macro_f1": 0.5093,
+    "genuine_calls": 0,
+    "not_comparable_found": "2/4",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "NOT_COMPARABLE": 3
+    },
+    "condition_attribution_merged_exact": 0.6136,
+    "condition_attribution_merged_pairs": 44,
+    "per_class_f1": {
+     "EXPLAINED": 0.9565,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5714
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.02,
+    "right": 1,
+    "pairs": 50,
+    "macro_f1": 0.0131,
+    "genuine_calls": 50,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "GENUINE": 50
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0392,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.62,
+    "right": 31,
+    "pairs": 50,
+    "macro_f1": 0.3272,
+    "genuine_calls": 8,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 34,
+     "NOT_COMPARABLE": 8,
+     "GENUINE": 8
+    },
+    "condition_attribution_merged_exact": 0.3,
+    "condition_attribution_merged_pairs": 30,
+    "per_class_f1": {
+     "EXPLAINED": 0.7595,
+     "GENUINE": 0.2222,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.3158,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0,
+    "condition_attribution_merged_pairs": 45,
+    "per_class_f1": {
+     "EXPLAINED": 0.9474,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  }
+ },
+ "pooled_100_pairs": {
+  "frozen (every switch off)": {
+   "accuracy": 0.58,
+   "right": 58,
+   "macro_f1": 0.3055,
+   "false_genuine_calls": 7,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.5556,
+   "condition_attribution_merged_pairs": 54,
+   "verdicts": {
+    "GENUINE": 7,
+    "EXPLAINED": 65,
+    "NOT_COMPARABLE": 28
+   }
+  },
+  "fix A (before table grounding)": {
+   "accuracy": 0.64,
+   "right": 64,
+   "macro_f1": 0.3736,
+   "false_genuine_calls": 3,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.5636,
+   "condition_attribution_merged_pairs": 55,
+   "verdicts": {
+    "GENUINE": 3,
+    "EXPLAINED": 64,
+    "NOT_COMPARABLE": 33
+   }
+  },
+  "policy B alone": {
+   "accuracy": 0.78,
+   "right": 78,
+   "macro_f1": 0.2971,
+   "false_genuine_calls": 7,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.4872,
+   "condition_attribution_merged_pairs": 78,
+   "verdicts": {
+    "GENUINE": 7,
+    "EXPLAINED": 93
+   }
+  },
+  "fix A + policy B": {
+   "accuracy": 0.86,
+   "right": 86,
+   "macro_f1": 0.5192,
+   "false_genuine_calls": 3,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.4872,
+   "condition_attribution_merged_pairs": 78,
+   "verdicts": {
+    "GENUINE": 3,
+    "EXPLAINED": 88,
+    "NOT_COMPARABLE": 9
+   }
+  },
+  "fix A + table grounding (shipped 10 Oct)": {
+   "accuracy": 0.8,
+   "right": 80,
+   "macro_f1": 0.4769,
+   "false_genuine_calls": 2,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.6571,
+   "condition_attribution_merged_pairs": 70,
+   "verdicts": {
+    "GENUINE": 2,
+    "EXPLAINED": 78,
+    "NOT_COMPARABLE": 20
+   }
+  },
+  "fix A + grounding + policy B (shipped from 11 Oct)": {
+   "accuracy": 0.87,
+   "right": 87,
+   "macro_f1": 0.5299,
+   "false_genuine_calls": 2,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.641,
+   "condition_attribution_merged_pairs": 78,
+   "verdicts": {
+    "GENUINE": 2,
+    "EXPLAINED": 87,
+    "NOT_COMPARABLE": 11
+   }
+  }
+ },
+ "one_sided_pairs": {
+  "first 50 pairs": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 14,
+   "gold": {
+    "EXPLAINED": 11,
+    "NOT COMPARABLE": 3
+   }
+  },
+  "held-out 50 pairs": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 14,
+   "gold": {
+    "EXPLAINED": 13,
+    "NOT COMPARABLE": 1
+   }
+  },
+  "fresh 50 pairs (clean test)": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 12,
+   "gold": {
+    "NOT COMPARABLE": 5,
+    "EXPLAINED": 7
+   }
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 14,
+   "gold": {
+    "EXPLAINED": 11,
+    "NOT COMPARABLE": 3
+   }
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 10,
+   "gold": {
+    "EXPLAINED": 7,
+    "NOT COMPARABLE": 3
+   }
+  }
+ },
+ "paired": {
+  "first 50 pairs": {
+   "grounding_vs_fixA": {
+    "gained": 6,
+    "lost": 0,
+    "sign_test_p": 0.0312
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 5,
+    "lost": 0,
+    "sign_test_p": 0.0625
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 9,
+    "lost": 4,
+    "sign_test_p": 0.2668
+   },
+   "grounding_vs_always_explained": {
+    "gained": 9,
+    "lost": 9,
+    "sign_test_p": 1.0
+   }
+  },
+  "held-out 50 pairs": {
+   "grounding_vs_fixA": {
+    "gained": 10,
+    "lost": 0,
+    "sign_test_p": 0.002
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 3,
+    "lost": 1,
+    "sign_test_p": 0.625
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 0,
+    "lost": 0,
+    "sign_test_p": 1.0
+   },
+   "grounding_vs_always_explained": {
+    "gained": 1,
+    "lost": 3,
+    "sign_test_p": 0.625
+   }
+  },
+  "fresh 50 pairs (clean test)": {
+   "grounding_vs_fixA": {
+    "gained": 9,
+    "lost": 1,
+    "sign_test_p": 0.0215
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 1,
+    "lost": 2,
+    "sign_test_p": 1.0
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 6,
+    "lost": 1,
+    "sign_test_p": 0.125
+   },
+   "grounding_vs_always_explained": {
+    "gained": 8,
+    "lost": 2,
+    "sign_test_p": 0.1094
+   }
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "grounding_vs_fixA": {
+    "gained": 11,
+    "lost": 1,
+    "sign_test_p": 0.0063
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 3,
+    "lost": 0,
+    "sign_test_p": 0.25
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 8,
+    "lost": 0,
+    "sign_test_p": 0.0078
+   },
+   "grounding_vs_always_explained": {
+    "gained": 8,
+    "lost": 3,
+    "sign_test_p": 0.2266
+   }
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "grounding_vs_fixA": {
+    "gained": 6,
+    "lost": 3,
+    "sign_test_p": 0.5078
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 3,
+    "lost": 1,
+    "sign_test_p": 0.625
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 2,
+    "lost": 1,
+    "sign_test_p": 1.0
+   },
+   "grounding_vs_always_explained": {
+    "gained": 3,
+    "lost": 4,
+    "sign_test_p": 1.0
+   }
+  }
+ },
+ "gold_counts": {
+  "first 50 pairs": {
+   "EXPLAINED": 41,
+   "NOT COMPARABLE": 9
+  },
+  "held-out 50 pairs": {
+   "EXPLAINED": 41,
+   "NOT COMPARABLE": 7,
+   "GENUINE": 2
+  },
+  "fresh 50 pairs (clean test)": {
+   "EXPLAINED": 35,
+   "NOT COMPARABLE": 15
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "EXPLAINED": 39,
+   "NOT COMPARABLE": 11
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "EXPLAINED": 45,
+   "NOT COMPARABLE": 4,
+   "GENUINE": 1
+  }
+ },
+ "pooled_150_pairs": {
+  "frozen (every switch off)": {
+   "accuracy": 0.652,
+   "right": 163,
+   "macro_f1": 0.3505,
+   "not_comparable_found": "15/46",
+   "verdicts": {
+    "GENUINE": 7,
+    "EXPLAINED": 179,
+    "NOT_COMPARABLE": 64
+   }
+  },
+  "fix A (before table grounding)": {
+   "accuracy": 0.688,
+   "right": 172,
+   "macro_f1": 0.3941,
+   "not_comparable_found": "23/46",
+   "verdicts": {
+    "GENUINE": 3,
+    "EXPLAINED": 175,
+    "NOT_COMPARABLE": 72
+   }
+  },
+  "policy B alone": {
+   "accuracy": 0.788,
+   "right": 197,
+   "macro_f1": 0.2958,
+   "not_comparable_found": "0/46",
+   "verdicts": {
+    "GENUINE": 7,
+    "EXPLAINED": 243
+   }
+  },
+  "fix A + policy B": {
+   "accuracy": 0.844,
+   "right": 211,
+   "macro_f1": 0.4563,
+   "not_comparable_found": "14/46",
+   "verdicts": {
+    "GENUINE": 3,
+    "EXPLAINED": 232,
+    "NOT_COMPARABLE": 15
+   }
+  },
+  "fix A + table grounding (shipped 10 Oct)": {
+   "accuracy": 0.836,
+   "right": 209,
+   "macro_f1": 0.5079,
+   "not_comparable_found": "29/46",
+   "verdicts": {
+    "GENUINE": 4,
+    "EXPLAINED": 199,
+    "NOT_COMPARABLE": 47
+   }
+  },
+  "fix A + grounding + policy B (shipped from 11 Oct)": {
+   "accuracy": 0.88,
+   "right": 220,
+   "macro_f1": 0.5355,
+   "not_comparable_found": "25/46",
+   "verdicts": {
+    "GENUINE": 4,
+    "EXPLAINED": 218,
+    "NOT_COMPARABLE": 28
+   }
+  },
+  "always EXPLAINED": {
+   "right": 201,
+   "of": 250
+  }
+ }
+}
