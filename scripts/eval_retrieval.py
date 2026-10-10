@@ -38,7 +38,7 @@ ABSENT = [
     "How does DALL-E 3 score on human preference?", "What is the MT-Bench score of Vicuna?", "What F1 does BioBERT get on NCBI-disease?",
     "What accuracy does Wav2Vec 2.0 get on speech emotion?", "What is the MRR of DPR on Natural Questions Open dev set in Korean?",
 ]
-THRESHOLDS = [-9.0, -8.0, -7.0, -6.0, -5.0, -4.0, -3.0, -2.0, -1.0, 0.0]
+THRESHOLDS = [float(t) for t in range(-9, 8)]          # -9 .. 7: wide enough for the logits of a stronger reranker (bge-reranker-base) too
 WORDINGS = [
     "What {metric} does {model} get on {dataset}{lang}?",
     "{model} {dataset}{lang} {metric}",
