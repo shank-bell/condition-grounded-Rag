@@ -15,7 +15,8 @@ fallback_model = ""
 
 [models]
 embedder = "BAAI/bge-m3"
-reranker = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+reranker = "BAAI/bge-reranker-base"
+text_relevance = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 nli = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
 query_classifier = "allenai/scibert_scivocab_uncased"
 
@@ -42,7 +43,7 @@ bm25_k = 30
 rrf_k = 60
 fused_top = 20
 rerank_keep = 10
-rerank_threshold = -2.0
+rerank_threshold = -3.0
 section_boost = 0.15
 generate_top = 5
 use_cards = true
@@ -57,6 +58,8 @@ max_pairs = 45
 human_rows_not_comparable = true
 two_metric_tasks_no_genuine = true
 mnli_split_tags = true
+one_sided_conditions_explain = true
+table_grounding = true
 
 [critic]
 entail_threshold = 0.50
@@ -78,4 +81,5 @@ profile_in_context = true
 escalation = true
 profile_guided_retrieval = true
 joint_coverage = true
+joint_setting = true
 ragas_loop = false
