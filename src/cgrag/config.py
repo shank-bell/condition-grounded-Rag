@@ -25,7 +25,8 @@ class LLMConfig(BaseModel):
 
 class ModelsConfig(BaseModel):
     embedder: str = "BAAI/bge-m3"
-    reranker: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    reranker: str = "BAAI/bge-reranker-base"      # Stage 5 (10 Oct: the "stronger" fallback of docs/backup_models_huggingface.md; was ms-marco-MiniLM-L-6-v2)
+    text_relevance: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"      # Stage 7's text-only path: its fixed relevance cut-off was calibrated on this model, so it stays on it
     nli: str = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
     query_classifier: str = "allenai/scibert_scivocab_uncased"
 
@@ -56,7 +57,7 @@ class RetrievalConfig(BaseModel):
     rrf_k: int = 60
     fused_top: int = 20
     rerank_keep: int = 10
-    rerank_threshold: float = -2.0
+    rerank_threshold: float = -3.0
     section_boost: float = 0.15
     generate_top: int = 5
     use_cards: bool = True       # retrieval cards (ingestion/cards.py): a card vector as a third ranking + keyword index + reranker text
@@ -74,6 +75,18 @@ class ContradictionConfig(BaseModel):
     human_rows_not_comparable: bool = True    # a "Human" row is a study of people, not a model result: never GENUINE / EXPLAINED
     two_metric_tasks_no_genuine: bool = True  # MRPC / QQP / STS-B: one number may be acc, F1 or their mean -> never GENUINE
     mnli_split_tags: bool = True              # MNLI matched / mismatched is a split, like dev / test
+    # Policy B (10 Oct 2026, found by reading the mistakes of two pair sets; OFF by default): when a result-changing condition (model size, setting, dataset
+    # version, language) is recorded for only one of the two papers, the pair is EXPLAINED ("probable explanation", naming that condition) instead of
+    # NOT_COMPARABLE. Measured on 150 labelled pairs (docs/evaluation_ai_annotated.md, 4.5d): it raises accuracy to the base rate of EXPLAINED (it is then the same
+    # as "always EXPLAINED" on the held-out and on a fresh set) and removes the ability to say NOT_COMPARABLE (macro-F1 on the fresh set 57 -> 41), so it was not shipped.
+    # 11 Oct 2026 (ON): together with table grounding it is no longer that rule: on fresh-2 47 of 50 right (44 without it), on fresh-3 (labelled after the
+    # hypothesis, blind) 46 of 50 against 42 without it and 45 for "always EXPLAINED", macro-F1 51 against 32; over 250 pairs 88.0 % against 82.4 %
+    # (docs/evaluation_ai_annotated.md, 4.5f). It costs some NOT_COMPARABLE recall (25 of 46 found against 29).
+    one_sided_conditions_explain: bool = True
+    # Table grounding (10 Oct 2026, ON): read each result's own table cell again (block heading, caption, row label, column name) to fill the split / system kind /
+    # size that the card lacks or has wrong, and to call a card whose model or dataset does not fit its cell NOT_COMPARABLE (pipeline/grounding.py). Designed on three
+    # labelled pair sets, then tested once on 50 new pairs: 44 of 50 right against 34 without it (docs/evaluation_ai_annotated.md, 4.5e).
+    table_grounding: bool = True
 
 
 class CriticConfig(BaseModel):
@@ -113,7 +126,9 @@ class FeaturesConfig(BaseModel):
     escalation: bool = False         # an agent on a small model hands a bad outcome to the fallback model (see AgentsConfig)
     profile_guided_retrieval: bool = False   # Stage 6 also pulls chunks whose profiles record a missing condition
     joint_coverage: bool = False      # Stage 6 also requires model, dataset and language to be recorded TOGETHER (see applicability.py)
+    joint_setting: bool = True        # ... and a setting the question names (5-shot, zero-shot, dev set); only with joint_coverage (11 Oct)
     ragas_loop: bool = False          # the original design's runtime loop: rewrite the answer while its RAGAS-style faithfulness is below [ragas].threshold
+    profile_repair: bool = True       # read the stored profiles through the repair overlay (ingestion/repair.py, table `profile_repairs`); False = the raw extraction
 
 
 class Settings(BaseModel):
@@ -152,6 +167,9 @@ def get_settings() -> Settings:
     local = ROOT / "config.local.toml"
     if local.exists():
         data = _deep_merge(data, tomllib.loads(local.read_text(encoding="utf-8")))
+    overlay = os.environ.get("CGRAG_OVERLAY")         # a small toml merged last, e.g. config/bench_metalead.toml (a separate index for a public benchmark)
+    if overlay:
+        data = _deep_merge(data, tomllib.loads(Path(overlay).read_text(encoding="utf-8")))
     settings = Settings.model_validate(data)
     settings.paths = _absolutize(settings.paths)
     return settings
