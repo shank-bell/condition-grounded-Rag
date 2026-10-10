@@ -25,12 +25,13 @@ from pydantic import BaseModel, Field, create_model
 from ..llm import OllamaLLM
 from ..schemas import ApplicabilityResult, ConditionCheck, ConditionProfile, RetrievedChunk
 from ..stores.profile_store import ProfileStore
-from .conditions import covers, norm, observed_values
+from .conditions import covers, is_regime_setting, norm, observed_values
 
 MAX_OBSERVED = 6
 JOINT_FIELDS = ("model", "dataset", "language")     # what "X on Y for Z" is made of: they must be recorded TOGETHER by one result
+JOINT_SETTING = ("setting",)                         # ... and a named setting ("5-shot", "zero-shot", "dev set"), unless [features] joint_setting is off
 MAX_JOINT_CHUNKS = 6
-BLAME_ORDER = ("language", "dataset", "model")        # which unsupported combination condition is reported first (most specific first)
+BLAME_ORDER = ("setting", "language", "dataset", "model")        # which unsupported combination condition is reported first (most specific first)
 MAX_VALUES_PER_FIELD = 4          # recorded values shown per field and passage in the LLM's evidence
 MAX_VALUES_FOR_JUDGED_FIELD = 12  # ... but the fields under judgement show more so the LLM can see e.g. 'hi', 'sw'
 SNIPPET_CHARS = 80
@@ -81,9 +82,11 @@ class Evidence:
 
 class ApplicabilityAgent:
     def __init__(self, profiles: ProfileStore, max_reretrieve: int = 1, llm: OllamaLLM | None = None,
-                 fallback: OllamaLLM | None = None, joint: bool = False) -> None:
+                 fallback: OllamaLLM | None = None, joint: bool = False, joint_setting: bool = True) -> None:
         self.profiles = profiles
         self.joint = joint            # also require the named model, dataset and language to be recorded together
+        self.joint_fields = JOINT_FIELDS + (JOINT_SETTING if joint_setting else ())     # ... and the named setting (found 11 Oct: "5-shot HellaSwag" for a model
+                                                                                        # that only has zero-shot HellaSwag was "covered" by any passage that says 5-shot)
         self.max_reretrieve = max_reretrieve
         self.llm = llm
         self.fallback = fallback if llm is not None else None    # the bigger model that gives a second opinion (escalation)
@@ -208,6 +211,14 @@ class ApplicabilityAgent:
 
     # ---------- guardrail: joint coverage ----------
 
+    def _key(self, requested: dict[str, str]) -> dict[str, str]:
+        """What must be recorded together: the named model / dataset / language, and a named setting when it is a REGIME (zero-shot, 5-shot, fine-tuned ...):
+        a split (dev / test) is unrecorded in many tables and is left to the per-condition check."""
+        key = {f: requested[f] for f in JOINT_FIELDS if requested.get(f)}
+        if "setting" in self.joint_fields and requested.get("setting") and is_regime_setting(requested["setting"]):
+            key["setting"] = requested["setting"]
+        return key
+
     def _joint(self, requested: dict[str, str], result: ApplicabilityResult, kept: list[RetrievedChunk],
                joint_fetch: Callable[[list[RetrievedChunk], list[str]], list[RetrievedChunk]] | None
                ) -> tuple[list[RetrievedChunk], ApplicabilityResult]:
@@ -217,7 +228,7 @@ class ApplicabilityAgent:
         If it does, its chunks are added to the evidence (the per-condition verdict stands). If not, the question is not covered as
         asked, whatever retrieval happened to find: ONE condition is reported as not covered - the most specific one that the others
         are recorded without (XLM-R on XNLI exists, in 15 languages, so: language) - and the warning says what IS recorded."""
-        key = {f: requested[f] for f in JOINT_FIELDS if requested.get(f)}
+        key = self._key(requested)
         if len(key) < 2:
             return kept, result
         together = self.profiles.profiles_matching(key, list(key))
@@ -269,7 +280,7 @@ class ApplicabilityAgent:
         each is checked like any condition; every further one is checked here the same way as the joint check: a result must record
         it together with the other named model / dataset / language. "GPT-4 on XNLI" is in no paper, so the warning names GPT-4 and
         says what IS recorded on XNLI. Covered ones add their best chunks to the evidence, so each compared system has a source."""
-        key = {f: requested[f] for f in JOINT_FIELDS if requested.get(f)}
+        key = self._key(requested)
         checks = list(result.checks)
         extra_missing: set[int] = set()
         for field, values in extras.items():
