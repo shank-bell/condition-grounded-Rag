@@ -108,7 +108,8 @@ class Pipeline:
         self.orchestrator = OrchestratorAgent(orchestrator_llm, self.cfg.features, self._escalation_target(orchestrator_llm))
         self.applicability = ApplicabilityAgent(
             self.profiles, self.cfg.applicability.max_reretrieve, llm=applicability_llm,
-            fallback=self._escalation_target(applicability_llm), joint=self.cfg.features.joint_coverage)
+            fallback=self._escalation_target(applicability_llm), joint=self.cfg.features.joint_coverage,
+            joint_setting=self.cfg.features.joint_setting)
         self.contradictions = ContradictionResolver(self.profiles, self.cfg.contradiction)
         self.critic = ClaimChecker(self.cfg.critic)
         self.judge_llm = self._agent_llm(self.cfg.ragas.judge_model) if self.cfg.features.ragas_loop else None
@@ -143,6 +144,7 @@ class Pipeline:
 
         torch_jobs = {"embedder": lambda: embed(["warm up"]),
                       "reranker": lambda: rerank_scores("warm up", ["warm up"]),
+                      "text_relevance": lambda: rerank_scores("warm up", ["warm up"], model=self.cfg.models.text_relevance),
                       "nli": lambda: get_nli().probs([("warm up", "warm up")])}
         if self.understand.classifier:
             torch_jobs["scibert"] = lambda: self.understand.classifier.predict("warm up")
