@@ -1,5 +1,11 @@
 # Ingestion pipeline report (offline path A-D), frozen 2026-09-30
 
+> **Update 11 Oct 2026.** The tables below describe the RAW extraction of 30 September (the `profiles` table, which is never rewritten). Since 11 Oct the
+> system reads the profiles through a code-only repair overlay (`profile_repairs`, `src/cgrag/ingestion/repair.py`, `scripts/repair_store.py`,
+> `[features] profile_repair`): 5,383 of the 10,275 profiles have at least one field corrected from their own table cell, caption, block heading or the paper's
+> own definitions (setting 3,321 fields, task 2,119, data set 915, model 467, language 433, model size 64), the retrieval cards were rebuilt from the repaired
+> fields, and the table reader reads a header row repeated in the middle of a wide table. Measured effect: `docs/evaluation_ai_annotated.md`, section 4.1b.
+
 Scope: the offline path of the architecture - A PDF loader, B section chunker, C Condition Profile Extractor (LLM), D BGE-M3
 embedder, and the three stores (ChromaDB vectors, BM25 index, SQLite Condition Profile store). Everything here was measured on
 the 28 papers in `data/papers` with `scripts/ingest_metrics.py` (no LLM; `--json data/index/ingest_metrics.json`) and
