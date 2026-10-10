@@ -1,0 +1,3 @@
+[paths]
+chroma_dir = "data/index_exp/bak_oct11_before_repair/chroma"
+bm25_path = "data/index_exp/bak_oct11_before_repair/bm25.pkl"
