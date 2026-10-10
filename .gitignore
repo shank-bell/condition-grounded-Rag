@@ -22,3 +22,6 @@ frontend/dist/
 data/labelling/
 # Experimental index copies
 data/index_exp/
+
+# Public benchmark copies (third-party PDFs and their indexes; rebuilt by scripts/bench_metalead.py)
+data/bench/
