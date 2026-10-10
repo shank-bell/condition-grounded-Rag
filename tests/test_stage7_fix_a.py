@@ -3,8 +3,8 @@ from cgrag.config import ContradictionConfig
 from cgrag.pipeline.contradiction import classify
 from cgrag.schemas import ConditionProfile
 
-OFF = ContradictionConfig(human_rows_not_comparable=False, two_metric_tasks_no_genuine=False, mnli_split_tags=False)
-ON = ContradictionConfig()
+OFF = ContradictionConfig(human_rows_not_comparable=False, two_metric_tasks_no_genuine=False, mnli_split_tags=False, one_sided_conditions_explain=False)
+ON = ContradictionConfig(one_sided_conditions_explain=False)          # fix A alone; policy B (one-sided conditions) is tested in test_stage7_policy_b.py
 
 
 def prof(cid: str, **kw) -> ConditionProfile:
