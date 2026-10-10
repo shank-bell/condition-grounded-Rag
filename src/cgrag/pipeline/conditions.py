@@ -169,7 +169,7 @@ def values_match(field: str, requested: str, observed: str) -> bool:
             return abs(pr - po) <= 0.05 * max(pr, po)
         return norm(requested) == norm(observed)
     if field == "setting":
-        tr, to = setting_tags(requested), setting_tags(observed)
+        tr, to = setting_tags(requested), _recorded_regime_tags(observed)
         if tr and to:
             return tr <= to
     r, o = norm(requested), norm(observed)          # task, setting: free text, so containment either way
@@ -219,6 +219,15 @@ def observed_values(profile: ConditionProfile, field: str) -> list[str]:
     return [value] if value and not is_nullish(value) else []
 
 
+def _recorded_regime_tags(text: str | None) -> frozenset[str]:
+    """`setting_tags` of a RECORDED setting for matching a requested one: "cross-lingual transfer" (fine-tune on English, test on the others) is zero-shot
+    transfer unless the setting says translate-train / translate-test."""
+    tags = set(setting_tags(text))
+    if re.search(r"cross[- ]?lingual transfer", (text or "").lower()) and not tags & {"translate-train", "translate-test"}:
+        tags.add("zero-shot")
+    return frozenset(tags)
+
+
 _SETTING_TAGS = (
     ("zero-shot", r"zero[- ]?shot"), ("few-shot", r"few[- ]?shot"), ("fine-tuned", r"fine[- ]?tun"),
     ("translate-train", r"translate[- ]?train"), ("translate-test", r"translate[- ]?test"),
@@ -234,6 +243,16 @@ def setting_tags(text: str | None) -> frozenset[str]:
     Free-text settings such as 'each N' carry no tag: they are too noisy to name as the explanation of a difference."""
     t = (text or "").lower()
     return frozenset(tag for tag, pattern in _SETTING_TAGS if re.search(pattern, t))
+
+
+NUMBER_WORDS = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+N_SHOT = re.compile(r"(?<![\w-])(\d{1,3}|" + "|".join(NUMBER_WORDS) + r")[- ]?shots?(?![\w-])", re.I)      # "5-shot", "5 shot", "five-shot", "1-shot"
+_REGIME_TAGS = frozenset({"zero-shot", "few-shot", "fine-tuned", "translate-train", "translate-test"})
+
+
+def is_regime_setting(text: str | None) -> bool:
+    """A setting that says HOW the model was used (zero-shot, 5-shot, fine-tuned, translate-train) and not which split was scored (dev / test)."""
+    return bool(text) and (bool(setting_tags(text) & _REGIME_TAGS) or bool(N_SHOT.search(text)))
 
 
 def differing_conditions(a: ConditionProfile, b: ConditionProfile) -> list[str]:
