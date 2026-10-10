@@ -1,0 +1,180 @@
+{
+ "questions": 30,
+ "intent": {
+  "accuracy": 0.9333,
+  "macro_f1": 0.9693
+ },
+ "complexity": {
+  "accuracy": 1.0,
+  "macro_f1": 1.0
+ },
+ "conditions": {
+  "dataset": {
+   "tp": 26,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.963,
+   "f1": 0.9811
+  },
+  "dataset_version": {
+   "tp": 3,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "language": {
+   "tp": 17,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "model": {
+   "tp": 42,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "model_size": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 6,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "setting": {
+   "tp": 2,
+   "fp": 0,
+   "fn": 3,
+   "precision": 1.0,
+   "recall": 0.4,
+   "f1": 0.5714
+  },
+  "task": {
+   "tp": 1,
+   "fp": 4,
+   "fn": 0,
+   "precision": 0.2,
+   "recall": 1.0,
+   "f1": 0.3333
+  },
+  "ALL": {
+   "tp": 91,
+   "fp": 4,
+   "fn": 10,
+   "precision": 0.9579,
+   "recall": 0.901,
+   "f1": 0.9286
+  }
+ },
+ "scope_warning": {
+  "tp": 18,
+  "fp": 1,
+  "fn": 1,
+  "precision": 0.9474,
+  "recall": 0.9474,
+  "f1": 0.9474,
+  "right_condition_named": 17,
+  "expected_warnings": 19,
+  "accuracy": 0.9333
+ },
+ "by_planned_type": {
+  "covered": {
+   "n": 11,
+   "warned": 1,
+   "expected_warning": 0,
+   "warning_correct": 10
+  },
+  "one missing": {
+   "n": 9,
+   "warned": 8,
+   "expected_warning": 9,
+   "warning_correct": 8
+  },
+  "partly covered": {
+   "n": 10,
+   "warned": 10,
+   "expected_warning": 10,
+   "warning_correct": 10
+  }
+ },
+ "seconds_per_question": {
+  "median": 3.8,
+  "max": 11.5
+ },
+ "provenance": {
+  "generated_at": "2026-10-10T15:45:40+00:00",
+  "frozen_at_commit": "0a79ad32f83bcd9034ba67970ffb571e9670e087",
+  "modified_files_at_that_time": [
+   " M .gitignore",
+   " M CLAUDE.md",
+   " M config.toml",
+   " M docs/evaluation_ai_annotated.md",
+   " M docs/ingestion_report.md",
+   " M eval/labels/ragas_analysis.json",
+   " M scripts/analyze_ragas.py",
+   " M scripts/eval_retrieval.py",
+   " M scripts/make_heldout_pairs.py",
+   " M scripts/reindex_cards.py",
+   " M src/cgrag/config.py",
+   " M src/cgrag/ingestion/pipeline.py",
+   " M src/cgrag/ingestion/tables.py",
+   " M src/cgrag/models.py",
+   " M src/cgrag/pipeline/contradiction.py",
+   " M src/cgrag/pipeline/query_understanding.py",
+   " M src/cgrag/pipeline/run.py",
+   " M src/cgrag/stores/profile_store.py",
+   " M tests/test_answer_side_fixes.py",
+   " M tests/test_stage1_stage9.py",
+   " M tests/test_stage6_stage7.py",
+   " M tests/test_stage7_fix_a.py",
+   "?? README.md",
+   "?? config/",
+   "?? docs/reproducibility.md",
+   "?? eval/labels/absent_flagged.oct10.json",
+   "?? eval/labels/answer_quality_gold_b.oct10.json",
+   "?? eval/labels/answer_quality_gold_b.oct10_grounded.json",
+   "?? eval/labels/extraction_repair_extraction_test.json",
+   "?? eval/labels/extraction_repair_extraction_test2.json",
+   "?? eval/labels/metalead_eval.json",
+   "?? eval/labels/metalead_eval_baseline.json",
+   "?? eval/labels/metalead_eval_baseline_v1_nosplit.json",
+   "?? eval/labels/questions_gold.oct10_main.results.jsonl",
+   "?? eval/labels/questions_gold.oct10_main.scores.json",
+   "?? eval/labels/questions_gold.oct11_main.results.jsonl",
+   "?? eval/labels/questions_gold.results.jsonl",
+   "?? eval/labels/questions_gold.scores.json",
+   "?? eval/labels/rerankers_gold.json",
+   "?? eval/labels/retrieval_gold.oct10.json",
+   "?? eval/labels/retrieval_gold.oct11.json",
+   "?? eval/labels/retrieval_gold.oct11_rawindex.json",
+   "?? eval/labels/retrieval_gold.oct11_unioncards.json",
+   "?? eval/labels/sources_gold.oct10.json",
+   "?? eval/labels/stage7_variants.json",
+   "?? eval/labels/stage7_variants_repaired.json",
+   "?? requirements-lock.txt",
+   "?? scripts/baseline_llm_extract.py",
+   "?? scripts/build_pwc_names.py",
+   "?? scripts/download_metalead.py",
+   "?? scripts/eval_metalead.py",
+   "?? scripts/eval_rerankers.py",
+   "?? scripts/extraction_test_ab.py",
+   "?? scripts/make_extraction_testset.py",
+   "?? scripts/repair_store.py",
+   "?? scripts/score_stage7_variants.py",
+   "?? src/cgrag/ingestion/repair.py",
+   "?? src/cgrag/knowledge/",
+   "?? src/cgrag/pipeline/grounding.py",
+   "?? tests/test_grounding.py",
+   "?? tests/test_repair.py",
+   "?? tests/test_stage7_policy_b.py"
+  ]
+ }
+}
