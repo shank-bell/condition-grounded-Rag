@@ -1,0 +1,9 @@
+# Overlay for the public MetaLead benchmark (Timmer et al., EACL 2026; 43 NLP papers, human-curated result tuples).
+# The benchmark papers get their own index so that the 28-paper corpus is never touched:
+#   $env:CGRAG_OVERLAY = "config/bench_metalead.toml"; .venv\Scripts\python scripts\ingest.py
+[paths]
+papers_dir = "data/bench/metalead/papers"
+index_dir = "data/bench/metalead/index"
+profile_db = "data/bench/metalead/index/profiles.sqlite"
+chroma_dir = "data/bench/metalead/index/chroma"
+bm25_path = "data/bench/metalead/index/bm25.pkl"
