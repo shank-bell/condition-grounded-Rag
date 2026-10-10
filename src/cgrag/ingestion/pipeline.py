@@ -16,6 +16,7 @@ from .cards import build_card
 from .chunker import chunk_paper
 from .pdf_loader import load_pdf
 from .profile_extractor import extract_paper
+from .repair import repair_paper
 
 
 @dataclass
@@ -55,8 +56,11 @@ class Ingestor:
         profiles, stats = extract_paper(chunks, self.llm)                   # C
         t["extract"] = time.perf_counter() - t0
         t0 = time.perf_counter()
+        fixed = profiles
+        if get_settings().features.profile_repair:                          # the repair overlay (ingestion/repair.py): cards are built from repaired fields
+            fixed, _ = repair_paper(profiles, {c.chunk_id: c.text for c in chunks}, title=paper.title)
         by_chunk: dict[str, list] = {}
-        for p in profiles:
+        for p in fixed:
             by_chunk.setdefault(p.chunk_id, []).append(p)
         chunks = [c.model_copy(update={"card": build_card(by_chunk.get(c.chunk_id, []))}) for c in chunks]    # retrieval cards (cards.py)
         vectors = embed([c.text for c in chunks])                           # D
@@ -67,6 +71,7 @@ class Ingestor:
         self.profiles.delete_paper(paper_id)
         self.vectors.add(chunks, vectors, card_vectors)
         self.profiles.add_many(profiles)
+        self.profiles.set_repairs(paper_id, profiles, fixed)
         self.profiles.log_extraction(paper_id, stats.chunks_extracted, len(profiles), self.llm.cfg.model, t["extract"])
         return IngestReport(
             paper_id, paper.title, False, paper.n_pages, len(chunks), dict(Counter(c.section for c in chunks)),
