@@ -26,6 +26,7 @@ from .conditions import (
     claim_text, differing_conditions, metric_key, model_family, norm, observed_values, unrecorded_conditions,
     values_match,
 )
+from .grounding import Grounding, enriched, ground
 from .text import split_sentences
 
 MAX_REPORTED = 6
@@ -90,13 +91,22 @@ def _split_words(p: ConditionProfile) -> frozenset[str]:
     return frozenset({"dev" if w in ("development", "validation") else w for w in words})
 
 
-def classify(a: ConditionProfile, b: ConditionProfile, cfg: ContradictionConfig | None = None) -> tuple[str, list[str], str]:
-    """(verdict, differing condition names, reason) for two profiles of the same subject with different values."""
+def classify(a: ConditionProfile, b: ConditionProfile, cfg: ContradictionConfig | None = None,
+             ga: Grounding | None = None, gb: Grounding | None = None) -> tuple[str, list[str], str]:
+    """(verdict, differing condition names, reason) for two profiles of the same subject with different values. `ga` / `gb` are what table grounding
+    read from the cards' own tables (pipeline/grounding.py); they are used only when `[contradiction] table_grounding` is on."""
     cfg = cfg or get_settings().contradiction
     values = f"{a.value:g} vs {b.value:g} {a.metric or ''}".strip()
     if cfg.human_rows_not_comparable and (norm(a.model) in _HUMAN or norm(b.model) in _HUMAN):
         return "NOT_COMPARABLE", [], (f"The results differ ({values}) but they are human performance figures, which papers "
                                       f"measure in different ways, not results of one system.")
+    if cfg.table_grounding:
+        for who, p, g in (("first", a, ga), ("second", b, gb)):
+            if g and g.suspect:
+                what = " and ".join({"dataset": "data set", "model": "model", "subset": "number (a part inside a bracket of its cell)"}[s] for s in g.suspect)
+                return "NOT_COMPARABLE", [], (f"The results differ ({values}) but the stored {what} of the {who} result does not fit its own table cell "
+                                              f"(row '{g.row_label}', column '{g.column}'), so the two numbers may not be about the same thing.")
+        a, b = enriched(a, ga) if ga else a, enriched(b, gb) if gb else b
     differing = differing_conditions(a, b)
     if cfg.mnli_split_tags and "setting" not in differing:
         sa, sb = _split_words(a), _split_words(b)
@@ -108,6 +118,9 @@ def classify(a: ConditionProfile, b: ConditionProfile, cfg: ContradictionConfig 
     missing = unrecorded_conditions(a, b)
     if missing:
         names = ", ".join(_LABEL[f] for f in missing)
+        if cfg.one_sided_conditions_explain:                       # policy B (10 Oct): a condition that only one paper states is the likely reason
+            return "EXPLAINED", missing, (f"Probable explanation ({values}): {names} is recorded for only one of the two papers, "
+                                          f"so the two results may not come from the same conditions.")
         return "NOT_COMPARABLE", [], (f"The results differ ({values}) but {names} is recorded for only one of the two "
                                       f"papers, so it cannot be shown that the conditions are the same.")
     if cfg.two_metric_tasks_no_genuine and (norm(a.dataset) in _TWO_METRIC_TASKS or norm(b.dataset) in _TWO_METRIC_TASKS):
@@ -161,7 +174,10 @@ class ContradictionResolver:
         found: list[ContradictionPair] = []
         probs = self._both_directions([(claim_text(x), claim_text(y)) for _, _, x, y in flagged])
         for (a, b, x, y), (fw, bw) in zip(flagged, probs):
-            verdict, differing, reason = classify(x, y, self.cfg)
+            ga = gb = None
+            if self.cfg.table_grounding:
+                ga, gb = ground(x, a.chunk.text), ground(y, b.chunk.text)
+            verdict, differing, reason = classify(x, y, self.cfg, ga, gb)
             found.append(ContradictionPair(
                 verdict=verdict, chunk_a=a.chunk.chunk_id, chunk_b=b.chunk.chunk_id, paper_a=a.chunk.paper_id,
                 paper_b=b.chunk.paper_id, metric=x.metric, value_a=x.value, value_b=y.value, differing=differing,
@@ -183,7 +199,7 @@ class ContradictionResolver:
         flat = [(cid, s) for cid, ss in sentences.items() for s in ss]
         if not flat:
             return []
-        scores = rerank_scores(question, [s for _, s in flat])
+        scores = rerank_scores(question, [s for _, s in flat], model=get_settings().models.text_relevance)      # TEXT_RELEVANCE was calibrated on this model
         best: dict[str, tuple[float, str]] = {}
         for (cid, s), score in zip(flat, scores):
             if cid not in best or score > best[cid][0]:
