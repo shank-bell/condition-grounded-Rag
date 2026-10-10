@@ -32,19 +32,22 @@ def embed(texts: list[str], batch_size: int = 32) -> np.ndarray:
                               show_progress_bar=False).astype(np.float32)
 
 
-@lru_cache(maxsize=1)
-def _reranker():
+@lru_cache(maxsize=4)
+def _reranker(name: str):
     from sentence_transformers import CrossEncoder
 
     cfg = get_settings()
-    return CrossEncoder(cfg.models.reranker, device=cfg.devices.reranker, max_length=512)
+    # Raw logits for every model: ms-marco-MiniLM returns them by default (the threshold -2.0 is on that scale), but bge-reranker-base squashes them through a
+    # sigmoid unless told not to, which would put every score in (0, 1) and make a threshold in logits meaningless (found 10 Oct).
+    return CrossEncoder(name, device=cfg.devices.reranker, max_length=512, activation_fn=torch.nn.Identity())
 
 
-def rerank_scores(question: str, passages: list[str]) -> list[float]:
-    """Cross-encoder relevance logits for (question, passage) pairs."""
+def rerank_scores(question: str, passages: list[str], model: str | None = None) -> list[float]:
+    """Cross-encoder relevance logits for (question, passage) pairs. `model` names another cross-encoder than the Stage 5 reranker (one is cached per name)."""
     if not passages:
         return []
-    return [float(s) for s in _reranker().predict([(question, p) for p in passages], batch_size=32, show_progress_bar=False)]
+    encoder = _reranker(model or get_settings().models.reranker)
+    return [float(s) for s in encoder.predict([(question, p) for p in passages], batch_size=32, show_progress_bar=False)]
 
 
 class NLI:
