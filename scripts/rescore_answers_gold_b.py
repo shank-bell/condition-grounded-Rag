@@ -1,6 +1,6 @@
 """Re-score the stored answers of the answer-quality test (eval/labels/answer_quality_gold_b.final.json) with a CORRECTED key. No pipeline run.
 
-  python scripts/rescore_answers_gold_b.py
+  python scripts/rescore_answers_gold_b.py [SRC.json OUT.json]       # default: the 8 Oct final run -> answer_quality_gold_b.corrected_key.json
 
 Why: the scorer takes every decimal number of the key's free-text 'facts' as the expected answer and calls an answer correct when it states at least
 half of them. For three questions the facts text lists a whole table row while the question asks for ONE cell, so a right answer scored wrong:
@@ -15,12 +15,13 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
 
 from cgrag.evaluation.answers import is_correct, paired
 
-SRC = Path("eval/labels/answer_quality_gold_b.final.json")
-OUT = Path("eval/labels/answer_quality_gold_b.corrected_key.json")
+SRC = Path(sys.argv[1]) if len(sys.argv) > 2 else Path("eval/labels/answer_quality_gold_b.final.json")
+OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("eval/labels/answer_quality_gold_b.corrected_key.json")
 CORRECTED = {"B-AI-03": ([35.0], "any"), "B-AI-04": ([27.2], "any"), "B-AI-17": ([64.1, 69.5], "any")}
 SYSTEMS = ("full", "no_stage_c67", "llm_only")
 
