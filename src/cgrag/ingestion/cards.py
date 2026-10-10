@@ -27,13 +27,25 @@ def _is_name(value: str | None) -> bool:
     return bool(value) and 1 < len(value.strip()) <= 40
 
 
+def _dataset_label(p: ConditionProfile) -> str | None:
+    """The data set with its version when one is recorded ("SQuAD 2.0"): two tables of one benchmark differ in the version only."""
+    name = (p.dataset or "").strip()
+    if not _is_name(name):
+        return None
+    version = (p.dataset_version or "").strip()
+    return f"{name} {version}" if version and version.lower() not in name.lower() else name
+
+
 def build_card(profiles: list[ConditionProfile]) -> str:
     """'' when the chunk has no profiles (prose without results gets no card)."""
     if not profiles:
         return ""
     parts = []
     for field, limit in MAX_PER_FIELD.items():
-        counts = Counter(getattr(p, field).strip() for p in profiles if _is_name(getattr(p, field)))
+        if field == "dataset":
+            counts = Counter(label for label in map(_dataset_label, profiles) if label)
+        else:
+            counts = Counter(getattr(p, field).strip() for p in profiles if _is_name(getattr(p, field)))
         values = [v for v, _ in counts.most_common(limit)]
         if values:
             parts.append(f"{_LABEL[field]}: {', '.join(values)}")
