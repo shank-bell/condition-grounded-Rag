@@ -1,0 +1,458 @@
+{
+ "name": "baseline_gemma12b_windows_split",
+ "variants": {
+  "baseline_gemma12b_windows_split": {
+   "papers": 43,
+   "gold": 3568,
+   "covered": 2817,
+   "dataset": 1709,
+   "metric": 2209,
+   "task": 1914,
+   "all": 1080,
+   "preds": 3537,
+   "pred_in_gold": 2820,
+   "coverage_pct": 79.0,
+   "macro_coverage_pct": 86.3,
+   "dataset_agree_pct": 60.7,
+   "metric_agree_pct": 78.4,
+   "task_agree_pct": 67.9,
+   "all_three_agree_pct": 38.3,
+   "precision_pct": 79.7,
+   "end_to_end_pct": 30.3
+  }
+ },
+ "per_paper": {
+  "baseline_gemma12b_windows_split": {
+   "1911.10390": {
+    "gold": 89,
+    "covered": 80,
+    "dataset": 48,
+    "metric": 70,
+    "task": 80,
+    "all": 38,
+    "preds": 119,
+    "pred_in_gold": 80
+   },
+   "2001.04063": {
+    "gold": 107,
+    "covered": 102,
+    "dataset": 99,
+    "metric": 82,
+    "task": 63,
+    "all": 40,
+    "preds": 105,
+    "pred_in_gold": 105
+   },
+   "1905.03197": {
+    "gold": 109,
+    "covered": 106,
+    "dataset": 100,
+    "metric": 102,
+    "task": 79,
+    "all": 69,
+    "preds": 116,
+    "pred_in_gold": 108
+   },
+   "1912.08777": {
+    "gold": 249,
+    "covered": 98,
+    "dataset": 82,
+    "metric": 81,
+    "task": 42,
+    "all": 39,
+    "preds": 341,
+    "pred_in_gold": 109
+   },
+   "1906.05012": {
+    "gold": 60,
+    "covered": 48,
+    "dataset": 15,
+    "metric": 48,
+    "task": 48,
+    "all": 15,
+    "preds": 85,
+    "pred_in_gold": 51
+   },
+   "2203.16804": {
+    "gold": 124,
+    "covered": 75,
+    "dataset": 19,
+    "metric": 70,
+    "task": 17,
+    "all": 5,
+    "preds": 118,
+    "pred_in_gold": 83
+   },
+   "1910.13461": {
+    "gold": 189,
+    "covered": 153,
+    "dataset": 97,
+    "metric": 90,
+    "task": 15,
+    "all": 12,
+    "preds": 149,
+    "pred_in_gold": 146
+   },
+   "1908.08345": {
+    "gold": 121,
+    "covered": 80,
+    "dataset": 38,
+    "metric": 46,
+    "task": 80,
+    "all": 17,
+    "preds": 105,
+    "pred_in_gold": 82
+   },
+   "1808.08745": {
+    "gold": 57,
+    "covered": 57,
+    "dataset": 51,
+    "metric": 57,
+    "task": 57,
+    "all": 51,
+    "preds": 83,
+    "pred_in_gold": 52
+   },
+   "2020.findings-emnlp.378": {
+    "gold": 202,
+    "covered": 186,
+    "dataset": 10,
+    "metric": 186,
+    "task": 174,
+    "all": 10,
+    "preds": 251,
+    "pred_in_gold": 189
+   },
+   "1809.08370": {
+    "gold": 122,
+    "covered": 75,
+    "dataset": 3,
+    "metric": 20,
+    "task": 29,
+    "all": 3,
+    "preds": 102,
+    "pred_in_gold": 53
+   },
+   "1806.03489": {
+    "gold": 53,
+    "covered": 51,
+    "dataset": 51,
+    "metric": 51,
+    "task": 51,
+    "all": 51,
+    "preds": 55,
+    "pred_in_gold": 55
+   },
+   "1702.02098": {
+    "gold": 34,
+    "covered": 32,
+    "dataset": 27,
+    "metric": 32,
+    "task": 18,
+    "all": 18,
+    "preds": 40,
+    "pred_in_gold": 36
+   },
+   "1511.08308": {
+    "gold": 164,
+    "covered": 161,
+    "dataset": 148,
+    "metric": 151,
+    "task": 161,
+    "all": 144,
+    "preds": 159,
+    "pred_in_gold": 159
+   },
+   "2020.emnlp-main.523": {
+    "gold": 108,
+    "covered": 103,
+    "dataset": 96,
+    "metric": 100,
+    "task": 96,
+    "all": 92,
+    "preds": 107,
+    "pred_in_gold": 105
+   },
+   "2105.03654": {
+    "gold": 89,
+    "covered": 89,
+    "dataset": 13,
+    "metric": 7,
+    "task": 18,
+    "all": 7,
+    "preds": 120,
+    "pred_in_gold": 103
+   },
+   "128538": {
+    "gold": 22,
+    "covered": 20,
+    "dataset": 19,
+    "metric": 20,
+    "task": 20,
+    "all": 19,
+    "preds": 29,
+    "pred_in_gold": 25
+   },
+   "1903.07785": {
+    "gold": 199,
+    "covered": 123,
+    "dataset": 68,
+    "metric": 74,
+    "task": 20,
+    "all": 7,
+    "preds": 93,
+    "pred_in_gold": 87
+   },
+   "D19-1367": {
+    "gold": 29,
+    "covered": 28,
+    "dataset": 17,
+    "metric": 28,
+    "task": 28,
+    "all": 17,
+    "preds": 29,
+    "pred_in_gold": 27
+   },
+   "C18-1139": {
+    "gold": 82,
+    "covered": 65,
+    "dataset": 31,
+    "metric": 64,
+    "task": 65,
+    "all": 30,
+    "preds": 66,
+    "pred_in_gold": 65
+   },
+   "D18-1279": {
+    "gold": 231,
+    "covered": 97,
+    "dataset": 27,
+    "metric": 51,
+    "task": 71,
+    "all": 25,
+    "preds": 108,
+    "pred_in_gold": 83
+   },
+   "1703.06345": {
+    "gold": 47,
+    "covered": 46,
+    "dataset": 39,
+    "metric": 6,
+    "task": 45,
+    "all": 0,
+    "preds": 41,
+    "pred_in_gold": 41
+   },
+   "1603.01354": {
+    "gold": 97,
+    "covered": 92,
+    "dataset": 34,
+    "metric": 91,
+    "task": 91,
+    "all": 34,
+    "preds": 112,
+    "pred_in_gold": 109
+   },
+   "1709.04109": {
+    "gold": 90,
+    "covered": 62,
+    "dataset": 26,
+    "metric": 54,
+    "task": 54,
+    "all": 23,
+    "preds": 68,
+    "pred_in_gold": 59
+   },
+   "2008.07772": {
+    "gold": 46,
+    "covered": 45,
+    "dataset": 25,
+    "metric": 44,
+    "task": 3,
+    "all": 0,
+    "preds": 52,
+    "pred_in_gold": 51
+   },
+   "1911.09483": {
+    "gold": 45,
+    "covered": 44,
+    "dataset": 40,
+    "metric": 44,
+    "task": 44,
+    "all": 40,
+    "preds": 50,
+    "pred_in_gold": 40
+   },
+   "1901.10430": {
+    "gold": 61,
+    "covered": 47,
+    "dataset": 13,
+    "metric": 46,
+    "task": 40,
+    "all": 13,
+    "preds": 41,
+    "pred_in_gold": 40
+   },
+   "2002.03184": {
+    "gold": 55,
+    "covered": 46,
+    "dataset": 26,
+    "metric": 37,
+    "task": 37,
+    "all": 26,
+    "preds": 50,
+    "pred_in_gold": 46
+   },
+   "wang19f": {
+    "gold": 91,
+    "covered": 52,
+    "dataset": 24,
+    "metric": 52,
+    "task": 52,
+    "all": 24,
+    "preds": 63,
+    "pred_in_gold": 60
+   },
+   "1804.09849": {
+    "gold": 21,
+    "covered": 21,
+    "dataset": 15,
+    "metric": 21,
+    "task": 0,
+    "all": 0,
+    "preds": 26,
+    "pred_in_gold": 25
+   },
+   "D18-1523": {
+    "gold": 24,
+    "covered": 24,
+    "dataset": 24,
+    "metric": 8,
+    "task": 0,
+    "all": 0,
+    "preds": 34,
+    "pred_in_gold": 24
+   },
+   "1905.12598": {
+    "gold": 39,
+    "covered": 39,
+    "dataset": 39,
+    "metric": 13,
+    "task": 0,
+    "all": 0,
+    "preds": 45,
+    "pred_in_gold": 40
+   },
+   "1811.09242": {
+    "gold": 81,
+    "covered": 78,
+    "dataset": 24,
+    "metric": 40,
+    "task": 25,
+    "all": 21,
+    "preds": 130,
+    "pred_in_gold": 82
+   },
+   "1812.10235": {
+    "gold": 39,
+    "covered": 34,
+    "dataset": 34,
+    "metric": 26,
+    "task": 20,
+    "all": 12,
+    "preds": 34,
+    "pred_in_gold": 32
+   },
+   "2020.emnlp-main.152": {
+    "gold": 78,
+    "covered": 55,
+    "dataset": 48,
+    "metric": 21,
+    "task": 39,
+    "all": 15,
+    "preds": 66,
+    "pred_in_gold": 52
+   },
+   "1909.02188": {
+    "gold": 98,
+    "covered": 96,
+    "dataset": 36,
+    "metric": 77,
+    "task": 84,
+    "all": 27,
+    "preds": 97,
+    "pred_in_gold": 97
+   },
+   "1907.00390": {
+    "gold": 58,
+    "covered": 58,
+    "dataset": 58,
+    "metric": 50,
+    "task": 44,
+    "all": 36,
+    "preds": 70,
+    "pred_in_gold": 64
+   },
+   "1812.09471": {
+    "gold": 37,
+    "covered": 37,
+    "dataset": 37,
+    "metric": 37,
+    "task": 27,
+    "all": 27,
+    "preds": 39,
+    "pred_in_gold": 37
+   },
+   "D18-1105": {
+    "gold": 18,
+    "covered": 18,
+    "dataset": 18,
+    "metric": 18,
+    "task": 18,
+    "all": 18,
+    "preds": 19,
+    "pred_in_gold": 18
+   },
+   "N19-1373": {
+    "gold": 37,
+    "covered": 33,
+    "dataset": 32,
+    "metric": 33,
+    "task": 14,
+    "all": 13,
+    "preds": 33,
+    "pred_in_gold": 32
+   },
+   "K19-1036": {
+    "gold": 33,
+    "covered": 33,
+    "dataset": 33,
+    "metric": 33,
+    "task": 33,
+    "all": 33,
+    "preds": 34,
+    "pred_in_gold": 32
+   },
+   "1811.05021": {
+    "gold": 12,
+    "covered": 12,
+    "dataset": 9,
+    "metric": 12,
+    "task": 12,
+    "all": 9,
+    "preds": 29,
+    "pred_in_gold": 13
+   },
+   "1711.05568": {
+    "gold": 21,
+    "covered": 16,
+    "dataset": 16,
+    "metric": 16,
+    "task": 0,
+    "all": 0,
+    "preds": 24,
+    "pred_in_gold": 23
+   }
+  }
+ }
+}
