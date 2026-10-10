@@ -1,0 +1,6 @@
+[paths]
+papers_dir = "data/bench/metalead/papers"
+index_dir = "data/bench/metalead/index"
+profile_db = "data/bench/metalead/index/profiles.sqlite"
+chroma_dir = "data/bench/metalead/index/chroma"
+bm25_path = "data/bench/metalead/index/bm25.pkl"
