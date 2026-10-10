@@ -105,8 +105,10 @@ def test_same_conditions_different_result_is_genuine(store):
 def test_condition_recorded_on_one_side_only_is_not_comparable(store):
     store.add_many([prof("a:1", "a", model="BERT", dataset="SQuAD", value=90.9, setting="dev set"),
                     prof("b:1", "b", model="BERT", dataset="SQuAD", value=84.0)])
-    out = ContradictionResolver(store, ContradictionConfig(), lambda: StubNLI()).resolve("q", [chunk("a:1", "a"), chunk("b:1", "b")])
-    assert [c.verdict for c in out] == ["NOT_COMPARABLE"] and "setting" in out[0].reason
+    out = ContradictionResolver(store, ContradictionConfig(one_sided_conditions_explain=False), lambda: StubNLI()).resolve("q", [chunk("a:1", "a"), chunk("b:1", "b")])
+    assert [c.verdict for c in out] == ["NOT_COMPARABLE"] and "setting" in out[0].reason          # the 10 Oct behaviour (policy B off)
+    now = ContradictionResolver(store, ContradictionConfig(one_sided_conditions_explain=True), lambda: StubNLI()).resolve("q", [chunk("a:1", "a"), chunk("b:1", "b")])
+    assert [c.verdict for c in now] == ["EXPLAINED"] and now[0].differing == ["setting"] and "Probable explanation" in now[0].reason
 
 
 def test_small_numeric_gap_and_same_paper_are_not_flagged(store):
