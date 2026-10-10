@@ -1,0 +1,171 @@
+{
+ "summary": {
+  "questions": 20,
+  "flagged_by_either_%": 100.0,
+  "weak_flag_only_%": 45.0,
+  "scope_warning_only_%": 100.0,
+  "tag": "oct11f"
+ },
+ "rows": [
+  {
+   "question": "What accuracy does ResNet-50 get on ImageNet?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 3,
+   "flagged": true
+  },
+  {
+   "question": "What F1 does GPT-4 get on HotpotQA?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.5,
+   "sources": 3,
+   "flagged": true
+  },
+  {
+   "question": "How well does Gemini perform on MMMU?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 5,
+   "flagged": true
+  },
+  {
+   "question": "What BLEU does Mistral 7B get on WMT22 English-German?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.3333333333333333,
+   "sources": 1,
+   "flagged": true
+  },
+  {
+   "question": "What accuracy does Qwen get on C-Eval?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 4,
+   "flagged": true
+  },
+  {
+   "question": "What is the FID of Stable Diffusion on COCO?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 4,
+   "flagged": true
+  },
+  {
+   "question": "What word error rate does Whisper get on LibriSpeech?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 5,
+   "flagged": true
+  },
+  {
+   "question": "How does YOLOv8 perform on object detection?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 3,
+   "flagged": true
+  },
+  {
+   "question": "What is the Elo of AlphaZero in chess?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 5,
+   "flagged": true
+  },
+  {
+   "question": "What accuracy does ViT-L get on CIFAR-10?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 3,
+   "flagged": true
+  },
+  {
+   "question": "What is the perplexity of Mamba on the Pile?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 3,
+   "flagged": true
+  },
+  {
+   "question": "How well does Claude 3 do on GPQA?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 2,
+   "flagged": true
+  },
+  {
+   "question": "What is the pass@1 of CodeLlama on HumanEval+?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.6666666666666666,
+   "sources": 4,
+   "flagged": true
+  },
+  {
+   "question": "What recall does ColBERT get on MS MARCO?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.5,
+   "sources": 4,
+   "flagged": true
+  },
+  {
+   "question": "What accuracy does PaLM 2 get on BIG-bench Hard?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.5,
+   "sources": 4,
+   "flagged": true
+  },
+  {
+   "question": "How does DALL-E 3 score on human preference?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 3,
+   "flagged": true
+  },
+  {
+   "question": "What is the MT-Bench score of Vicuna?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 2,
+   "flagged": true
+  },
+  {
+   "question": "What F1 does BioBERT get on NCBI-disease?",
+   "weak_flag": true,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 4,
+   "flagged": true
+  },
+  {
+   "question": "What accuracy does Wav2Vec 2.0 get on speech emotion?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.0,
+   "sources": 3,
+   "flagged": true
+  },
+  {
+   "question": "What is the MRR of DPR on Natural Questions Open dev set in Korean?",
+   "weak_flag": false,
+   "scope_warning": true,
+   "coverage": 0.75,
+   "sources": 1,
+   "flagged": true
+  }
+ ]
+}
