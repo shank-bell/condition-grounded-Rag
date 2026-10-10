@@ -10,16 +10,28 @@ eval/labels/ragas_analysis.json (no answers, no per-question rows). The three an
 Each set is scored by two judges: Llama 3.1 8B (independent of the writer) and Gemma 4 12B (the writer's own family). A set must never be read
 as evidence for itself: the loop optimises the score of ITS judge, so "loop_llama scored by Llama" and "loop_same scored by Gemma" are circular;
 "loop_llama scored by Gemma" and "loop_same scored by Llama" are cross-judge checks. The last block counts the correct numbers in the 9 answerable
-gold questions with the corrected key (no language model involved), to see that the loop does not remove right numbers.
+gold questions with the corrected key (no language model involved), to see that the loop does not remove right numbers, and a second judge-free block counts
+the decimal numbers of each answer that occur in the text it was written from ("number grounding"; it cannot tell a right number from one that
+belongs to another model, which is what the judges and the NLI critic are for).
+
+WARNING (10 Oct): the Llama 3.1 8B judge turned out to be unreliable on table-heavy contexts (a hand check found its "unsupported" verdicts wrong for the answers
+read in detail: it misreads tables, does not match "XLMR" with "XLM-R", and garbles the statements it extracts), so its faithfulness figures are kept as measured
+but are not evidence of the answers' faithfulness or of the loop's effect (docs/evaluation_ai_annotated.md, section 4.8).
 """
 from __future__ import annotations
 
 import json
 import random
+import re
 import statistics
 from pathlib import Path
 
+from cgrag.config import get_settings
 from cgrag.evaluation.answers import is_correct, paired, sign_test
+from cgrag.labelling.sampling import load_chunk_index
+from cgrag.pipeline.conditions import claim_text
+from cgrag.pipeline.text import strip_citations
+from cgrag.stores.profile_store import ProfileStore
 
 STORE = Path("data/labelling/private/ragas")
 OUT = Path("eval/labels/ragas_analysis.json")
@@ -49,6 +61,36 @@ def _rewrites(text: str) -> int:
         except ValueError:
             return 1
     return 0
+
+
+_NUMBER = re.compile(r"(?<![\w.])(\d+\.\d+|\d+(?=\s?%))(?![\w])")
+
+
+def number_grounding() -> dict:
+    """Share of the decimal numbers (and whole percentages) in the answers that occur in the passages and recorded results the answer was written from."""
+    cfg = get_settings()
+    idx = load_chunk_index(cfg.paths.index_dir / "chunks.jsonl")
+    profiles = ProfileStore(cfg.paths.profile_db)
+    out = {}
+    for tag in TAGS:
+        recs = json.loads((STORE / f"{tag}.json").read_text(encoding="utf-8"))["records"]
+        total = found = answers = grounded = 0
+        for r in recs:
+            context = "\n".join(idx.texts.get(cid, "") for cid in r["chunks"])
+            context += "\n" + "\n".join(claim_text(p) for ps in profiles.for_chunks(r["chunks"]).values() for p in ps)
+            known = set(_NUMBER.findall(context)) | set(re.findall(r"\d+\.\d+", context))
+            asked = set(_NUMBER.findall(r["question"]))
+            nums = [n for n in _NUMBER.findall(strip_citations(r["answer"])) if n not in asked]
+            if not nums:
+                continue
+            answers += 1
+            hit = sum(n in known for n in nums)
+            total += len(nums)
+            found += hit
+            grounded += hit == len(nums)
+        out[tag] = {"answers_with_numbers": answers, "numbers": total, "numbers_in_context": found, "share_numbers_in_context": round(found / total, 4),
+                    "answers_with_every_number_in_context": grounded, "share_answers_fully_grounded": round(grounded / answers, 3)}
+    return out
 
 
 def main() -> None:
@@ -99,6 +141,7 @@ def main() -> None:
         out["gold_numbers"][t] = {"correct": sum(right[t]), "of": len(cases)}
     for t in TAGS[1:]:
         out["gold_numbers"][t]["against_loop_off"] = paired(right[t], right["loop_off"])
+    out["number_grounding"] = number_grounding()
     OUT.write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
 
     for j, block in out["judges"].items():
@@ -112,6 +155,7 @@ def main() -> None:
                 print(f"{'':14s}vs loop_off: +{a['higher']} -{a['lower']} ={a['equal']}  p={a['sign_test_p']}  diff {a['mean_difference']:+.3f} CI {a['bootstrap_ci95']}  [{a['kind']}]")
     print("\ncost", json.dumps(out["cost"]))
     print("gold numbers", json.dumps(out["gold_numbers"]))
+    print("number grounding", json.dumps(out["number_grounding"]))
     print("wrote", OUT)
 
 
