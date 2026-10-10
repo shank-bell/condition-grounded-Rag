@@ -227,20 +227,68 @@ def _join_fragments(cells: list[str]) -> str:
     return out.strip()
 
 
+def _is_cut_heading(cells: list[str]) -> bool:
+    """A group label that the layout cut at column borders can end in a piece that looks like a number ("(from leaderboard as of Sept. 16, 2" + "019)"
+    cut "2019)" in two), which made the row a result row and lost the block heading ("Ensembles on test") for every row below it (found 10 Oct on ALBERT's
+    GLUE table: four ensemble rows kept the heading of the dev block). A heading has several text pieces, no decimal and at most a lone integer piece."""
+    filled = [c for c in cells[1:] if c not in _DASHES]
+    numeric = [is_numeric_cell(c) for c in filled]
+    decimals = sum(1 for c, ok in zip(filled, numeric) if ok and ("." in c or "/" in c))
+    words = sum(1 for ok in numeric if not ok)
+    return bool(cells[0]) and decimals == 0 and words >= 2 and words >= 2 * sum(numeric)
+
+
+def _vertical_pieces(first: str, second: str) -> bool:
+    """Two labels of neighbouring rows that are one name printed vertically beside a group of rows (Llama 2's tables: "L" over "lama 1"): the first a
+    short run of letters, the second starting in lower case with no capital in it ("lama 1", "lama 2-hat"). A real name such as "mT5" or "mBERT"
+    has a capital, so it is never glued."""
+    return bool(re.fullmatch(r"[A-Za-z]{1,4}", first)) and bool(re.match(r"[a-z]", second)) and not re.search(r"[A-Z]", second)
+
+
 @dataclass
 class _Row:
     label: str
     context: str
     pairs: list[str]
     n_results: int
+    index: int = -1               # position among the result rows (cells of one row share it)
+
+
+_YES_NO = {"yes", "no", "y", "n", "true", "false", "none", "n/a", "na"}
+
+
+def _restated_header(cells: list[str], header: list[str]) -> list[str] | None:
+    """A wide table printed in two halves one above the other repeats a header row of NEW column names in the middle ("| | ka | kk | ko | ... | avg |"
+    under "| Model | af | ar | ... | jv |"; IndicXTREME's "| | | or | pa | sa | sat | ..."). Rows below it belong to the new names, but they were read with the
+    first header (so a value of the second half got the language of the first half's column: found 11 Oct on mT5's WikiAnn / TyDi QA tables and IndicCOPA).
+    Returns the new header, the current header when the row only repeats it, or None when the row is not a header: its cells must be short single-word
+    names (not numbers, not a sentence cut at column borders), at least three, all different, and the row label cell empty or the header's own."""
+    if not header or len(cells) < 4 or abs(len(cells) - len(header)) > 1:
+        return None
+    toks = [c for c in cells[1:] if c]
+    if len(toks) < 3 or len(set(t.lower() for t in toks)) != len(toks):
+        return None
+    if any(len(c) > 8 or not re.fullmatch(r"[A-Za-z][A-Za-z.\-]*", c) or c.lower() in _YES_NO for c in toks):
+        return None
+    if cells[0] and cells[0].lower() != (header[0] or "").lower():
+        return None
+    known = {h.lower() for h in header if h}
+    if sum(1 for c in toks if c.lower() in known) > 0.3 * len(toks):
+        return list(header)                                         # the same names again: only a repeat
+    return (cells + [""] * max(0, len(header) - len(cells)))[:max(len(header), len(cells))]
 
 
 def _rows(t: ParsedTable) -> list[_Row]:
     parsed: list[list] = []                   # [label or "", context, pairs, n_results, context id]
     context, ctx_id = "", 0
+    header = list(t.header)
     for cells in t.rows:
+        restated = _restated_header(cells, header)
+        if restated is not None:
+            header = restated
+            continue
         numeric = [is_numeric_cell(c) for c in cells[1:]]
-        if not any(numeric):                                       # a group label ("Monolingual baselines", "Ours")
+        if not any(numeric) or _is_cut_heading(cells):             # a group label ("Monolingual baselines", "Ours")
             text = _join_fragments([c for c in cells if c])
             if text:
                 context, ctx_id = text, ctx_id + 1
@@ -249,7 +297,7 @@ def _rows(t: ParsedTable) -> list[_Row]:
         for j in range(1, len(cells)):
             if cells[j] in _DASHES:
                 continue
-            name = t.header[j] if j < len(t.header) and t.header[j] else f"column {j + 1}"
+            name = header[j] if j < len(header) and header[j] else f"column {j + 1}"
             pairs.append(f"{name} = {cells[j]}")
         n = sum(len(_PLAIN_NUMBER.findall(c)) for c, ok in zip(cells[1:], numeric) if ok)
         parsed.append([_FOOTNOTE.sub("", cells[0]), context, pairs, n, ctx_id])
@@ -257,16 +305,53 @@ def _rows(t: ParsedTable) -> list[_Row]:
         cur, prev = parsed[i], parsed[i - 1]
         if cur[0] and len(cur[0]) <= 2 and cur[0].isalpha() and cur[0].islower() and prev[0][:1].isupper() and prev[4] == cur[4]:
             prev[0] = cur[0] = cur[0] + prev[0]
+        elif cur[0] and prev[0] and prev[4] == cur[4] and _vertical_pieces(prev[0], cur[0]):
+            prev[0] = cur[0] = prev[0] + cur[0]                    # "Llama 1" written vertically over a group arrives as "L" / "lama 1" (11 Oct)
     labelled = [i for i, r in enumerate(parsed) if r[0]]
+    run = _size_runs([_row_size(r[2]) for r in parsed])
     for i, r in enumerate(parsed):                                 # a group label centred over its rows sits on one of them
         if r[0]:
             continue
         same = [k for k in labelled if parsed[k][4] == r[4]]
+        in_run = {parsed[k][0] for k in same if run[k] is not None and run[k] == run[i]}
+        if len(in_run) == 1:                                       # sizes 7B, 13B, 33B, 65B under one label: a smaller size starts the next model (11 Oct)
+            r[0] = next(iter(in_run))
+            continue
         before = max((k for k in same if k < i), default=None)
         after = min((k for k in same if k > i), default=None)
         pick = after if after is not None and (before is None or after - i <= i - before) else before
         r[0] = parsed[pick][0] if pick is not None else ""
-    return [_Row(r[0], r[1], r[2], r[3]) for r in parsed]
+    return [_Row(r[0], r[1], r[2], r[3], i) for i, r in enumerate(parsed)]
+
+
+_PARAM_COUNT = re.compile(r"^(\d+(?:\.\d+)?)\s?([KMBT])$", re.I)
+_SCALE = {"k": 1e3, "m": 1e6, "b": 1e9, "t": 1e12}
+
+
+def _row_size(pairs: list[str]) -> float | None:
+    """The parameter count written in a row's own size column ("7B", "540B", "110M"), when the row has one."""
+    for pair in pairs:
+        m = _PARAM_COUNT.match(pair.rpartition(" = ")[2].strip())
+        if m:
+            return float(m.group(1)) * _SCALE[m.group(2).lower()]
+    return None
+
+
+def _size_runs(sizes: list[float | None]) -> list[int | None]:
+    """Group consecutive rows whose model sizes grow (7B, 13B, 33B, 65B | 7B, 13B ...): a smaller size than the row above starts a new run. Rows
+    without a size belong to no run."""
+    out: list[int | None] = []
+    run, last = 0, None
+    for s in sizes:
+        if s is None:
+            out.append(None)
+            last = None
+            continue
+        if last is not None and s <= last:
+            run += 1
+        out.append(run)
+        last = s
+    return out
 
 
 def table_views(t: ParsedTable, max_results: int = 30) -> list[str]:
@@ -325,3 +410,24 @@ def split_table_text(text: str, max_chars: int) -> list[str]:
     if cur:
         parts.append("\n".join(head + cur))
     return parts
+
+
+@dataclass
+class Cell:
+    """One result cell of a table with everything that says what it is: the row's label, the block heading above the row, the column name."""
+    row_label: str
+    block: str            # "Single-task single models on dev": the group label above the row ("" when none)
+    column: str           # the column name, with its group label ("Dev EM")
+    text: str             # the cell as written ("86.6/-", "90.2")
+    row: int = -1         # index of the result row (the cells of one row share it: a size column, the other values)
+
+
+def table_cells(t: ParsedTable) -> list[Cell]:
+    """Every non-empty result cell of a parsed table (the same row labels, block headings and column names that `table_views` shows the LLM),
+    kept as data so that a stored result can be checked against the cell it came from (pipeline/grounding.py)."""
+    out: list[Cell] = []
+    for row in _rows(t):
+        for pair in row.pairs:
+            column, _, text = pair.rpartition(" = ")
+            out.append(Cell(row.label, row.context, column, text, row.index))
+    return out
