@@ -93,7 +93,7 @@ TEXT_B = "Human performance on the benchmark stays at 80.3 accuracy across annot
 
 
 def stub_rerank(score):
-    return lambda question, passages: [score] * len(passages)
+    return lambda question, passages, model=None: [score] * len(passages)
 
 
 def test_text_only_disagreement_needs_relevance_shared_words_and_both_directions(store, monkeypatch):
