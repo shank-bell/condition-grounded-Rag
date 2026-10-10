@@ -225,5 +225,31 @@
     "sign_test_p": 1.0
    }
   }
+ },
+ "number_grounding": {
+  "loop_off": {
+   "answers_with_numbers": 25,
+   "numbers": 121,
+   "numbers_in_context": 120,
+   "share_numbers_in_context": 0.9917,
+   "answers_with_every_number_in_context": 24,
+   "share_answers_fully_grounded": 0.96
+  },
+  "loop_same": {
+   "answers_with_numbers": 24,
+   "numbers": 127,
+   "numbers_in_context": 127,
+   "share_numbers_in_context": 1.0,
+   "answers_with_every_number_in_context": 24,
+   "share_answers_fully_grounded": 1.0
+  },
+  "loop_llama": {
+   "answers_with_numbers": 25,
+   "numbers": 107,
+   "numbers_in_context": 106,
+   "share_numbers_in_context": 0.9907,
+   "answers_with_every_number_in_context": 24,
+   "share_answers_fully_grounded": 0.96
+  }
  }
 }
