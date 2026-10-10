@@ -89,3 +89,14 @@ def test_dense_search_over_cards_finds_a_table_its_text_vector_misses(tmp_path, 
         "a:1" in [r.chunk.chunk_id for r in on.retrieve(["Kannada results"], "result")]
     assert "a:1" not in [r.chunk.chunk_id for r in off.retrieve(["Kannada results"], "result")]
     assert "a:1" not in [r.chunk.chunk_id for r in on.retrieve(["How does it work?"], "method")]     # method questions skip the cards
+
+
+def test_a_card_names_the_dataset_version_so_that_two_tables_of_one_benchmark_differ():
+    card_v2 = build_card([prof(1, dataset="SQuAD", dataset_version="2.0", model="BERT-large"), prof(2, dataset="SQuAD", dataset_version="2.0", model="nlnet")])
+    card_v1 = build_card([prof(3, dataset="SQuAD", dataset_version="1.1", model="BERT-large")])
+    assert "SQuAD 2.0" in card_v2 and "SQuAD 1.1" not in card_v2
+    assert "SQuAD 1.1" in card_v1
+    both = build_card([prof(1, dataset="SQuAD", dataset_version="2.0"), prof(2, dataset="SQuAD", dataset_version="1.1"), prof(3, dataset="GLUE")])
+    assert "SQuAD 2.0" in both and "SQuAD 1.1" in both and "GLUE" in both
+    assert build_card([prof(1, dataset="SQuAD 2.0", dataset_version="2.0")]).count("2.0") == 1       # a version already in the name is not repeated
+
