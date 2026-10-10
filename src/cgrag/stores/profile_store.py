@@ -1,6 +1,7 @@
 """Condition Profile Store: SQLite, keyed by chunk_id. Read by stage 6 (with the question) and stage 7 (pairwise)."""
 from __future__ import annotations
 
+import json
 import sqlite3
 import threading
 import time
@@ -23,11 +24,18 @@ CREATE INDEX IF NOT EXISTS idx_profiles_paper ON profiles(paper_id);
 CREATE TABLE IF NOT EXISTS extraction_log (
     paper_id TEXT PRIMARY KEY, chunks_processed INTEGER, profiles INTEGER, llm TEXT, seconds REAL, ts REAL
 );
+-- the repair overlay (ingestion/repair.py): only the fields a rule changed, per profile; `profiles` itself is never rewritten
+CREATE TABLE IF NOT EXISTS profile_repairs (
+    profile_id TEXT PRIMARY KEY, paper_id TEXT NOT NULL, fields TEXT NOT NULL, rules TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_repairs_paper ON profile_repairs(paper_id);
 """
 
 
 class ProfileStore:
-    def __init__(self, path: Path | None = None) -> None:
+    def __init__(self, path: Path | None = None, repaired: bool | None = None) -> None:
+        """`repaired`: read profiles through the repair overlay (None = `[features] profile_repair`); False gives the raw extraction (the evaluation
+        of the repair itself, and the ablation, read the store this way)."""
         path = path or get_settings().paths.profile_db
         path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(path, check_same_thread=False)
@@ -36,6 +44,43 @@ class ProfileStore:
         self._cache: list[ConditionProfile] | None = None          # every profile, for chunks_recording()
         with self.lock:
             self.db.executescript(_SCHEMA)
+        self.repaired = get_settings().features.profile_repair if repaired is None else repaired
+        self._overrides: dict[str, dict] = self._load_overrides() if self.repaired else {}
+
+    # ---- the repair overlay -------------------------------------------------------------------------------------------------------------------
+    def _load_overrides(self) -> dict[str, dict]:
+        with self.lock:
+            return {r[0]: json.loads(r[1]) for r in self.db.execute("SELECT profile_id, fields FROM profile_repairs")}
+
+    def set_repairs(self, paper_id: str, raw: list[ConditionProfile], fixed: list[ConditionProfile], rules: dict[str, list[str]] | None = None) -> int:
+        """Store, for one paper, the fields in which `fixed[i]` differs from `raw[i]` (replaces the paper's earlier overlay). Returns the number of
+        repaired profiles."""
+        rows = []
+        for a, b in zip(raw, fixed):
+            diff = {c: getattr(b, c) for c in _COLS if c not in ("profile_id", "paper_id", "chunk_id", "methods_chunk_id", "evidence")
+                    and (getattr(a, c) or None) != (getattr(b, c) or None)}
+            if diff:
+                rows.append((a.profile_id, paper_id, json.dumps(diff, ensure_ascii=False), json.dumps((rules or {}).get(a.profile_id, []))))
+        with self.lock, self.db:
+            self.db.execute("DELETE FROM profile_repairs WHERE paper_id=?", (paper_id,))
+            self.db.executemany("INSERT OR REPLACE INTO profile_repairs VALUES (?,?,?,?)", rows)
+        if self.repaired:
+            self._overrides = self._load_overrides()
+        self._cache = None
+        return len(rows)
+
+    def clear_repairs(self, paper_id: str | None = None) -> None:
+        with self.lock, self.db:
+            if paper_id is None:
+                self.db.execute("DELETE FROM profile_repairs")
+            else:
+                self.db.execute("DELETE FROM profile_repairs WHERE paper_id=?", (paper_id,))
+        self._overrides = self._load_overrides() if self.repaired else {}
+        self._cache = None
+
+    def repair_count(self) -> int:
+        with self.lock:
+            return self.db.execute("SELECT COUNT(*) FROM profile_repairs").fetchone()[0]
 
     def add_many(self, profiles: list[ConditionProfile]) -> None:
         rows = [tuple(getattr(p, c) for c in _COLS) for p in profiles]
@@ -57,11 +102,14 @@ class ProfileStore:
         with self.lock, self.db:
             self.db.execute("DELETE FROM profiles WHERE paper_id=?", (paper_id,))
             self.db.execute("DELETE FROM extraction_log WHERE paper_id=?", (paper_id,))
+            self.db.execute("DELETE FROM profile_repairs WHERE paper_id=?", (paper_id,))
             self._cache = None
+        self._overrides = {k: v for k, v in self._overrides.items() if not k.startswith(f"{paper_id}:")}
 
-    @staticmethod
-    def _row(r: sqlite3.Row) -> ConditionProfile:
-        return ConditionProfile(**{c: r[c] for c in _COLS})
+    def _row(self, r: sqlite3.Row) -> ConditionProfile:
+        p = ConditionProfile(**{c: r[c] for c in _COLS})
+        ov = self._overrides.get(p.profile_id)
+        return p.model_copy(update=ov) if ov else p
 
     def for_chunks(self, chunk_ids: list[str]) -> dict[str, list[ConditionProfile]]:
         """Profiles grouped by chunk_id (chunks without any profile are absent)."""
@@ -129,10 +177,10 @@ class ProfileStore:
         """Distinct values recorded per condition field: the names the paper store already knows."""
         from ..pipeline.conditions import is_nullish
         out: dict[str, list[str]] = {}
-        with self.lock:
-            for field in ("dataset", "model", "language", "task"):
-                rows = self.db.execute(f"SELECT DISTINCT {field} FROM profiles WHERE {field} IS NOT NULL").fetchall()
-                out[field] = [r[0] for r in rows if not is_nullish(r[0])]
+        profiles = self._cached()                                   # through the repair overlay, like every other read
+        for field in ("dataset", "model", "language", "task"):
+            values = {getattr(p, field) for p in profiles if getattr(p, field) is not None}
+            out[field] = sorted(v for v in values if not is_nullish(v))
         return out
 
     def paper_count(self) -> int:
