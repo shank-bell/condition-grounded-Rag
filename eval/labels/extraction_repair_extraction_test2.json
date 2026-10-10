@@ -1,0 +1,106 @@
+{
+  "lenient": {
+    "stored": {
+      "micro": [
+        90.6,
+        90.1,
+        90.3
+      ],
+      "per_field_f1": {
+        "model": 92.6,
+        "dataset": 83.0,
+        "dataset_version": 100.0,
+        "metric": 93.6,
+        "value": 100.0,
+        "language": 98.4,
+        "task": 90.4,
+        "model_size": 96.3,
+        "setting": 58.4
+      },
+      "fully_right": "35/94 = 37.2 %",
+      "fully_right_by_group": {
+        "unseen": "35/94"
+      }
+    },
+    "repaired": {
+      "micro": [
+        94.2,
+        93.7,
+        94.0
+      ],
+      "per_field_f1": {
+        "model": 92.6,
+        "dataset": 83.0,
+        "dataset_version": 100.0,
+        "metric": 93.6,
+        "value": 100.0,
+        "language": 98.4,
+        "task": 91.5,
+        "model_size": 99.5,
+        "setting": 87.1
+      },
+      "fully_right": "57/94 = 60.6 %",
+      "fully_right_by_group": {
+        "unseen": "57/94"
+      }
+    },
+    "fully_right_sign_test": {
+      "repaired_better": 23,
+      "stored_better": 1,
+      "p": 0.0
+    }
+  },
+  "strict": {
+    "stored": {
+      "micro": [
+        85.1,
+        84.6,
+        84.9
+      ],
+      "per_field_f1": {
+        "model": 79.8,
+        "dataset": 70.2,
+        "dataset_version": 100.0,
+        "metric": 83.0,
+        "value": 100.0,
+        "language": 98.4,
+        "task": 89.4,
+        "model_size": 96.3,
+        "setting": 46.5
+      },
+      "fully_right": "21/94 = 22.3 %",
+      "fully_right_by_group": {
+        "unseen": "21/94"
+      }
+    },
+    "repaired": {
+      "micro": [
+        90.3,
+        89.8,
+        90.0
+      ],
+      "per_field_f1": {
+        "model": 79.8,
+        "dataset": 79.8,
+        "dataset_version": 100.0,
+        "metric": 84.0,
+        "value": 100.0,
+        "language": 98.4,
+        "task": 90.4,
+        "model_size": 99.5,
+        "setting": 78.5
+      },
+      "fully_right": "37/94 = 39.4 %",
+      "fully_right_by_group": {
+        "unseen": "37/94"
+      }
+    },
+    "fully_right_sign_test": {
+      "repaired_better": 16,
+      "stored_better": 0,
+      "p": 0.0
+    }
+  },
+  "n_items": 100,
+  "not_a_result": 6
+}
