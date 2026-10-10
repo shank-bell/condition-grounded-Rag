@@ -1,0 +1,6 @@
+# Ablation overlay (11 Oct 2026): keep the REPAIRED profile store for Stages 6 / 7 / 8, but retrieve with the retrieval cards and keyword index that were
+# built from the RAW (unrepaired) profiles - the index of 10 Oct, backed up before the repair. Isolates what the repaired cards do to Stage 4.
+#   $env:CGRAG_OVERLAY = "config/raw_cards_oct11.toml"
+[paths]
+chroma_dir = "data/index_exp/bak_oct11_before_repair/chroma"
+bm25_path = "data/index_exp/bak_oct11_before_repair/bm25.pkl"
