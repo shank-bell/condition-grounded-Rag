@@ -1,0 +1,454 @@
+{
+ "summary": {
+  "questions_scored": 28,
+  "skipped_no_page_evidence": [
+   "B-AI-10",
+   "B-AI-12"
+  ],
+  "hit@20": 92.9,
+  "hit@5(rerank)": 78.6,
+  "hit@kept(rerank threshold)": 92.9,
+  "paper_hit@5": 89.3,
+  "MRR(rerank order)": 0.577,
+  "mean_kept": 9.25,
+  "tag": "oct11_repair",
+  "reranker_threshold": -3.0,
+  "use_cards": true,
+  "hit@5 covered (n=10)": 90.0,
+  "hit@5 one missing (n=8)": 87.5,
+  "hit@5 partly covered (n=10)": 60.0
+ },
+ "rows": [
+  {
+   "id": "B-AI-01",
+   "planned_type": "covered",
+   "n_relevant": 6,
+   "pages": [
+    "1810.04805 p7"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.3333333333333333,
+   "rank_first": 3,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-02",
+   "planned_type": "covered",
+   "n_relevant": 8,
+   "pages": [
+    "1911.02116 p8",
+    "2010.11934 p15"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.5,
+   "rank_first": 2,
+   "paper_hit5": true,
+   "kept": 6
+  },
+  {
+   "id": "B-AI-03",
+   "planned_type": "covered",
+   "n_relevant": 5,
+   "pages": [
+    "2302.13971 p4"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-04",
+   "planned_type": "covered",
+   "n_relevant": 2,
+   "pages": [
+    "2005.14165 p15"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-05",
+   "planned_type": "covered",
+   "n_relevant": 5,
+   "pages": [
+    "2103.10730 p7"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.5,
+   "rank_first": 2,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-06",
+   "planned_type": "covered",
+   "n_relevant": 2,
+   "pages": [
+    "2010.11934 p16"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-07",
+   "planned_type": "covered",
+   "n_relevant": 4,
+   "pages": [
+    "2212.05409 p21"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-08",
+   "planned_type": "covered",
+   "n_relevant": 3,
+   "pages": [
+    "2010.11934 p5"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 5
+  },
+  {
+   "id": "B-AI-09",
+   "planned_type": "covered",
+   "n_relevant": 8,
+   "pages": [
+    "2003.10555 p1",
+    "2003.10555 p2",
+    "2003.10555 p3"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-11",
+   "planned_type": "one missing",
+   "n_relevant": 10,
+   "pages": [
+    "1809.05053 p8",
+    "1911.02116 p7",
+    "2212.05409 p20"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-13",
+   "planned_type": "one missing",
+   "n_relevant": 8,
+   "pages": [
+    "1911.02116 p8",
+    "2010.11934 p15"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.5,
+   "rank_first": 2,
+   "paper_hit5": true,
+   "kept": 9
+  },
+  {
+   "id": "B-AI-14",
+   "planned_type": "one missing",
+   "n_relevant": 4,
+   "pages": [
+    "2005.14165 p18"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-15",
+   "planned_type": "one missing",
+   "n_relevant": 6,
+   "pages": [
+    "2302.13971 p18",
+    "2302.13971 p7"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.3333333333333333,
+   "rank_first": 3,
+   "paper_hit5": true,
+   "kept": 5
+  },
+  {
+   "id": "B-AI-16",
+   "planned_type": "one missing",
+   "n_relevant": 5,
+   "pages": [
+    "2302.13971 p4"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.5,
+   "rank_first": 2,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-17",
+   "planned_type": "covered",
+   "n_relevant": 3,
+   "pages": [
+    "2004.02984 p7"
+   ],
+   "hit20": true,
+   "hit5": false,
+   "hit_kept": true,
+   "rr": 0.14285714285714285,
+   "rank_first": 7,
+   "paper_hit5": false,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-18",
+   "planned_type": "one missing",
+   "n_relevant": 3,
+   "pages": [
+    "1810.04805 p6"
+   ],
+   "hit20": false,
+   "hit5": false,
+   "hit_kept": false,
+   "rr": 0.0,
+   "rank_first": null,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-19",
+   "planned_type": "one missing",
+   "n_relevant": 11,
+   "pages": [
+    "2103.10730 p7",
+    "2103.10730 p8"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 9
+  },
+  {
+   "id": "B-AI-20",
+   "planned_type": "one missing",
+   "n_relevant": 4,
+   "pages": [
+    "2212.05409 p21"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-21",
+   "planned_type": "partly covered",
+   "n_relevant": 9,
+   "pages": [
+    "1911.02116 p7",
+    "2103.10730 p7"
+   ],
+   "hit20": true,
+   "hit5": false,
+   "hit_kept": true,
+   "rr": 0.14285714285714285,
+   "rank_first": 7,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-22",
+   "planned_type": "partly covered",
+   "n_relevant": 11,
+   "pages": [
+    "1911.02116 p7",
+    "1911.02116 p8"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.5,
+   "rank_first": 2,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-23",
+   "planned_type": "partly covered",
+   "n_relevant": 4,
+   "pages": [
+    "1911.02116 p7"
+   ],
+   "hit20": true,
+   "hit5": false,
+   "hit_kept": true,
+   "rr": 0.16666666666666666,
+   "rank_first": 6,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-24",
+   "planned_type": "partly covered",
+   "n_relevant": 4,
+   "pages": [
+    "2302.13971 p6"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.2,
+   "rank_first": 5,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-25",
+   "planned_type": "partly covered",
+   "n_relevant": 7,
+   "pages": [
+    "1810.04805 p6",
+    "1810.04805 p8"
+   ],
+   "hit20": false,
+   "hit5": false,
+   "hit_kept": false,
+   "rr": 0.0,
+   "rank_first": null,
+   "paper_hit5": false,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-26",
+   "planned_type": "partly covered",
+   "n_relevant": 2,
+   "pages": [
+    "2307.09288 p70"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.3333333333333333,
+   "rank_first": 3,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-27",
+   "planned_type": "partly covered",
+   "n_relevant": 5,
+   "pages": [
+    "2103.10730 p7"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.5,
+   "rank_first": 2,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-28",
+   "planned_type": "partly covered",
+   "n_relevant": 1,
+   "pages": [
+    "2010.11934 p15"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 1.0,
+   "rank_first": 1,
+   "paper_hit5": true,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-29",
+   "planned_type": "partly covered",
+   "n_relevant": 3,
+   "pages": [
+    "1810.04805 p6"
+   ],
+   "hit20": true,
+   "hit5": false,
+   "hit_kept": true,
+   "rr": 0.16666666666666666,
+   "rank_first": 6,
+   "paper_hit5": false,
+   "kept": 10
+  },
+  {
+   "id": "B-AI-30",
+   "planned_type": "partly covered",
+   "n_relevant": 3,
+   "pages": [
+    "2010.11934 p4"
+   ],
+   "hit20": true,
+   "hit5": true,
+   "hit_kept": true,
+   "rr": 0.3333333333333333,
+   "rank_first": 3,
+   "paper_hit5": true,
+   "kept": 5
+  }
+ ]
+}
