@@ -25,7 +25,8 @@ class LLMConfig(BaseModel):
 
 class ModelsConfig(BaseModel):
     embedder: str = "BAAI/bge-m3"
-    reranker: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    reranker: str = "BAAI/bge-reranker-base"
+    text_relevance: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     nli: str = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
     query_classifier: str = "allenai/scibert_scivocab_uncased"
 
@@ -56,7 +57,7 @@ class RetrievalConfig(BaseModel):
     rrf_k: int = 60
     fused_top: int = 20
     rerank_keep: int = 10
-    rerank_threshold: float = -2.0
+    rerank_threshold: float = -3.0
     section_boost: float = 0.15
     generate_top: int = 5
     use_cards: bool = True
@@ -73,6 +74,8 @@ class ContradictionConfig(BaseModel):
     human_rows_not_comparable: bool = True
     two_metric_tasks_no_genuine: bool = True
     mnli_split_tags: bool = True
+    one_sided_conditions_explain: bool = True
+    table_grounding: bool = True
 
 
 class CriticConfig(BaseModel):
@@ -112,7 +115,9 @@ class FeaturesConfig(BaseModel):
     escalation: bool = False
     profile_guided_retrieval: bool = False
     joint_coverage: bool = False
+    joint_setting: bool = True
     ragas_loop: bool = False
+    profile_repair: bool = True
 
 
 class Settings(BaseModel):
@@ -151,6 +156,9 @@ def get_settings() -> Settings:
     local = ROOT / "config.local.toml"
     if local.exists():
         data = _deep_merge(data, tomllib.loads(local.read_text(encoding="utf-8")))
+    overlay = os.environ.get("CGRAG_OVERLAY")
+    if overlay:
+        data = _deep_merge(data, tomllib.loads(Path(overlay).read_text(encoding="utf-8")))
     settings = Settings.model_validate(data)
     settings.paths = _absolutize(settings.paths)
     return settings
