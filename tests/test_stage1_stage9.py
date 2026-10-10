@@ -249,3 +249,88 @@ def test_answer_without_citations_is_checked_against_all_sources():
     sources = [rc("c1", "Model A reaches 70.5 accuracy on the test set."), rc("c2", "Other text about training details only.")]
     checks = ClaimChecker(CriticConfig(), lambda: StubNLI()).check("Model A reaches 70.5 accuracy on the test set.", sources, {})
     assert len(checks) == 1 and checks[0].supported and checks[0].chunk_id == "c1"
+
+
+# ---------- stage 1: hyphenated languages and the second reading (10 Oct) ----------
+
+def test_a_language_next_to_a_hyphen_or_slash_is_found():
+    from cgrag.pipeline.query_understanding import extras_from_vocabulary, vocabulary_conditions
+    vocab = {"model": ["mT5"], "dataset": ["XQuAD"], "language": [], "task": []}
+    assert vocabulary_conditions("What BLEU does Mistral 7B get on WMT22 English-German?", vocab)["language"] == "English"
+    assert extras_from_vocabulary("What BLEU does Mistral 7B get on WMT22 English-German?", vocab, {"language": "English"}) == {"other_languages": ["German"]}
+    assert extras_from_vocabulary("BLEU for English-to-German and Hindi/English translation", vocab, {"language": "English"}) == {"other_languages": ["German", "Hindi"]}
+    # a language is still not found inside a longer word
+    assert "language" not in vocabulary_conditions("How is Thailand's economy modelled?", vocab)
+    assert "language" not in vocabulary_conditions("Which Malayalam model is best?", vocab) or vocabulary_conditions("Which Malayalam model is best?", vocab)["language"] == "Malayalam"
+
+
+class _FailsOnTheFullReading:
+    """The full reading raises (invalid JSON, a runaway list); the second reading answers from the single-valued schema."""
+
+    def __init__(self, lite=None):
+        self.lite = lite
+        self.calls: list[str] = []
+
+    def structured(self, prompt, model_cls, **kwargs):
+        self.calls.append(model_cls.__name__)
+        if model_cls is QueryAnalysis or self.lite is None:
+            raise ValueError("LLM did not return valid JSON")
+        return self.lite, None
+
+
+def test_a_failed_full_reading_gets_a_second_reading_and_the_further_languages_come_from_the_question():
+    from cgrag.pipeline.query_understanding import QueryUnderstanding, _AnalysisLite, _ConditionsLite
+    lite = _AnalysisLite(intent="result", complexity="simple",
+                         conditions=_ConditionsLite(task="translation", dataset="WMT22", language="English", model="Mistral 7B"))
+    llm = _FailsOnTheFullReading(lite)
+    got = QueryUnderstanding(llm, classifier=None, profiles=StubProfiles()).analyze("What BLEU does Mistral 7B get on WMT22 English-German?")
+    assert llm.calls == ["QueryAnalysis", "_AnalysisLite"]
+    assert got.conditions.specified() == {"dataset": "WMT22", "language": "English", "model": "Mistral 7B"}      # "translation" is implied, not written: dropped as before
+    assert got.conditions.other_languages == ["German"] and got.intent == "result"
+
+
+def test_when_both_readings_fail_the_names_found_in_the_question_still_give_conditions():
+    from cgrag.pipeline.query_understanding import QueryUnderstanding
+    llm = _FailsOnTheFullReading(None)
+    got = QueryUnderstanding(llm, classifier=None, profiles=StubProfiles()).analyze("What BLEU does Mistral 7B get on WMT22 English-German?")
+    assert llm.calls == ["QueryAnalysis", "_AnalysisLite"]
+    assert got.conditions.language == "English" and got.conditions.other_languages == ["German"]      # no longer "conditions = none"
+
+
+def test_a_good_full_reading_does_not_trigger_the_second_reading():
+    from cgrag.pipeline.query_understanding import QueryUnderstanding
+
+    class Ok(_FailsOnTheFullReading):
+        def structured(self, prompt, model_cls, **kwargs):
+            self.calls.append(model_cls.__name__)
+            return QueryAnalysis(intent="result", conditions=QueryConditions(model="mT5", language="Arabic")), None
+
+    llm = Ok()
+    QueryUnderstanding(llm, classifier=None, profiles=StubProfiles()).analyze("What accuracy does mT5 get on XQuAD for Arabic?")
+    assert llm.calls == ["QueryAnalysis"]
+
+
+def test_an_n_shot_setting_named_in_the_question_is_a_condition():
+    """Found 11 Oct: "in the 5-shot setting" was deleted as 'not an evaluation setting' (setting_tags knows no N-shot tag), so a question about 5-shot
+    results never got its scope warning once the data set name was stored correctly."""
+    from cgrag.pipeline.query_understanding import _n_shot, vocabulary_conditions
+    q = "What accuracy does LLaMA 65B get on HellaSwag in the 5-shot setting?"
+    assert _n_shot(q) == "5-shot"
+    assert _n_shot("with a five shot prompt") == "5-shot" and _n_shot("in the 0-shot setting") == "zero-shot" and _n_shot("one-shot") == "1-shot"
+    assert _n_shot("a shot of espresso") is None and _n_shot("the 2019-shotgun") is None
+    kept = clean_conditions(QueryConditions(model="LLaMA 65B", dataset="HellaSwag", setting="5-shot"), q)
+    assert kept.setting == "5-shot"
+    assert vocabulary_conditions(q, {}).get("setting") == "5-shot"                     # read literally when the LLM left it out
+    assert clean_conditions(QueryConditions(model="BERT", setting="human"), "How well does BERT do against a human?").setting is None
+
+
+def test_a_task_that_is_only_a_setting_word_is_filed_as_the_setting():
+    """Seen 11 Oct: "BERT-base on MNLI in the zero-shot setting" came back with task = zero-shot, which no profile can record."""
+    q = "What accuracy does BERT-base get on MNLI in the zero-shot setting?"
+    got = clean_conditions(QueryConditions(task="zero-shot", dataset="MNLI", model="BERT-base"), q)
+    assert got.task is None and got.setting == "zero-shot"
+    got = clean_conditions(QueryConditions(task="zero-shot", setting="zero-shot", dataset="MNLI"), q)
+    assert got.task is None and got.setting == "zero-shot"
+    real = clean_conditions(QueryConditions(task="few-shot learning", model="GPT-3"), "How well does GPT-3 do at few-shot learning?")
+    assert real.task == "few-shot learning"                    # a longer phrase can be a task
+
