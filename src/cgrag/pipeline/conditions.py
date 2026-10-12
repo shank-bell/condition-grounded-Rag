@@ -244,7 +244,24 @@ def is_regime_setting(text: str | None) -> bool:
     return bool(text) and (bool(setting_tags(text) & _REGIME_TAGS) or bool(N_SHOT.search(text)))
 
 
-def differing_conditions(a: ConditionProfile, b: ConditionProfile) -> list[str]:
+_SETTING_DIMENSIONS = (
+    frozenset({"dev", "test", "train"}),
+    frozenset({"single", "ensemble"}),
+    frozenset({"zero-shot", "few-shot", "fine-tuned", "translate-train", "translate-test", "feature-based"}),
+    frozenset({"in-domain", "out-of-domain"}),
+)
+
+
+def setting_differs(ta: frozenset[str] | set[str], tb: frozenset[str] | set[str]) -> bool:
+    """True when the two tag sets disagree in a kind of setting that both record (split, system kind, regime, domain)."""
+    ta, tb = set(ta), set(tb)
+    for tags in (ta, tb):
+        if tags & {"translate-train", "translate-test"}:
+            tags -= {"train", "test"}
+    return any((ta & dim) and (tb & dim) and (ta & dim) != (tb & dim) for dim in _SETTING_DIMENSIONS)
+
+
+def differing_conditions(a: ConditionProfile, b: ConditionProfile, aligned: bool = True) -> list[str]:
     """Condition fields that are recorded on both profiles with different values (dataset and metric are
     the shared subject of the comparison, so they are not listed). The free-text task is not compared: labels
     such as 'cross-lingual classification' vs 'sentence pair question answering' are extraction noise, not conditions."""
@@ -254,7 +271,7 @@ def differing_conditions(a: ConditionProfile, b: ConditionProfile) -> list[str]:
         if va and vb and not values_match(f, va[0], vb[0]):
             diffs.append(f)
     ta, tb = setting_tags(a.setting), setting_tags(b.setting)
-    if ta and tb and ta != tb:
+    if ta and tb and (setting_differs(ta, tb) if aligned else ta != tb):
         diffs.append("setting")
     return diffs
 
@@ -266,9 +283,34 @@ def _recorded(p: ConditionProfile, field: str) -> bool:
     return bool(setting_tags(p.setting)) if field == "setting" else bool(observed_values(p, field))
 
 
-def unrecorded_conditions(a: ConditionProfile, b: ConditionProfile) -> list[str]:
-    """Result-changing conditions recorded on one profile but missing on the other."""
-    return [f for f in _RESULT_CHANGING if _recorded(a, f) != _recorded(b, f)]
+_UNMARKED = frozenset({"single", "fine-tuned"})
+_MULTILINGUAL = ("xquad", "mlqa", "tydi", "xnli", "pawsx", "panx", "wikiann", "udpos", "tatoeba", "indicxnli", "indiccopa", "xcopa", "mewsli", "flores", "massive")
+
+
+def _marked(tags) -> frozenset[str]:
+    """The tags of a setting that carry information (split, ensemble, zero-/few-shot, translate-*, feature-based, domain)."""
+    t = set(tags)
+    if t & {"translate-train", "translate-test"}:
+        t -= {"train", "test"}
+    return frozenset(t - _UNMARKED)
+
+
+def unrecorded_conditions(a: ConditionProfile, b: ConditionProfile, aligned: bool = True) -> list[str]:
+    """Result-changing conditions recorded on one profile but missing on the other. With `aligned` (11 Oct): two settings that both say something are
+    one-sided only where an informative tag (split, ensemble, zero-shot ...) is stated by one paper and not by the other; "single model test set" against
+    "fine-tuned test set" says the same about the conditions. A language counts for the multilingual data sets (a result without a language is one of
+    their languages)."""
+    out = []
+    for f in _RESULT_CHANGING:
+        if f == "setting" and aligned:
+            ta, tb = setting_tags(a.setting), setting_tags(b.setting)
+            if bool(ta) != bool(tb) or (ta and tb and _marked(ta) != _marked(tb)):
+                out.append(f)
+        elif _recorded(a, f) != _recorded(b, f):
+            out.append(f)
+    if aligned and any(norm(p.dataset).startswith(_MULTILINGUAL) for p in (a, b) if p.dataset)             and bool(observed_values(a, "language")) != bool(observed_values(b, "language")):
+        out.append("language")
+    return out
 
 
 def claim_text(p: ConditionProfile) -> str:
