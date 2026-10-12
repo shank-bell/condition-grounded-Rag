@@ -1,0 +1,167 @@
+{
+ "grid": {
+  "z_weights": [
+   0.25,
+   0.5,
+   1.0,
+   2.0
+  ],
+  "rank_weights": [
+   0.5,
+   1.0
+  ],
+  "rrf_k": 60
+ },
+ "sets": {
+  "store_made": {
+   "rerank": {
+    "questions": 190,
+    "hit@3": 93.2,
+    "hit@5": 96.8,
+    "MRR": 0.842
+   },
+   "rrf": {
+    "questions": 190,
+    "hit@3": 77.4,
+    "hit@5": 85.8,
+    "MRR": 0.671,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 22,
+    "sign_test_p": 0.0
+   },
+   "z+0.25": {
+    "questions": 190,
+    "hit@3": 92.6,
+    "hit@5": 96.8,
+    "MRR": 0.859,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 1,
+    "sign_test_p": 1.0
+   },
+   "z+0.5": {
+    "questions": 190,
+    "hit@3": 92.1,
+    "hit@5": 96.3,
+    "MRR": 0.85,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 2,
+    "sign_test_p": 1.0
+   },
+   "z+1.0": {
+    "questions": 190,
+    "hit@3": 89.5,
+    "hit@5": 94.7,
+    "MRR": 0.802,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 5,
+    "sign_test_p": 0.2188
+   },
+   "z+2.0": {
+    "questions": 190,
+    "hit@3": 85.8,
+    "hit@5": 93.7,
+    "MRR": 0.769,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 7,
+    "sign_test_p": 0.0703
+   },
+   "rank+0.5": {
+    "questions": 190,
+    "hit@3": 91.6,
+    "hit@5": 96.3,
+    "MRR": 0.853,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 2,
+    "sign_test_p": 1.0
+   },
+   "rank+1.0": {
+    "questions": 190,
+    "hit@3": 88.9,
+    "hit@5": 95.3,
+    "MRR": 0.809,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 4,
+    "sign_test_p": 0.375
+   }
+  },
+  "gold": {
+   "rerank": {
+    "questions": 28,
+    "hit@3": 75.0,
+    "hit@5": 78.6,
+    "MRR": 0.585,
+    "paper_hit@5": 89.3
+   },
+   "rrf": {
+    "questions": 28,
+    "hit@3": 60.7,
+    "hit@5": 71.4,
+    "MRR": 0.423,
+    "paper_hit@5": 82.1,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 3,
+    "sign_test_p": 0.625
+   },
+   "z+0.25": {
+    "questions": 28,
+    "hit@3": 78.6,
+    "hit@5": 82.1,
+    "MRR": 0.571,
+    "paper_hit@5": 92.9,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 0,
+    "sign_test_p": 1.0
+   },
+   "z+0.5": {
+    "questions": 28,
+    "hit@3": 78.6,
+    "hit@5": 85.7,
+    "MRR": 0.601,
+    "paper_hit@5": 92.9,
+    "gained_vs_rerank": 2,
+    "lost_vs_rerank": 0,
+    "sign_test_p": 0.5
+   },
+   "z+1.0": {
+    "questions": 28,
+    "hit@3": 71.4,
+    "hit@5": 78.6,
+    "MRR": 0.607,
+    "paper_hit@5": 85.7,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 1,
+    "sign_test_p": 1.0
+   },
+   "z+2.0": {
+    "questions": 28,
+    "hit@3": 67.9,
+    "hit@5": 75.0,
+    "MRR": 0.534,
+    "paper_hit@5": 85.7,
+    "gained_vs_rerank": 1,
+    "lost_vs_rerank": 2,
+    "sign_test_p": 1.0
+   },
+   "rank+0.5": {
+    "questions": 28,
+    "hit@3": 75.0,
+    "hit@5": 85.7,
+    "MRR": 0.629,
+    "paper_hit@5": 92.9,
+    "gained_vs_rerank": 2,
+    "lost_vs_rerank": 0,
+    "sign_test_p": 0.5
+   },
+   "rank+1.0": {
+    "questions": 28,
+    "hit@3": 75.0,
+    "hit@5": 85.7,
+    "MRR": 0.593,
+    "paper_hit@5": 92.9,
+    "gained_vs_rerank": 2,
+    "lost_vs_rerank": 0,
+    "sign_test_p": 0.5
+   }
+  }
+ }
+}
