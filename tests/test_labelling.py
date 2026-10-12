@@ -230,3 +230,20 @@ def test_job_c_round_trip_kappa_gold_and_system_score(tmp_path):
     score = score_system_c(gold, key)
     assert score["pairs"] == 3 and score["accuracy"] == pytest.approx(2 / 3, abs=1e-3)
     assert score["per_class"]["GENUINE"]["recall"] == 0.0 and score["condition_attribution"]["exact_match"] == 1.0
+
+
+def test_condition_naming_is_split_into_recall_and_precision():
+    """The exact match of the named conditions is also reported as 'names every condition of the key' and 'names more than the key' (11 Oct)."""
+    gold = {p: {"verdict": "EXPLAINED", "differs": d, "extraction_error": False}
+            for p, d in {"A": ["model size"], "B": ["setting"], "C": ["language", "model size"], "D": ["dataset version / split"]}.items()}
+    system = {"A": ["model_size"],
+              "B": ["setting", "model_size"],
+              "C": ["language"],
+              "D": ["setting"]}
+    key = {p: {"system_verdict": "EXPLAINED", "system_differing": d} for p, d in system.items()}
+    named = score_system_c(gold, key)["condition_attribution_merged"]
+    assert named["pairs"] == 4 and named["exact_match"] == pytest.approx(0.5)
+    assert named["all_key_conditions_named"] == pytest.approx(0.75)
+    assert named["names_conditions_beyond_key"] == pytest.approx(0.25)
+    assert named["mean_recall"] == pytest.approx((1 + 1 + 0.5 + 1) / 4)
+    assert named["mean_precision"] == pytest.approx((1 + 0.5 + 1 + 1) / 4)
