@@ -55,13 +55,20 @@ def select_sources(kept: list[RetrievedChunk], conflicts: list[ContradictionPair
     return sources
 
 
-def _relevance(p: ConditionProfile, requested: dict[str, str]) -> int:
-    """How many of the question's conditions this recorded result satisfies."""
-    return sum(any(values_match(f, wanted, v) for v in observed_values(p, f)) for f, wanted in requested.items())
+def _relevance(p: ConditionProfile, requested: dict[str, str | list[str]]) -> int:
+    """How many of the question's conditions this recorded result satisfies. A condition the question names with several values ("Hindi and Tamil",
+    "MuRIL and mBERT") is satisfied by any of them, so the result of each named language or system is listed before the results of the others
+    (found 11 Oct: with one wanted value per field, mBERT's Tamil result of a 19-column table fell behind the six results that matched only the model and
+    the data set, and the answer said that no Tamil result is recorded)."""
+    total = 0
+    for f, wanted in requested.items():
+        values = [w for w in (wanted if isinstance(wanted, (list, tuple)) else [wanted]) if w]
+        total += any(values_match(f, w, v) for w in values for v in observed_values(p, f))
+    return total
 
 
 def format_sources(sources: list[RetrievedChunk], profiles: dict[str, list[ConditionProfile]], include_profiles: bool,
-                   requested: dict[str, str] | None = None) -> str:
+                   requested: dict[str, str | list[str]] | None = None) -> str:
     """The numbered sources for the prompt. When a passage has many recorded results, the ones that match the question's
     conditions are listed first, so the answer can find e.g. the Hindi result of a 15-language table."""
     blocks = []
@@ -89,7 +96,7 @@ def describe_conflicts(conflicts: list[ContradictionPair], sources: list[Retriev
 def generate(question: str, sources: list[RetrievedChunk], llm: OllamaLLM, *, warning: str | None = None,
              conflicts: list[ContradictionPair] | None = None, history: list[dict] | None = None,
              profiles: dict[str, list[ConditionProfile]] | None = None, include_profiles: bool = True,
-             requested: dict[str, str] | None = None, feedback: str | None = None) -> str:
+             requested: dict[str, str | list[str]] | None = None, feedback: str | None = None) -> str:
     parts = [f"QUESTION: {question}"]
     if warning:
         parts.append(f"SCOPE WARNING: {warning}")
