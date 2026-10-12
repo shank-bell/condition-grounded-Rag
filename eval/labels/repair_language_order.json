@@ -1,0 +1,255 @@
+{
+ "note": "profiles whose language the rule `language_order` (src/cgrag/ingestion/repair.py, 11 Oct 2026) changes in the 28-paper store; every row was checked by hand against its table in the chunk text; the benchmark store changes 0 profiles",
+ "changed": [
+  {
+   "paper": "2010.11934",
+   "profile": "2010.11934:0034#49",
+   "model": "mT5-Large (Span length 10)",
+   "dataset": "XNLI",
+   "value": 81.5,
+   "stored_by_the_extractor": "Belarusian",
+   "after_the_other_rules": "Belarusian",
+   "after_language_order": "Bulgarian"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0053#42",
+   "model": "v1-data",
+   "dataset": "IndicSentiment",
+   "value": 92.7,
+   "stored_by_the_extractor": "Bengali (bn)",
+   "after_the_other_rules": "Bengali (bn)",
+   "after_language_order": "Bengali"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#107",
+   "model": "v1-data",
+   "dataset": "IndicCOPA",
+   "value": 53.8,
+   "stored_by_the_extractor": "Bengali",
+   "after_the_other_rules": "Bengali",
+   "after_language_order": "Odia"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#108",
+   "model": "v1-data",
+   "dataset": "IndicCOPA",
+   "value": 55.0,
+   "stored_by_the_extractor": "Konkani",
+   "after_the_other_rules": "Konkani",
+   "after_language_order": "Punjabi"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#111",
+   "model": "v1-data",
+   "dataset": "IndicCOPA",
+   "value": 53.0,
+   "stored_by_the_extractor": "Kannada",
+   "after_the_other_rules": "Kannada",
+   "after_language_order": "Sindhi"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#112",
+   "model": "v1-data",
+   "dataset": "IndicCOPA",
+   "value": 54.8,
+   "stored_by_the_extractor": "Maithili",
+   "after_the_other_rules": "Maithili",
+   "after_language_order": "Tamil"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#113",
+   "model": "v1-data",
+   "dataset": "IndicCOPA",
+   "value": 50.8,
+   "stored_by_the_extractor": "Malayalam",
+   "after_the_other_rules": "Malayalam",
+   "after_language_order": "Telugu"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#114",
+   "model": "v1-data",
+   "dataset": "IndicCOPA",
+   "value": 55.0,
+   "stored_by_the_extractor": "Marathi",
+   "after_the_other_rules": "Marathi",
+   "after_language_order": "Urdu"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#115",
+   "model": "v1-data",
+   "dataset": "IndicCOPA",
+   "value": 52.4,
+   "stored_by_the_extractor": "Nepali",
+   "after_the_other_rules": "Nepali",
+   "after_language_order": null
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#22",
+   "model": "MuRIL",
+   "dataset": "IndicCOPA",
+   "value": 52.0,
+   "stored_by_the_extractor": "Dogri",
+   "after_the_other_rules": "Dogri",
+   "after_language_order": "Konkani"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#81",
+   "model": "mBERT",
+   "dataset": "IndicCOPA",
+   "value": 51.8,
+   "stored_by_the_extractor": "Dogri",
+   "after_the_other_rules": "Dogri",
+   "after_language_order": "Punjabi"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#82",
+   "model": "mBERT",
+   "dataset": "IndicCOPA",
+   "value": 47.2,
+   "stored_by_the_extractor": "Gujarati",
+   "after_the_other_rules": "Gujarati",
+   "after_language_order": "Sanskrit"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#83",
+   "model": "mBERT",
+   "dataset": "IndicCOPA",
+   "value": 52.0,
+   "stored_by_the_extractor": "Hindi",
+   "after_the_other_rules": "Hindi",
+   "after_language_order": "Santali"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#85",
+   "model": "mBERT",
+   "dataset": "IndicCOPA",
+   "value": 51.8,
+   "stored_by_the_extractor": "Maithili",
+   "after_the_other_rules": "Maithili",
+   "after_language_order": "Tamil"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#86",
+   "model": "mBERT",
+   "dataset": "IndicCOPA",
+   "value": 51.8,
+   "stored_by_the_extractor": "Malayalam",
+   "after_the_other_rules": "Malayalam",
+   "after_language_order": "Telugu"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#87",
+   "model": "mBERT",
+   "dataset": "IndicCOPA",
+   "value": 56.2,
+   "stored_by_the_extractor": "Marathi",
+   "after_the_other_rules": "Marathi",
+   "after_language_order": "Urdu"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#89",
+   "model": "XLMR",
+   "dataset": "IndicCOPA",
+   "value": 59.4,
+   "stored_by_the_extractor": "Bengali",
+   "after_the_other_rules": "Bengali",
+   "after_language_order": "Odia"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#90",
+   "model": "XLMR",
+   "dataset": "IndicCOPA",
+   "value": 58.8,
+   "stored_by_the_extractor": "Konkani",
+   "after_the_other_rules": "Konkani",
+   "after_language_order": "Punjabi"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#91",
+   "model": "XLMR",
+   "dataset": "IndicCOPA",
+   "value": 54.6,
+   "stored_by_the_extractor": "Gujarati",
+   "after_the_other_rules": "Gujarati",
+   "after_language_order": "Sanskrit"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#92",
+   "model": "XLMR",
+   "dataset": "IndicCOPA",
+   "value": 53.8,
+   "stored_by_the_extractor": "Hindi",
+   "after_the_other_rules": "Hindi",
+   "after_language_order": "Santali"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#94",
+   "model": "XLMR",
+   "dataset": "IndicCOPA",
+   "value": 64.8,
+   "stored_by_the_extractor": "Maithili",
+   "after_the_other_rules": "Maithili",
+   "after_language_order": "Tamil"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#96",
+   "model": "XLMR",
+   "dataset": "IndicCOPA",
+   "value": 64.8,
+   "stored_by_the_extractor": "Marathi",
+   "after_the_other_rules": "Marathi",
+   "after_language_order": "Urdu"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0055#99",
+   "model": "MuRIL",
+   "dataset": "IndicCOPA",
+   "value": 62.0,
+   "stored_by_the_extractor": "Konkani",
+   "after_the_other_rules": "Konkani",
+   "after_language_order": "Punjabi"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0061#102",
+   "model": "MuRIL",
+   "dataset": "FLORES",
+   "value": 0.5,
+   "stored_by_the_extractor": "Konkani",
+   "after_the_other_rules": "Konkani",
+   "after_language_order": "Santali"
+  },
+  {
+   "paper": "2212.05409",
+   "profile": "2212.05409:0061#15",
+   "model": "XLMR",
+   "dataset": "FLORES",
+   "value": 0.3,
+   "stored_by_the_extractor": "Konkani",
+   "after_the_other_rules": "Konkani",
+   "after_language_order": "Kashmiri"
+  }
+ ]
+}
