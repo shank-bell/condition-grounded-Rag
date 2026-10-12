@@ -274,7 +274,7 @@ def score_system_c(gold: dict[str, dict], key: dict[str, dict]) -> dict:
         fn = sum(confusion[c][s] for s in classes if s != c)
         per_class[c] = {**prf(tp, fp, fn), "support": sum(confusion[c].values())}
     f1s = [v["f1"] for v in per_class.values() if v["f1"] is not None and v["support"]]
-    attribution, attribution_merged = [], []
+    attribution, attribution_merged, coverage = [], [], []
     merge = lambda names: {SPLIT_OR_SETTING if n in ("dataset version / split", "setting") else n for n in names}
     for i in ids:
         if gold[i]["verdict"] == "EXPLAINED" and SYSTEM_VERDICT[key[i]["system_verdict"]] == "EXPLAINED":
@@ -283,6 +283,8 @@ def score_system_c(gold: dict[str, dict], key: dict[str, dict]) -> dict:
             attribution.append((sys_set == gold_set, len(sys_set & gold_set) / len(sys_set | gold_set) if sys_set | gold_set else 1.0))
             m_sys, m_gold = merge(sys_set), merge(gold_set)
             attribution_merged.append((m_sys == m_gold, len(m_sys & m_gold) / len(m_sys | m_gold) if m_sys | m_gold else 1.0))
+            hit = len(m_sys & m_gold)
+            coverage.append((hit / len(m_gold) if m_gold else 1.0, hit / len(m_sys) if m_sys else 1.0, m_gold <= m_sys, bool(m_sys - m_gold)))
     return {"pairs": len(ids), "accuracy": round(sum(confusion[c][c] for c in classes) / len(ids), 4) if ids else None,
             "macro_f1": round(sum(f1s) / len(f1s), 4) if f1s else None, "per_class": per_class, "confusion_gold_rows_system_columns": confusion,
             "condition_attribution": {"pairs": len(attribution), "exact_match": round(sum(a for a, _ in attribution) / len(attribution), 4) if attribution else None,
@@ -290,5 +292,9 @@ def score_system_c(gold: dict[str, dict], key: dict[str, dict]) -> dict:
             "condition_attribution_merged": {
                 "pairs": len(attribution_merged), "note": "'dataset version / split' and 'setting' counted as one name (dev vs test is listed under both)",
                 "exact_match": round(sum(a for a, _ in attribution_merged) / len(attribution_merged), 4) if attribution_merged else None,
-                "mean_jaccard": round(sum(j for _, j in attribution_merged) / len(attribution_merged), 4) if attribution_merged else None},
+                "mean_jaccard": round(sum(j for _, j in attribution_merged) / len(attribution_merged), 4) if attribution_merged else None,
+                "mean_recall": round(sum(c[0] for c in coverage) / len(coverage), 4) if coverage else None,
+                "mean_precision": round(sum(c[1] for c in coverage) / len(coverage), 4) if coverage else None,
+                "all_key_conditions_named": round(sum(c[2] for c in coverage) / len(coverage), 4) if coverage else None,
+                "names_conditions_beyond_key": round(sum(c[3] for c in coverage) / len(coverage), 4) if coverage else None},
             "extraction_errors_flagged": sum(gold[i]["extraction_error"] for i in ids)}
