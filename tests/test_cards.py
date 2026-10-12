@@ -100,3 +100,20 @@ def test_a_card_names_the_dataset_version_so_that_two_tables_of_one_benchmark_di
     assert "SQuAD 2.0" in both and "SQuAD 1.1" in both and "GLUE" in both
     assert build_card([prof(1, dataset="SQuAD 2.0", dataset_version="2.0")]).count("2.0") == 1
 
+
+def test_the_profile_signal_adds_the_chunks_whose_profiles_record_the_named_conditions(tmp_path, monkeypatch):
+    """Stage 4's fourth ranking (11 Oct): the store knows who recorded mBERT on XNLI even when no text vector is near the question."""
+    from cgrag.stores.profile_store import ProfileStore
+    vs = VectorStore(tmp_path / "chroma")
+    vs.add([chunk("a:1", "a paragraph about something else"), chunk("a:2", "Table 7 | hi | sw |")], np.array([[1.0, 0, 0, 0], [0, 1.0, 0, 0]]), None)
+    store = ProfileStore(tmp_path / "p.sqlite")
+    store.add_many([prof(1, chunk_id="a:2", model="mBERT", dataset="XNLI", language="Hindi"), prof(2, chunk_id="a:1", model="XLM-R", dataset="MLQA")])
+    monkeypatch.setattr(retrieval_module, "embed", lambda qs: np.repeat(np.array([[1.0, 0, 0, 0]]), len(qs), axis=0))
+    cond = {"model": "mBERT", "dataset": "XNLI", "other_models": []}
+    on = HybridRetriever(vs, BM25Store([], []), RetrievalConfig(dense_k=1, bm25_k=1, fused_top=5, use_cards=True, profile_signal=True), profiles=store)
+    off = HybridRetriever(vs, BM25Store([], []), RetrievalConfig(dense_k=1, bm25_k=1, fused_top=5, use_cards=True, profile_signal=False), profiles=store)
+    assert "a:2" in [r.chunk.chunk_id for r in on.retrieve(["How does mBERT do on XNLI?"], "result", conditions=cond)]
+    assert "a:2" not in [r.chunk.chunk_id for r in off.retrieve(["How does mBERT do on XNLI?"], "result", conditions=cond)]
+    assert on.profile_ids({"model": "mBERT"}) == []
+    assert on.profile_ids({"model": "mBERT", "dataset": "XNLI", "other_models": ["XLM-R"]}) == ["a:2"]
+
