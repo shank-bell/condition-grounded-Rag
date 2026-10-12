@@ -28,14 +28,16 @@ from ..knowledge.benchmarks import (ABBREVIATIONS, FAMILIES as FAMILIES_RX, LANG
                                     language_code, language_name, lookup, lookup_cut, task_fits)
 from ..knowledge import pwc
 from ..pipeline.conditions import _SIZE_LABELS, metric_key, split_dataset
-from ..pipeline.grounding import (Grounding, _size_like, block_tags, candidates, caption_split, ground, model_fits)
+from ..pipeline.grounding import (Grounding, _numbers, _size_like, block_tags, candidates, caption_split, ground, model_fits)
 from ..schemas import ConditionProfile
+from .dataset_context import group_key, label_kind
+from .model_context import is_pure_citation, model_key, strip_citation
 from .tables import parse_table, table_cells
 
 RULES = ("task", "model_name", "model_own", "setting_split", "setting_system", "setting_noise", "setting_regime", "dataset_split",
          "dataset_cut", "dataset_column", "dataset_signature", "metric", "language", "language_column", "language_average",
          "model_size", "dataset_version", "dataset_abbrev", "task_filler", "setting_fragment", "dataset_caption", "dataset_paper_abbrev", "metric_paper_abbrev", "task_paper",
-         "model_heading")
+         "model_heading", "language_order", "dataset_context", "model_citation", "model_context")
 
 
 _ABLATION = re.compile(r"\bablation|\beffect of\b|\bdifferent (?:masking|pre-?training|mixing|training) (?:strateg|objective|data)", re.I)
@@ -398,6 +400,9 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
     if not (upd.get("task", p.task)) and ctx.task:
         put("task_paper", task=ctx.task)
 
+    cited = strip_citation(p.model)
+    if cited:
+        put("model_citation", model=cited)
     if p.model and key(p.model) in _HEADING_MODELS and cells:
         rows = {c.row_label for c in cells if c.row_label}
         if len(rows) == 1:
@@ -531,9 +536,51 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
     return (p.model_copy(update=upd) if upd else p), fired
 
 
+def _order_languages(profiles: list[ConditionProfile], chunks: dict[str, str]) -> dict[int, str | None]:
+    """The languages of the results of a stacked table of languages, read from the ORDER of the extraction (11 Oct; found on IndicCOPA, Table 17 of
+    2212.05409, where mBERT's 51.8 stands in the pa, ta and te columns of the second half).
+
+    The extractor read the second half with the first half's header, so a result carries the language of the column at the same position in the first
+    half ("Dogri" = gom for the 51.8 of pa). The value rule cannot choose between three cells with one number. But the extractor wrote the results of a row
+    in the order of the cells (the profile ids of one model in one chunk count along the rows), so when a system's results, in that order, have exactly
+    the numbers of the cells of the rows that carry its name, the k-th result IS the k-th cell, and the column of that cell names the language. Used
+    only for a table of languages, for a model whose row labels name it, and only when the whole sequence agrees number by number (otherwise nothing
+    is changed). Returns {profile index: language or None (the column is an average)} for the profiles whose stored language differs."""
+    def seq(p: ConditionProfile) -> int:
+        n = p.profile_id.rpartition("#")[2]
+        return int(n) if n.isdigit() else 10 ** 9
+
+    by_chunk: dict[str, list[int]] = {}
+    for i, p in enumerate(profiles):
+        if p.value is not None and p.model and p.chunk_id in chunks:
+            by_chunk.setdefault(p.chunk_id, []).append(i)
+    out: dict[int, str | None] = {}
+    for chunk_id, idx in by_chunk.items():
+        table = parse_table(chunks[chunk_id])
+        if table is None or not _language_table(table):
+            continue
+        cells = table_cells(table)
+        models: dict[str, list[int]] = {}
+        for i in idx:
+            models.setdefault(profiles[i].model.lower(), []).append(i)
+        for members in models.values():
+            members.sort(key=lambda i: seq(profiles[i]))
+            rows = [c for c in cells if model_fits(profiles[members[0]].model, c.row_label) is True]
+            if len(rows) != len(members):
+                continue
+            if not all(any(abs(n - profiles[i].value) < 1e-6 for n in _numbers(c.text)) for i, c in zip(members, rows)):
+                continue
+            for i, c in zip(members, rows):
+                col = _column_code(c.column)
+                if profiles[i].language and language_code(profiles[i].language) != col:
+                    out[i] = language_name(col) if col else None
+    return out
+
+
 def repair_paper(profiles: list[ConditionProfile], chunks: dict[str, str], off: frozenset[str] = frozenset(),
-                 title: str = "") -> tuple[list[ConditionProfile], Counter]:
-    """Repair every profile of one paper; `chunks` maps chunk id -> text. Returns the profiles (repaired or not, same order) and the rule counts."""
+                 title: str = "", resolutions: dict[str, dict] | None = None) -> tuple[list[ConditionProfile], Counter]:
+    """Repair every profile of one paper; `chunks` maps chunk id -> text. Returns the profiles (repaired or not, same order) and the rule counts.
+    `resolutions` are the paper's data set decisions of ingestion/dataset_context.py (group key -> {dataset, evidence, ...}); without them the repair is code only."""
     if not profiles:
         return [], Counter()
     ctx = paper_context(profiles[0].paper_id, [chunks[k] for k in sorted(chunks)], [p.model for p in profiles if p.model], title,
@@ -543,6 +590,25 @@ def repair_paper(profiles: list[ConditionProfile], chunks: dict[str, str], off: 
         q, fired = repair(p, chunks.get(p.chunk_id, ""), ctx, off)
         out.append(q)
         counts.update(fired)
+    if "language_order" not in off:
+        for i, language in _order_languages(out, chunks).items():
+            if (out[i].language or None) != (language or None):
+                out[i] = out[i].model_copy(update={"language": language})
+                counts.update(["language_order"])
+    if resolutions and "dataset_context" not in off:
+        for i, q in enumerate(out):
+            if label_kind(q.dataset):
+                found = resolutions.get(group_key(q.chunk_id, q.dataset))
+                if found and found.get("dataset") and found["dataset"] != q.dataset:
+                    out[i] = q.model_copy(update={"dataset": found["dataset"]})
+                    counts.update(["dataset_context"])
+    if resolutions and "model_context" not in off:
+        for i, q in enumerate(out):
+            if is_pure_citation(q.model):
+                found = resolutions.get(model_key(q.model))
+                if found and found.get("model") and found["model"] != q.model:
+                    out[i] = q.model_copy(update={"model": found["model"]})
+                    counts.update(["model_context"])
     return out, counts
 
 
