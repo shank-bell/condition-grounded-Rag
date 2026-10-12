@@ -106,3 +106,20 @@ def test_a_translation_direction_is_matched_by_either_of_its_languages():
     assert values_match("language", "en-de", "de")
     assert not values_match("language", "English-to-German", "French")
     assert values_match("language", "Hindi", "Hindi") and not values_match("language", "Hindi", "Tamil")
+
+
+def test_settings_differ_only_in_a_kind_that_both_state():
+    """11 Oct: "single-task single-model dev set" against "dev set" is one split, "zero-shot" against "test set" are two different questions."""
+    from cgrag.pipeline.conditions import setting_differs, setting_tags
+    same = [("single-task single-model dev set", "dev set"), ("zero-shot", "test set"), ("single model test set", "fine-tuned test set"),
+            ("single-task", "dev set"), ("translate-train", "test set"), ("dev set", "dev set")]
+    differ = [("dev set", "test set"), ("zero-shot", "fine-tuned"), ("single model", "ensemble"), ("fine-tuned dev set", "zero-shot dev set"),
+              ("translate-train", "zero-shot")]
+    for x, y in same:
+        assert not setting_differs(setting_tags(x), setting_tags(y)), (x, y)
+    for x, y in differ:
+        assert setting_differs(setting_tags(x), setting_tags(y)), (x, y)
+    a = ConditionProfile(profile_id="a", paper_id="p", chunk_id="p:1", metric="accuracy", value=1.0, setting="single model test set")
+    b = a.model_copy(update={"profile_id": "b", "setting": "fine-tuned test set"})
+    assert differing_conditions(a, b) == [] and differing_conditions(a, b, aligned=False) == ["setting"]
+
