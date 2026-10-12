@@ -44,6 +44,15 @@ def test_dataset_version_model_and_language_are_found_in_the_question():
     assert got == {"dataset": "SQuAD", "dataset_version": "2.0", "model": "BERT-large", "language": "Kannada"}
 
 
+def test_a_data_set_stored_in_two_spellings_is_named_as_the_question_writes_it():
+    """The store holds "SQUAD" and "SQuAD"; the answer must not depend on the order of a set (it followed the process's string hash: found 11 Oct)."""
+    for names in (["SQUAD", "SQuAD"], ["SQuAD", "SQUAD"]):
+        vocab = {"dataset": names + ["GLUE"], "model": [], "language": [], "task": []}
+        assert vocabulary_conditions("What F1 does BERT get on SQuAD 2.0?", vocab)["dataset"] == "SQuAD"
+        assert vocabulary_conditions("What F1 does BERT get on SQUAD 2.0?", vocab)["dataset"] == "SQUAD"
+        assert vocabulary_conditions("What F1 does BERT get on squad 2.0?", vocab)["dataset"] == "SQUAD"
+
+
 def test_names_the_question_does_not_contain_are_not_invented():
     assert vocabulary_conditions("How does pre-training work?", VOCAB) == {}
     assert "model" not in vocabulary_conditions("Is DistilBERT smaller?", VOCAB)
@@ -157,3 +166,30 @@ def test_number_grounded_claim_is_still_rejected_when_nli_contradicts_it():
 
 def test_markdown_is_stripped_before_a_sentence_is_checked():
     assert plain("*   **SQuAD 2.0 (dev)**: humans get 89.0 F1 [4].") == "SQuAD 2.0 (dev): humans get 89.0 F1."
+
+
+def test_recorded_results_of_every_named_language_are_listed_first():
+    """"mBERT on IndicCOPA for Hindi and Tamil": with one wanted language per field, the Tamil result fell behind the results that match only the model
+    and the data set, and the writer was shown six other languages (the answer then said that no Tamil result is recorded)."""
+    from cgrag.pipeline.generate import format_sources
+    from cgrag.pipeline.run import requested_for_prompt
+    from cgrag.schemas import QueryConditions
+    languages = ["Assamese", "Bengali", "Konkani", "Gujarati", "Hindi", "Kannada", "Maithili", "Malayalam", "Marathi", "Nepali", "Tamil", "Telugu"]
+    profs = [ConditionProfile(profile_id=f"p:1#{i}", paper_id="p", chunk_id="p:1", model="mBERT", dataset="IndicCOPA", language=lang, metric="accuracy", value=50.0 + i)
+             for i, lang in enumerate(languages)]
+    source = RetrievedChunk(chunk=Chunk(chunk_id="p:1", paper_id="p", paper_title="Paper", page=1, text="a table"), score=1.0)
+    cond = QueryConditions(model="mBERT", dataset="IndicCOPA", language="Hindi", other_languages=["Tamil"])
+    shown = format_sources([source], {"p:1": profs}, True, requested_for_prompt(cond))
+    recorded = shown.split("Recorded results:")[1].split("a table")[0]
+    assert "Hindi" in recorded and "Tamil" in recorded
+    old = format_sources([source], {"p:1": profs}, True, cond.specified())
+    assert "Tamil" not in old.split("Recorded results:")[1].split("a table")[0]
+
+
+def test_requested_for_prompt_keeps_a_single_value_as_a_string():
+    from cgrag.pipeline.run import requested_for_prompt
+    from cgrag.schemas import QueryConditions
+    one = requested_for_prompt(QueryConditions(model="BERT", dataset="SQuAD"))
+    assert one == {"model": "BERT", "dataset": "SQuAD"}
+    many = requested_for_prompt(QueryConditions(model="MuRIL", dataset="XNLI", language="Hindi", other_models=["mBERT", "MuRIL"]))
+    assert many["model"] == ["MuRIL", "mBERT"] and many["dataset"] == "XNLI" and many["language"] == "Hindi"
