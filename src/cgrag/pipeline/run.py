@@ -92,13 +92,36 @@ class _Timer:
         self.emit(type="note", stage=stage, text=text)
 
 
+def requested_for_prompt(conditions) -> dict:
+    """The conditions the question names, as the writer ranks recorded results by them: a field that the question names with several values ("Hindi and
+    Tamil", "mBERT and MuRIL") gets all of them, so the recorded result of each is shown (Stage 8's recorded-result list is short)."""
+    out: dict = dict(conditions.specified())
+    extras = conditions.extras() if hasattr(conditions, "extras") else {}
+    for field, values in extras.items():
+        first = out.get(field)
+        merged = [first] if first else []
+        merged += [v for v in values if v and v != first]
+        if len(merged) > 1:
+            out[field] = merged
+        elif merged:
+            out[field] = merged[0]
+    return out
+
+
+def retrieval_conditions(conditions) -> dict:
+    """What Stage 4's profile signal reads from Stage 1: the named model / dataset / language and the further models of a comparison."""
+    out = {f: v for f, v in conditions.specified().items() if f in ("model", "dataset", "language")}
+    out["other_models"] = list(getattr(conditions, "other_models", None) or [])
+    return out
+
+
 class Pipeline:
     def __init__(self, settings: Settings | None = None, llm: OllamaLLM | None = None) -> None:
         self.cfg = settings or get_settings()
         self.llm = llm or OllamaLLM(self.cfg)
         self.vectors = VectorStore(self.cfg.paths.chroma_dir)
         self.profiles = ProfileStore(self.cfg.paths.profile_db)
-        self.retriever = HybridRetriever(self.vectors, BM25Store.load(self.cfg.paths.bm25_path), self.cfg.retrieval)
+        self.retriever = HybridRetriever(self.vectors, BM25Store.load(self.cfg.paths.bm25_path), self.cfg.retrieval, profiles=self.profiles)
         self.understand = QueryUnderstanding(self._agent_llm(self.cfg.agents.understanding_model),
                                              profiles=self.profiles if self.cfg.features.use_profiles else None)
         self.refine_llm = self._agent_llm(self.cfg.agents.refinement_model)
@@ -196,7 +219,7 @@ class Pipeline:
             t.skip("3_refine", "the orchestrator judged the question simple enough to search as it is")
 
         with t("4_retrieve"):
-            candidates = self.retriever.retrieve(queries, analysis.intent)
+            candidates = self.retriever.retrieve(queries, analysis.intent, conditions=retrieval_conditions(analysis.conditions))
         t.note(4, f"{len(candidates)} candidate passages")
         with t("5_rerank"):
             kept, weak = rerank_filter(question, candidates, self.cfg.retrieval)
@@ -207,7 +230,7 @@ class Pipeline:
             review = self.orchestrator.review(question, plan, n_kept=len(kept), weak=weak)
         if review.action == "refine_and_retry":
             queries = refine(question, analysis, self.refine_llm, decompose=False)
-            candidates = self.retriever.retrieve(queries, analysis.intent)
+            candidates = self.retriever.retrieve(queries, analysis.intent, conditions=retrieval_conditions(analysis.conditions))
             kept, weak = rerank_filter(question, candidates, self.cfg.retrieval)
             say(f"2 re-plan ({review.reason or 'weak evidence'}): rewrote the question {queries} and searched again "
                 f"-> kept {len(kept)}" + (" (still weak)" if weak else ""))
@@ -254,7 +277,7 @@ class Pipeline:
 
         with t("8_generate"):
             answer = generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
-                              profiles=profile_map, include_profiles=include, requested=analysis.conditions.specified())
+                              profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions))
         t.note(8, f"wrote {len(answer)} characters from {len(sources)} passages")
 
         checks: list[ClaimCheck] = []
@@ -266,7 +289,7 @@ class Pipeline:
                 if bad and self.cfg.critic.max_regenerate > 0:
                     t.note(9, f"{len(bad)} sentence(s) not backed by the sources: writing the answer once more")
                     retry = generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
-                                     profiles=profile_map, include_profiles=include, requested=analysis.conditions.specified(),
+                                     profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions),
                                      feedback="\n".join(f"- {c.sentence}" for c in bad))
                     retry_checks = self.critic.check(retry, sources, profile_map)
                     regenerated = True
@@ -290,7 +313,7 @@ class Pipeline:
                     max_retries=self.cfg.ragas.max_retries, max_context_chars=self.cfg.ragas.max_context_chars,
                     notify=lambda msg: t.note(9, msg),
                     regenerate=lambda feedback: generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
-                                                         profiles=profile_map, include_profiles=include, requested=analysis.conditions.specified(),
+                                                         profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions),
                                                          feedback=feedback))
                 if retries:
                     regenerated = True
