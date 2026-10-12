@@ -115,6 +115,20 @@ def test_a_second_language_is_checked_with_the_model_and_dataset(store):
     assert "English" in result.warning and "language = Kannada together with model = XLM-R, dataset = XNLI" in result.warning
 
 
+def test_a_further_system_is_covered_by_any_named_language_whichever_is_listed_first(store):
+    """"Compare XLM-R and mBERT on XNLI for Kannada and Hindi": mBERT has Hindi only. Whichever language the question lists first, mBERT is
+    recorded on XNLI and only Kannada is missing (found 11 Oct: with Kannada first, mBERT was reported as not recorded)."""
+    for first, second in (("Kannada", "Hindi"), ("Hindi", "Kannada")):
+        requested = {"model": "XLM-R", "dataset": "XNLI", "language": first}
+        _, result = agent(store).run(requested, [rc("xnli:1")], NONE, "q", extras={"model": ["mBERT"], "language": [second]})
+        assert result.missing == ["language=Kannada"], first
+        assert next(c for c in result.checks if c.requested == "mBERT").covered is True
+    store.add_many([prof("mmlu:1", 9, model="GPT-4", dataset="MMLU")])
+    _, result = agent(store).run({"model": "XLM-R", "dataset": "XNLI", "language": "Kannada"}, [rc("xnli:1")], NONE, "q",
+                                 extras={"model": ["GPT-4"], "language": ["Hindi"]})
+    assert "model=GPT-4" in result.missing
+
+
 def test_covered_extras_add_their_chunks_to_the_evidence_and_the_flag_switches_the_check_off(store):
     asked = []
 
