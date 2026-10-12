@@ -1,0 +1,168 @@
+{
+ "1606.05250": {
+  "1606.05250:0019|": {
+   "dataset": "SQuAD",
+   "evidence": "Table 5 shows the performance of our models alongside human performance on the v1.0 of development and test sets.",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1606.05250:0020|": {
+   "dataset": "SQuAD",
+   "evidence": "The results, shown in Table 6, indicate that lexicalized and dependency tree path features are most important.",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1606.05250:0022|": {
+   "dataset": "SQuAD",
+   "evidence": "The results (shown in Table 7) show that the model performs best on dates and other numbers, categories for which there are usually only a few plausible candidates, and most answers are single tokens.",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "1804.07461": {},
+ "1806.03822": {},
+ "1809.05053": {},
+ "1810.04805": {
+  "1810.04805:0041|NER": {
+   "dataset": "CoNLL-2003",
+   "evidence": "In this section, we compare the two approaches by applying BERT to the CoNLL-2003 Named Entity Recognition (NER) task",
+   "mode": "label",
+   "kind": "task_name"
+  }
+ },
+ "1901.07291": {
+  "model|Devlin et al.(2018)": {
+   "model": "mBERT",
+   "evidence": "the multilingual BERT approach of Devlin et al.",
+   "mode": "model",
+   "kind": "citation"
+  }
+ },
+ "1905.00537": {},
+ "1906.08237": {},
+ "1907.10529": {
+  "1907.10529:0024|Coreference": {
+   "dataset": "OntoNotes",
+   "evidence": "We also achieve a new state of the art on the OntoNotes coreference resolution task (79.6% F1)",
+   "mode": "label",
+   "kind": "task_name"
+  }
+ },
+ "1907.11692": {
+  "1907.11692:0023|Average": {
+   "dataset": "GLUE",
+   "evidence": "Table 5: Results on GLUE. ... Averages are obtained from the GLUE leaderboard.",
+   "mode": "label",
+   "kind": "metric_label"
+  }
+ },
+ "1908.10084": {
+  "1908.10084:0021|Average": {
+   "dataset": "SentEval",
+   "evidence": "Table 5: Evaluation of SBERT sentence embeddings using the SentEval toolkit. SentEval evaluates sentence embeddings on different sentence classification tasks by training a logistic regression classifier using the sentence embeddings as fea",
+   "mode": "label",
+   "kind": "metric_label"
+  }
+ },
+ "1909.10351": {},
+ "1909.11942": {
+  "1909.11942:0042|Average": {
+   "dataset": "GLUE",
+   "evidence": "For the GLUE (Table 9) and RACE (Table 10) benchmarks, we average the model predictions for the ensemble models",
+   "mode": "label",
+   "kind": "metric_label"
+  }
+ },
+ "1910.01108": {},
+ "1910.10683": {
+  "model|Liu et al. (2019c)": {
+   "model": "RoBERTa",
+   "evidence": "or RoBERTa (Liu et al., 2019c), which used roughly 2.2T tokens.",
+   "mode": "model",
+   "kind": "citation"
+  }
+ },
+ "1911.02116": {
+  "model|Lample and Conneau(2019)": {
+   "model": "XLM",
+   "evidence": "mBERT (Devlin et al., 2018) and XLM (Lample and Conneau, 2019) have pushed the state-of-the-art on cross-lingual understanding tasks",
+   "mode": "model",
+   "kind": "citation"
+  },
+  "model|Lample and Conneau (2019)": {
+   "model": "XLM",
+   "evidence": "mBERT (Devlin et al., 2018) and XLM (Lample and Conneau, 2019) have pushed the state-of-the-art on cross-lingual understanding tasks",
+   "mode": "model",
+   "kind": "citation"
+  },
+  "model|Huang et al.(2019)": {
+   "model": "Unicoder",
+   "evidence": "Unicoder (Huang et al., 2019)",
+   "mode": "model",
+   "kind": "citation"
+  },
+  "model|Devlin et al.(2018)": {
+   "model": "mBERT",
+   "evidence": "Multilingual masked language models (MLM) like mBERT (Devlin et al., 2018)",
+   "mode": "model",
+   "kind": "citation"
+  },
+  "model|Akbik et al. (2018)": {
+   "model": "Flair",
+   "evidence": "the Flair model from Akbik et al.",
+   "mode": "model",
+   "kind": "citation"
+  }
+ },
+ "2003.10555": {
+  "2003.10555:0020|D": {
+   "dataset": "SQuAD",
+   "evidence": "Results on SQuAD are shown in Table 4.",
+   "mode": "table",
+   "kind": "fragment"
+  }
+ },
+ "2004.02984": {
+  "2004.02984:0022|D": {
+   "dataset": "SQuAD",
+   "evidence": "Table 5: The results on the SQuAD dev datasets.",
+   "mode": "table",
+   "kind": "fragment"
+  },
+  "2004.02984:0023|": {
+   "dataset": "GLUE",
+   "evidence": "MobileBERT is very competitive on the GLUE benchmark.",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "2004.04906": {},
+ "2004.05150": {},
+ "2005.11401": {},
+ "2005.14165": {},
+ "2006.03654": {},
+ "2010.11934": {},
+ "2103.10730": {},
+ "2212.05409": {},
+ "2302.13971": {},
+ "2307.09288": {
+  "2307.09288:0104|SAT-math": {
+   "dataset": "AGI Eval",
+   "evidence": "In Table 24, we present fine-grained results from the English part of the AGI Eval (Zhong et al., 2023) benchmark.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "2307.09288:0110|Avg": {
+   "dataset": "Meta Helpful",
+   "evidence": "We report both their per-rating and average accuracy on the Meta Helpful test set in Table 28.",
+   "mode": "label",
+   "kind": "metric_label"
+  },
+  "2307.09288:0112|": {
+   "dataset": "Meta Safety",
+   "evidence": "We ablated the impact of the safety auxiliary loss with results on the Meta Safety test set shown in Table 29.",
+   "mode": "table",
+   "kind": "none"
+  }
+ }
+}
