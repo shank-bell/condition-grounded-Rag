@@ -61,6 +61,8 @@ class RetrievalConfig(BaseModel):
     section_boost: float = 0.15
     generate_top: int = 5
     use_cards: bool = True
+    profile_signal: bool = False
+    profile_k: int = 8
 
 
 class ApplicabilityConfig(BaseModel):
@@ -76,6 +78,7 @@ class ContradictionConfig(BaseModel):
     mnli_split_tags: bool = True
     one_sided_conditions_explain: bool = True
     table_grounding: bool = True
+    setting_dimensions: bool = True
 
 
 class CriticConfig(BaseModel):
@@ -118,6 +121,7 @@ class FeaturesConfig(BaseModel):
     joint_setting: bool = True
     ragas_loop: bool = False
     profile_repair: bool = True
+    dataset_context: bool = True
 
 
 class Settings(BaseModel):
