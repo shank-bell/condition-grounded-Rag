@@ -270,12 +270,21 @@ class ApplicabilityAgent:
         key = self._key(requested)
         checks = list(result.checks)
         extra_missing: set[int] = set()
+        languages = [lang for lang in (requested.get("language"), *extras.get("language", [])) if lang]
         for field, values in extras.items():
             for value in values:
                 if any(c.condition == field and norm(c.requested) == norm(value) for c in checks):
                     continue
                 variant = {**key, field: value}
                 together = self.profiles.profiles_matching(variant, list(variant))
+                if not together and field != "language" and "language" in variant:
+                    for language in languages:
+                        if norm(language) == norm(variant["language"]):
+                            continue
+                        again = {**variant, "language": language}
+                        together = self.profiles.profiles_matching(again, list(again))
+                        if together:
+                            break
                 if together:
                     ids = [cid for cid, _ in Counter(p.chunk_id for p in together).most_common(2)]
                     if joint_fetch is not None:
