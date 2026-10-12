@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import time
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from ..config import get_settings
@@ -14,6 +14,7 @@ from ..stores.profile_store import ProfileStore
 from ..stores.vector_store import VectorStore
 from .cards import build_card
 from .chunker import chunk_paper
+from .dataset_context import load_resolutions, resolve_paper, save_resolutions
 from .pdf_loader import load_pdf
 from .profile_extractor import extract_paper
 from .repair import repair_paper
@@ -58,7 +59,17 @@ class Ingestor:
         t0 = time.perf_counter()
         fixed = profiles
         if get_settings().features.profile_repair:
-            fixed, _ = repair_paper(profiles, {c.chunk_id: c.text for c in chunks}, title=paper.title)
+            texts = {c.chunk_id: c.text for c in chunks}
+            fixed, _ = repair_paper(profiles, texts, title=paper.title)
+            if get_settings().features.dataset_context:
+                found = resolve_paper(self.llm, fixed, texts, paper.title)
+                if found:
+                    decided = {k: asdict(v) for k, v in found.items()}
+                    fixed, _ = repair_paper(profiles, texts, title=paper.title, resolutions=decided)
+                    store = get_settings().paths.index_dir / "dataset_context.json"
+                    allr = load_resolutions(store)
+                    allr[paper_id] = decided
+                    save_resolutions(store, allr)
         by_chunk: dict[str, list] = {}
         for p in fixed:
             by_chunk.setdefault(p.chunk_id, []).append(p)
