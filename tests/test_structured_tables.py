@@ -227,3 +227,42 @@ def test_a_long_table_is_cut_between_rows_and_every_part_keeps_caption_and_heade
     assert len(parts) > 2 and all(len(p) <= 900 for p in parts)
     assert all(p.startswith("Table 9: long table.\n| Model | train |") for p in parts)
     assert sum(p.count("| Model") for p in parts) == 60 + len(parts)
+
+
+T5_MERGED = """Table 14: Performance of our T5 variants on every task we study.
+|  | GLUE | CoLA | SST-2 MRPC MRPC | STS-B | STS-B |
+| Model | Average | Matthew | 's Accuracy F1 Accuracy | Pearson | Spearman |
+| Previous best | 89.4 | 69.2 | 97.1 93.6 91.5 | 92.7 | 92.3 |
+| T5-Small | 77.4 | 41.0 | 91.8 89.7 86.6 | 85.6 | 85.0 |
+| T5-11B | 90.3 | 71.6 | 97.5 92.8 90.4 | 93.1 | 92.8 |
+|  | WMT EnD | e WMT | EnFr WMT EnRo CNN/DM | CNN/DM | CNN/DM |
+| Model | BLEU | BL | EU BLEU ROUGE-1 | ROUGE-2 | ROUGE-L |
+| Previous best | 33.8 | 43 | .8 38.5 43.47 | 20.30 | 40.63 |
+| T5-Small | 26.7 | 36 | .0 26.8 41.12 | 19.56 | 38.35 |"""
+
+
+def test_merged_columns_of_a_garbled_table_are_split_block_by_block():
+    from cgrag.ingestion.tables import GARBLE_LIMIT, garble_ratio, rescue_tables
+    assert garble_ratio(T5_MERGED) >= GARBLE_LIMIT and not wants_extraction(Chunk(chunk_id="p:1", paper_id="p", page=1, section="other", text="x")) is None
+    pieces = rescue_tables(T5_MERGED)
+    assert pieces is not None and len(pieces) == 1
+    t = parse_table(pieces[0])
+    assert t.header == ["Model", "GLUE Average", "CoLA Matthew's", "SST-2 Accuracy", "MRPC F1", "MRPC Accuracy", "STS-B Pearson", "STS-B Spearman"]
+    assert t.rows[1] == ["T5-Small", "77.4", "41.0", "91.8", "89.7", "86.6", "85.6", "85.0"]
+    view = table_views(t, 36)[0]
+    assert "T5-11B: GLUE Average = 90.3; CoLA Matthew's = 71.6; SST-2 Accuracy = 97.5; MRPC F1 = 92.8; MRPC Accuracy = 90.4" in view
+
+
+def test_the_extractor_reads_a_rescued_table_and_still_skips_one_that_cannot_be_split():
+    chunk = Chunk(chunk_id="p:1", paper_id="p", page=1, section="other", text=T5_MERGED)
+    assert wants_extraction(chunk)
+    views = _views(T5_MERGED)
+    assert views and all("MRPC F1" in v or "SST-2 Accuracy" in v for v in views)
+    cut_only = "Table 3: x\n|  | WMT EnD | e WMT | EnFr WMT EnRo CNN/DM | CNN/DM | CNN/DM |\n| Model | BLEU | BL | EU BLEU ROUGE-1 | ROUGE-2 | ROUGE-L |\n" \
+               "| A | 33.8 | 43 | .8 38.5 43.47 | 20.30 | 40.63 |\n| B | 26.7 | 36 | .0 26.8 41.12 | 19.56 | 38.35 |"
+    assert not wants_extraction(Chunk(chunk_id="p:2", paper_id="p", page=1, section="other", text=cut_only))
+
+
+def test_a_table_that_is_read_today_is_never_changed_by_the_rescue():
+    from cgrag.ingestion.tables import rescue_tables
+    assert rescue_tables(NER) is None
