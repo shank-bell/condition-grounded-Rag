@@ -155,12 +155,15 @@ def aggregate(per_paper: dict[str, dict]) -> dict:
     }
 
 
-def load_pipeline(paper_ids: list[str]) -> tuple[dict[str, list[dict]], dict[str, list[dict]], dict]:
+def load_pipeline(paper_ids: list[str]) -> tuple[dict[str, list[dict]], dict[str, list[dict]], dict[str, list[dict]], dict]:
     from cgrag.ingestion.repair import repair_paper
     from cgrag.stores.profile_store import ProfileStore
     from cgrag.stores.vector_store import VectorStore
     store, vs = ProfileStore(repaired=False), VectorStore()
-    raw, rep, rules = {}, {}, {}
+    from cgrag.config import get_settings
+    from cgrag.ingestion.dataset_context import load_resolutions
+    resolutions = load_resolutions(get_settings().paths.index_dir / "dataset_context.json")
+    raw, rep, ctx, rules = {}, {}, {}, {}
     from collections import Counter
     total = Counter()
     for pid in paper_ids:
@@ -172,7 +175,13 @@ def load_pipeline(paper_ids: list[str]) -> tuple[dict[str, list[dict]], dict[str
         total.update(counts)
         dump = lambda ps: [p.model_dump(include={"task", "dataset", "dataset_version", "metric", "value", "model", "setting", "language", "model_size"}) for p in ps]
         raw[pid], rep[pid] = dump(profs), dump(fixed)
-    return raw, rep, dict(total)
+        if resolutions.get(pid):
+            with_ctx, counts2 = repair_paper(profs, {c.chunk_id: c.text for c in cs}, title=cs[0].paper_title if cs else "", resolutions=resolutions[pid])
+            ctx[pid] = dump(with_ctx)
+            total.update({"dataset_context": counts2.get("dataset_context", 0)})
+        else:
+            ctx[pid] = rep[pid]
+    return raw, rep, ctx, dict(total)
 
 
 def main() -> None:
@@ -193,13 +202,17 @@ def main() -> None:
         result["variants"] = {args.name: {"papers": len(ids), **aggregate(per)}}
         result["per_paper"] = {args.name: per}
     else:
-        raw, rep, rules = load_pipeline([i for i in gold if not args.only or i in args.only])
+        raw, rep, ctx, rules = load_pipeline([i for i in gold if not args.only or i in args.only])
         ids = [i for i in gold if i in raw]
         per_raw = {i: score_paper(gold[i], raw[i]) for i in ids}
         per_rep = {i: score_paper(gold[i], rep[i]) for i in ids}
+        per_ctx = {i: score_paper(gold[i], ctx[i]) for i in ids}
         result["variants"] = {"stored": {"papers": len(ids), **aggregate(per_raw)}, "repaired": {"papers": len(ids), **aggregate(per_rep)}}
         result["repair_rules_fired"] = rules
         result["per_paper"] = {"stored": per_raw, "repaired": per_rep}
+        if rules.get("dataset_context"):
+            result["variants"]["repaired + data set context (LLM, grounded)"] = {"papers": len(ids), **aggregate(per_ctx)}
+            result["per_paper"]["repaired + data set context (LLM, grounded)"] = per_ctx
         missing = [i for i in gold if i not in raw]
         result["gold_papers_without_profiles"] = missing
     Path(args.out).write_text(json.dumps(result, indent=1), encoding="utf-8")
