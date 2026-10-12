@@ -19,6 +19,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from cgrag.config import get_settings
+from cgrag.ingestion.dataset_context import load_resolutions
 from cgrag.ingestion.repair import repair_paper
 from cgrag.stores.profile_store import ProfileStore
 from cgrag.stores.vector_store import VectorStore
@@ -40,11 +42,13 @@ def main() -> None:
         return
     vs = VectorStore()
     papers = sorted({p.paper_id for p in store.all()})
+    cfg = get_settings()
+    resolutions = load_resolutions(cfg.paths.index_dir / "dataset_context.json") if cfg.features.dataset_context else {}
     total, changed, rules, fields = 0, 0, Counter(), Counter()
     for pid in papers:
         raw = store.for_paper(pid)
         cs = vs.paper_chunks(pid)
-        fixed, counts = repair_paper(raw, {c.chunk_id: c.text for c in cs}, frozenset(args.off), cs[0].paper_title if cs else "")
+        fixed, counts = repair_paper(raw, {c.chunk_id: c.text for c in cs}, frozenset(args.off), cs[0].paper_title if cs else "", resolutions.get(pid))
         rules.update(counts)
         n = 0
         for a, b in zip(raw, fixed):
