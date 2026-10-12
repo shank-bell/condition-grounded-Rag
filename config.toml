@@ -59,6 +59,7 @@ human_rows_not_comparable = true
 two_metric_tasks_no_genuine = true
 mnli_split_tags = true
 one_sided_conditions_explain = true
+setting_dimensions = true
 table_grounding = true
 
 [critic]
@@ -82,4 +83,5 @@ escalation = true
 profile_guided_retrieval = true
 joint_coverage = true
 joint_setting = true
+dataset_context = true
 ragas_loop = false
