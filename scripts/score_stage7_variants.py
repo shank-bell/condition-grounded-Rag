@@ -29,14 +29,18 @@ DONE = Path("data/labelling/done")
 PRIVATE = Path("data/labelling/private")
 REPAIRED = os.environ.get("PROFILE_REPAIR", "off") == "on"
 OUT = Path("eval/labels/stage7_variants_repaired.json" if REPAIRED else "eval/labels/stage7_variants.json")
-FROZEN = dict(human_rows_not_comparable=False, two_metric_tasks_no_genuine=False, mnli_split_tags=False, one_sided_conditions_explain=False, table_grounding=False)
+FROZEN = dict(human_rows_not_comparable=False, two_metric_tasks_no_genuine=False, mnli_split_tags=False, one_sided_conditions_explain=False, table_grounding=False,
+              setting_dimensions=False)
+NOALIGN = dict(setting_dimensions=False)
 VARIANTS = {
     "frozen (every switch off)": FROZEN,
-    "fix A (before table grounding)": dict(one_sided_conditions_explain=False, table_grounding=False),
-    "policy B alone": dict(human_rows_not_comparable=False, two_metric_tasks_no_genuine=False, mnli_split_tags=False, one_sided_conditions_explain=True, table_grounding=False),
-    "fix A + policy B": dict(one_sided_conditions_explain=True, table_grounding=False),
-    "fix A + table grounding (shipped 10 Oct)": dict(table_grounding=True, one_sided_conditions_explain=False),
-    "fix A + grounding + policy B (shipped from 11 Oct)": dict(table_grounding=True, one_sided_conditions_explain=True),
+    "fix A (before table grounding)": dict(one_sided_conditions_explain=False, table_grounding=False, **NOALIGN),
+    "policy B alone": dict(human_rows_not_comparable=False, two_metric_tasks_no_genuine=False, mnli_split_tags=False, one_sided_conditions_explain=True, table_grounding=False,
+                           **NOALIGN),
+    "fix A + policy B": dict(one_sided_conditions_explain=True, table_grounding=False, **NOALIGN),
+    "fix A + table grounding (shipped 10 Oct)": dict(table_grounding=True, one_sided_conditions_explain=False, **NOALIGN),
+    "fix A + grounding + policy B (shipped from 11 Oct)": dict(table_grounding=True, one_sided_conditions_explain=True, **NOALIGN),
+    "grounding + policy B + settings by kind (11 Oct, after error analysis)": dict(table_grounding=True, one_sided_conditions_explain=True, setting_dimensions=True),
 }
 
 
@@ -54,6 +58,8 @@ def main() -> None:
     fresh2_gold = {p: {"verdict": v["verdict"], "differs": v["differs"], "extraction_error": v["extraction_error"], "settled_by_third": False} for p, v in fresh2_first.items()}
     fresh3_first, _ = S.parse_job_c(DONE / "C_fresh3_pairs_first_AIannotated-fresh3-first_DONE.xlsx")
     fresh3_gold = {p: {"verdict": v["verdict"], "differs": v["differs"], "extraction_error": v["extraction_error"], "settled_by_third": False} for p, v in fresh3_first.items()}
+    fresh4_first, _ = S.parse_job_c(DONE / "C_fresh4_pairs_first_AIannotated-fresh4-first_DONE.xlsx")
+    fresh4_gold = {p: {"verdict": v["verdict"], "differs": v["differs"], "extraction_error": v["extraction_error"], "settled_by_third": False} for p, v in fresh4_first.items()}
     sets = {
         "first 50 pairs": (load_gold("C_result_pairs_Aditya_AIannotated-pass1_DONE.xlsx", "C_result_pairs_Tarun_AIannotated-second_ai_DONE.xlsx",
                                      "C_result_pairs_Tarun_AIannotated-third_DONE.xlsx"), json.loads((PRIVATE / "job_C_key.json").read_text(encoding="utf-8")),
@@ -65,11 +71,14 @@ def main() -> None:
         "fresh-2 50 pairs (final clean test)": (fresh2_gold, json.loads((PRIVATE / "job_C_fresh2_key.json").read_text(encoding="utf-8")), "system_verdict_frozen"),
         "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": (fresh3_gold, json.loads((PRIVATE / "job_C_fresh3_key.json").read_text(encoding="utf-8")),
                                                                          "system_verdict_frozen"),
+        "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": (fresh4_gold, json.loads((PRIVATE / "job_C_fresh4_key.json").read_text(encoding="utf-8")),
+                                                                                 "system_verdict_frozen"),
     }
     baseline_files = {"first 50 pairs": PRIVATE / "job_C_baselines.json", "held-out 50 pairs": PRIVATE / "job_C_heldout_baselines.json",
                       "fresh 50 pairs (clean test)": PRIVATE / "job_C_fresh_baselines.json",
                       "fresh-2 50 pairs (final clean test)": PRIVATE / "job_C_fresh2_baselines.json",
-                      "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": PRIVATE / "job_C_fresh3_baselines.json"}
+                      "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": PRIVATE / "job_C_fresh3_baselines.json",
+                      "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": PRIVATE / "job_C_fresh4_baselines.json"}
     chunk_text = load_chunk_index(get_settings().paths.index_dir / "chunks.jsonl").texts
     con = sqlite3.connect(get_settings().paths.profile_db)
     con.row_factory = sqlite3.Row
@@ -115,6 +124,10 @@ def main() -> None:
                                               "condition_attribution_merged_exact": sc["condition_attribution_merged"]["exact_match"],
                                               "condition_attribution_merged_pairs": sc["condition_attribution_merged"]["pairs"],
                                               "condition_attribution_merged_jaccard": sc["condition_attribution_merged"]["mean_jaccard"],
+                                              "condition_attribution_merged_recall": sc["condition_attribution_merged"]["mean_recall"],
+                                              "condition_attribution_merged_precision": sc["condition_attribution_merged"]["mean_precision"],
+                                              "all_key_conditions_named": sc["condition_attribution_merged"]["all_key_conditions_named"],
+                                              "names_conditions_beyond_key": sc["condition_attribution_merged"]["names_conditions_beyond_key"],
                                               "per_class_f1": {c: v["f1"] for c, v in sc["per_class"].items()}}
             if name.startswith("frozen"):
                 print(f"[{set_name}] replay of the frozen rules differs from the stored frozen verdicts on {mismatch} pair(s)")
@@ -136,6 +149,10 @@ def main() -> None:
                                               "condition_attribution_merged_exact": sc["condition_attribution_merged"]["exact_match"],
                                               "condition_attribution_merged_pairs": sc["condition_attribution_merged"]["pairs"],
                                               "condition_attribution_merged_jaccard": sc["condition_attribution_merged"]["mean_jaccard"],
+                                              "condition_attribution_merged_recall": sc["condition_attribution_merged"]["mean_recall"],
+                                              "condition_attribution_merged_precision": sc["condition_attribution_merged"]["mean_precision"],
+                                              "all_key_conditions_named": sc["condition_attribution_merged"]["all_key_conditions_named"],
+                                              "names_conditions_beyond_key": sc["condition_attribution_merged"]["names_conditions_beyond_key"],
                                               "per_class_f1": {c: v["f1"] for c, v in sc["per_class"].items()}}
     result["one_sided_pairs"] = one_sided
     from cgrag.evaluation.answers import sign_test
