@@ -20,7 +20,7 @@ from ..pipeline.conditions import is_nullish, norm, split_dataset
 from ..schemas import Chunk, ConditionProfile, ExtractedProfile, ProfileExtraction
 from ..stores.bm25_store import tokenize
 from .pdf_loader import is_table_row
-from .tables import GARBLE_LIMIT, garble_ratio, is_statistics_table, is_structured_table, linearize, parse_table, table_views
+from .tables import GARBLE_LIMIT, garble_ratio, is_statistics_table, is_structured_table, linearize, parse_table, rescue_tables, table_views
 
 EXTRACT_SECTIONS = {"results", "experiments", "discussion"}
 MAX_RESULTS_PER_CALL = 36
@@ -106,7 +106,7 @@ def wants_extraction(chunk: Chunk) -> bool:
     if chunk.section == "references":
         return False
     if is_structured_table(chunk.text):
-        return not is_statistics_table(parse_table(chunk.text).caption) and garble_ratio(chunk.text) < GARBLE_LIMIT
+        return not is_statistics_table(parse_table(chunk.text).caption) and (garble_ratio(chunk.text) < GARBLE_LIMIT or rescue_tables(chunk.text) is not None)
     if chunk.section in EXTRACT_SECTIONS:
         return len(re.findall(r"\d+\.\d+", chunk.text)) >= 3
     if chunk.section in SKIP_SECTIONS:
@@ -188,7 +188,12 @@ def _views(text: str) -> list[str]:
     with only its own header and caption (a window of lines around it) so one table's caption cannot leak into another
     table's numbers, a long table is read a few rows at a time so one call never emits dozens of results, and the
     remaining prose gets a view of its own. A table the loader recognised (caption + header + rows) is read through
-    table_views: the header is applied to every number in code."""
+    table_views: the header is applied to every number in code. A garbled table whose merged columns can be split without doubt is read block by block
+    (`tables.rescue_tables`); the blocks that cannot be split are left out, as the whole table was before."""
+    if garble_ratio(text) >= GARBLE_LIMIT:
+        views = [v for piece in (rescue_tables(text) or []) for v in table_views(parse_table(piece), MAX_RESULTS_PER_CALL)]
+        if views:
+            return views
     table = parse_table(text)
     if table is not None:
         views = table_views(table, MAX_RESULTS_PER_CALL)
