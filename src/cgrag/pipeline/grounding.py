@@ -15,11 +15,13 @@ function of the stored profile and the chunk text. Used by Stage 7 (`[contradict
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 
-from ..ingestion.tables import Cell, ParsedTable, parse_table, table_cells
+from ..ingestion.model_context import is_pure_citation, strip_citation
+from ..ingestion.tables import GARBLE_LIMIT, Cell, ParsedTable, garble_ratio, parse_table, rescue_tables, table_cells
 from ..schemas import ConditionProfile
 from .conditions import _SIZE_LABELS, _strip_decor, model_family, norm
 
@@ -110,6 +112,11 @@ def caption_subject(caption: str) -> str | None:
 
 @lru_cache(maxsize=256)
 def _cells(chunk_text: str) -> tuple[ParsedTable | None, tuple[Cell, ...]]:
+    pieces = rescue_tables(chunk_text) if garble_ratio(chunk_text or "") >= GARBLE_LIMIT else None
+    if pieces:
+        tables = [t for t in (parse_table(p) for p in pieces) if t]
+        if tables:
+            return tables[0], tuple(c for t in tables for c in table_cells(t))
     t = parse_table(chunk_text)
     return (t, tuple(table_cells(t))) if t else (None, ())
 
@@ -139,6 +146,40 @@ def _model_fits(model: str | None, label: str) -> bool | None:
     if not fm or len(fm) < 2:
         return None
     return fm == model_family(label) or fm in nl or (len(nl) >= 3 and nl in norm(model))
+
+
+@lru_cache(maxsize=1)
+def _model_resolutions() -> dict[str, dict[str, str]]:
+    """paper -> {normalised row label -> the system the paper means}, from the citation step of the repair (ingestion/model_context.py, stored with the
+    data set decisions); empty when that file does not exist."""
+    try:
+        from ..config import get_settings
+        raw = json.loads((get_settings().paths.index_dir / "dataset_context.json").read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    out: dict[str, dict[str, str]] = {}
+    for paper, groups in raw.items():
+        for key, decision in groups.items():
+            if key.startswith("model|") and decision.get("model"):
+                out.setdefault(paper, {})[norm(key[len("model|"):])] = decision["model"]
+    return out
+
+
+def _fits(model: str | None, label: str, paper: str | None) -> bool | None:
+    """`_model_fits` that also understands a row labelled by a citation. The repair renames "Devlin et al. (2018)" to the system the paper means
+    (mBERT); comparing the new name with the label itself would call every such card suspect (found 11 Oct: a labelled pair of Stage 7 turned NOT
+    COMPARABLE). A label that is the stored model fits; a bare citation fits the system the paper's own words resolved it to, and gives no verdict when
+    there is none; a name followed by a citation is read without the citation."""
+    if not model:
+        return None
+    if norm(model) == norm(label):
+        return True
+    if is_pure_citation(label):
+        said = _model_resolutions().get(paper or "", {}).get(norm(label))
+        if not said:
+            return None
+        return norm(said) == norm(model) or (len(model_family(said)) >= 2 and model_family(said) == model_family(model))
+    return _model_fits(model, strip_citation(label) or label)
 
 
 _TASKS = ("cola", "sst", "sst2", "mrpc", "sts", "stsb", "qqp", "mnli", "qnli", "rte", "wnli", "boolq", "cb", "copa", "multirc", "record", "wic", "wsc")
@@ -184,7 +225,7 @@ def ground(p: ConditionProfile, chunk_text: str) -> Grounding:
 
     def score(c: Cell) -> int:
         s = 0
-        s += 2 * (_model_fits(p.model, c.row_label) is True) - 2 * (_model_fits(p.model, c.row_label) is False)
+        s += 2 * (_fits(p.model, c.row_label, p.paper_id) is True) - 2 * (_fits(p.model, c.row_label, p.paper_id) is False)
         s += 2 * (_column_fits(p.dataset, c.column) is True) - 1 * (_column_fits(p.dataset, c.column) is False)
         if _column_fits(p.dataset, c.column) is None and len(norm(p.dataset)) >= 3 and norm(p.dataset) in norm(c.column):
             s += 2
@@ -207,8 +248,8 @@ def ground(p: ConditionProfile, chunk_text: str) -> Grounding:
     tags = tags | caption_protocol(t.caption)
     g.setting_tags = frozenset(tags)
     g.size = label_size(best.row_label) or label_size(best.block) or caption_size(t.caption)
-    fit_model, fit_data = _model_fits(p.model, best.row_label), _column_fits(p.dataset, best.column)
-    if _model_fits(p.model, best.column) is True:
+    fit_model, fit_data = _fits(p.model, best.row_label, p.paper_id), _column_fits(p.dataset, best.column)
+    if _fits(p.model, best.column, p.paper_id) is True:
         fit_model = True
         d, r = _task_of(p.dataset), _task_of(best.row_label)
         fit_data = None if d is None or r is None else d == r
