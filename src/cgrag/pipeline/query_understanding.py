@@ -23,6 +23,7 @@ from .intent_classifier import IntentClassifier
 _METRIC_WORDS = frozenset({"accuracy", "acc", "f1", "f1score", "fscore", "em", "exactmatch", "bleu", "rouge", "rougel", "perplexity", "ppl", "precision",
                            "recall", "auc", "mcc", "matthewscorrelation", "pearson", "spearman", "passat1", "passat10", "passat100", "score",
                            "errorrate"})
+_AGGREGATE_WORDS = frozenset({"average", "avg", "mean", "overall", "total", "macro", "micro", "macroaverage", "microaverage", "averagescore", "avgscore"})
 
 SYSTEM = (
     "You analyse a research question about computer-science papers. Return JSON with:\n"
@@ -143,6 +144,8 @@ def clean_conditions(conditions: QueryConditions, question: str) -> QueryConditi
         further[field] = values
     if kept.get("dataset") and norm(kept["dataset"]) in TASK_WORDS:
         kept.setdefault("task", kept.pop("dataset"))
+    if kept.get("dataset") and (norm(kept["dataset"]) in _METRIC_WORDS or norm(kept["dataset"]) in _AGGREGATE_WORDS):
+        del kept["dataset"]
     if kept.get("task") and norm(kept["task"]) in _METRIC_WORDS:
         del kept["task"]
     if kept.get("task") and _SETTING_WORD.match(kept["task"].strip()):
@@ -190,10 +193,17 @@ def _find_language(name: str, text: str) -> re.Match | None:
     return re.search(r"(?<![A-Za-z])" + re.escape(name) + r"(?![A-Za-z])", text, re.I)
 
 
+def _written_as(name: str, question: str) -> bool:
+    """Does the question write `name` with exactly these letters (case included)?"""
+    m = _find(name, question)
+    return bool(m) and m.group(0) == name
+
+
 def vocabulary_conditions(question: str, vocab: dict[str, list[str]]) -> dict[str, str]:
     """Dataset, version, model and language written literally in the question."""
     found: dict[str, str] = {}
-    for name in sorted({d for d in vocab.get("dataset", []) if len(d) >= 3 and norm(d) not in TASK_WORDS}, key=len, reverse=True):
+    datasets = {d for d in vocab.get("dataset", []) if len(d) >= 3 and norm(d) not in TASK_WORDS}
+    for name in sorted(datasets, key=lambda d: (-len(d), not _written_as(d, question), d)):
         m = _find(name, question)
         if m:
             found["dataset"] = name
