@@ -53,11 +53,14 @@ def main() -> None:
     ap.add_argument("--bm25", type=Path, default=cfg.paths.bm25_path)
     ap.add_argument("--out", type=Path, default=Path("eval/labels/retrieval_gold.json"))
     ap.add_argument("--tag", default="")
+    ap.add_argument("--profile-signal", choices=["on", "off"], default=None, help="the profile signal of Stage 4 (default: [retrieval] profile_signal); it reads the gold conditions of the key")
     args = ap.parse_args()
 
     index = load_chunk_index(cfg.paths.index_dir / "chunks.jsonl")
     page_of = index.pages
-    retriever = HybridRetriever(VectorStore(args.chroma), BM25Store.load(args.bm25), cfg.retrieval)
+    retrieval_cfg = cfg.retrieval if args.profile_signal is None else cfg.retrieval.model_copy(update={"profile_signal": args.profile_signal == "on"})
+    from cgrag.stores.profile_store import ProfileStore
+    retriever = HybridRetriever(VectorStore(args.chroma), BM25Store.load(args.bm25), retrieval_cfg, profiles=ProfileStore())
     rows, skipped = [], []
     for line in args.gold.read_text(encoding="utf-8").splitlines():
         if not line.strip():
@@ -69,7 +72,13 @@ def main() -> None:
         if not rel:
             skipped.append(q["id"])
             continue
-        cands = retriever.retrieve([q["question"]], q.get("intent") or "result")
+        gold_conditions = {f: (v[0] if isinstance(v, list) and v else v) for f, v in (q.get("conditions") or {}).items() if f in ("model", "dataset", "language")}
+        if isinstance(q.get("conditions", {}).get("model"), list):
+            gold_conditions["other_models"] = q["conditions"]["model"][1:]
+            size = (q["conditions"].get("model_size") or [None])[0]
+            if size and gold_conditions.get("model") and len(q["conditions"]["model"]) == 1:
+                gold_conditions["model"] = f"{gold_conditions['model']} {size}"
+        cands = retriever.retrieve([q["question"]], q.get("intent") or "result", conditions=gold_conditions)
         scores = rerank_scores(q["question"], [rerank_text(c.chunk, cfg.retrieval.use_cards) for c in cands])
         ranked = [c for c, _ in sorted(zip(cands, scores), key=lambda cs: cs[1], reverse=True)]
         order = [c.chunk.chunk_id for c in ranked]
