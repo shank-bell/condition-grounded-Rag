@@ -319,3 +319,14 @@ def test_a_task_that_is_only_a_setting_word_is_filed_as_the_setting():
     real = clean_conditions(QueryConditions(task="few-shot learning", model="GPT-3"), "How well does GPT-3 do at few-shot learning?")
     assert real.task == "few-shot learning"
 
+
+
+def test_an_aggregate_word_is_not_a_data_set_and_the_named_data_set_is_still_found():
+    """"What GLUE average does T5-11B reach?" came back from the reading as the data set "Average" (a false scope warning, found 11 Oct)."""
+    from cgrag.pipeline.query_understanding import vocabulary_conditions
+    q = "What GLUE average does T5-11B reach?"
+    cleaned = clean_conditions(QueryConditions(dataset="Average", model="T5-11B"), q)
+    assert cleaned.dataset is None and cleaned.model == "T5-11B"
+    found = vocabulary_conditions(q, {"dataset": ["GLUE", "SQuAD"], "model": ["T5-11B"], "language": [], "task": []})
+    assert found["dataset"] == "GLUE"
+    assert clean_conditions(QueryConditions(dataset="GLUE"), q).dataset == "GLUE"
