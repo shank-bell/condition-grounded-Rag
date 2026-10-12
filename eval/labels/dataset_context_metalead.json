@@ -1,0 +1,431 @@
+{
+ "128538": {},
+ "1511.08308": {},
+ "1603.01354": {
+  "1603.01354:0018|POS 9713": {
+   "dataset": "Penn Treebank WSJ",
+   "evidence": "We evaluate our system on two data sets for two sequence labeling tasks — Penn Treebank WSJ corpus for part-of-speech (POS) tagging and CoNLL 2003 corpus for named entity recognition (NER).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1603.01354:0018|NER 8076": {
+   "dataset": "CoNLL 2003",
+   "evidence": "We evaluate our system on two data sets for two sequence labeling tasks — Penn Treebank WSJ corpus for part-of-speech (POS) tagging and CoNLL 2003 corpus for named entity recognition (NER).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1603.01354:0018|POS Dev": {
+   "dataset": "Penn Treebank WSJ",
+   "evidence": "We evaluate our system on two data sets for two sequence labeling tasks — Penn Treebank WSJ corpus for part-of-speech (POS) tagging and CoNLL 2003 corpus for named entity recognition (NER).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1603.01354:0018|NER Dev": {
+   "dataset": "CoNLL 2003",
+   "evidence": "We evaluate our system on two data sets for two sequence labeling tasks — Penn Treebank WSJ corpus for part-of-speech (POS) tagging and CoNLL 2003 corpus for named entity recognition (NER).",
+   "mode": "label",
+   "kind": "task_name"
+  }
+ },
+ "1702.02098": {
+  "1702.02098:0022|": {
+   "dataset": "CoNLL-2003",
+   "evidence": "In Table 4 we show that adding document-level context improves every model on CoNLL-2003.",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1702.02098:0023|": {
+   "dataset": "CoNLL-2003",
+   "evidence": "Our greedy model is out-performed by the Bi-LSTM-CRF reported in Chiu and Nichols (2016) as well as our own re-implementation, which appears to be the new state-of-the-art on this dataset.",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "1703.06345": {},
+ "1709.04109": {
+  "1709.04109:0021|LL03 NER": {
+   "dataset": "CoNLL03",
+   "evidence": "Table 6: Training statistics of TagLM (index 4 and 5) and LM-LSTM-CRF on the CoNLL03 NER dataset.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1709.04109:0021|L00 Chunking": {
+   "dataset": "CoNLL 2000",
+   "evidence": "the CoNLL 2000 chunking dataset (Tjong Kim Sang and Buchholz 2000)",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1709.04109:0021|SJ POS": {
+   "dataset": "WSJ",
+   "evidence": "the Wall Street Journal portion of Penn Treebank dataset (WSJ)",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1709.04109:0025|": {
+   "dataset": "CoNLL03",
+   "evidence": "Table 6: Training statistics of TagLM (index 4 and 5) and LM-LSTM-CRF on the CoNLL03 NER dataset.",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1709.04109:0029|": {
+   "dataset": "CoNLL03",
+   "evidence": "As shown in Table 10, LM-LSTM-CRF NH yields worse performance than LM-LSTM-CRF NL. ... CoNLL03 NER contains ann",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "1711.05568": {},
+ "1804.09849": {
+  "1804.09849:0021|benchmark datasets": {
+   "dataset": "WMT’14",
+   "evidence": "the RNMT+ model, which significantly outperforms all fundamental architectures on the widely-used WMT’14 En→Fr and En→De benchmark datasets.",
+   "mode": "label",
+   "kind": "task_name"
+  }
+ },
+ "1806.03489": {},
+ "1808.08745": {},
+ "1809.08370": {
+  "1809.08370:0014|Chunk": {
+   "dataset": "CoNLL-2000",
+   "evidence": "Text Chunking: We use the CoNLL-2000 data (Tjong Kim Sang and Buchholz, 2000).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0014|Fine-Grained NER": {
+   "dataset": "OntoNotes",
+   "evidence": "Fine-Grained NER (FGN): We use the OntoNotes (Hovy et al., 2006) dataset.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0014|Part-of-Speech": {
+   "dataset": "Wall Street Journal",
+   "evidence": "Part-of-Speech (POS) Tagging: We use the Wall Street Journal portion of the Penn Treebank (Marcus et al., 1993).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0014|Translate": {
+   "dataset": "IWSLT 2015",
+   "evidence": "Machine Translation: We use the English- Vietnamese translation dataset from IWSLT 2015 (Cettolo et al., 2015).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0014|Combinatory Categorial Grammar": {
+   "dataset": "CCGBank",
+   "evidence": "Combinatory Categorial Grammar (CCG) Supertagging: We use data from CCGBank (Hockenmaier and Steedman, 2007).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0014|NER": {
+   "dataset": "CoNLL-2003",
+   "evidence": "Named Entity Recognition (NER): We use the CoNLL-2003 data (Tjong Kim Sang and De Meulder, 2003).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0019|Chunking": {
+   "dataset": "CoNLL-2000",
+   "evidence": "Text Chunking: We use the CoNLL-2000 data (Tjong Kim Sang and Buchholz, 2000).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0020|Combinatory Categorial Grammar": {
+   "dataset": "CCGBank",
+   "evidence": "Combinatory Categorial Grammar (CCG) Supertagging: We use data from CCGBank (Hockenmaier and Steedman, 2007).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0020|Chunking": {
+   "dataset": "CoNLL-2000",
+   "evidence": "Text Chunking: We use the CoNLL-2000 data (Tjong Kim Sang and Buchholz, 2000).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0020|NER": {
+   "dataset": "CoNLL-2003",
+   "evidence": "Named Entity Recognition (NER): We use the CoNLL-2003 data (Tjong Kim Sang and De Meulder, 2003).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0020|Fine-Grained NER": {
+   "dataset": "OntoNotes",
+   "evidence": "Fine-Grained NER (FGN): We use the OntoNotes (Hovy et al., 2006) dataset.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0020|Part-of-Speech": {
+   "dataset": "Wall Street Journal",
+   "evidence": "Part-of-Speech (POS) Tagging: We use the Wall Street Journal portion of the Penn Treebank (Marcus et al., 1993).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0021|NER": {
+   "dataset": "CoNLL-2003",
+   "evidence": "Named Entity Recognition (NER): We use the CoNLL-2003 data (Tjong Kim Sang and De Meulder, 2003).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0036|NER": {
+   "dataset": "CoNLL-2003",
+   "evidence": "Named Entity Recognition (NER): We use the CoNLL-2003 data (Tjong Kim Sang and De Meulder, 2003).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0036|Part-of-Speech": {
+   "dataset": "Wall Street Journal portion of the Penn Treebank",
+   "evidence": "Part-of-Speech (POS) Tagging: We use the Wall Street Journal portion of the Penn Treebank (Marcus et al., 1993).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0036|Chunking": {
+   "dataset": "CoNLL-2000",
+   "evidence": "Text Chunking: We use the CoNLL-2000 data (Tjong Kim Sang and Buchholz, 2000).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0036|Translation": {
+   "dataset": "IWSLT 2015",
+   "evidence": "Machine Translation: We use the English- Vietnamese translation dataset from IWSLT 2015 (Cettolo et al., 2015).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0036|translation": {
+   "dataset": "IWSLT 2015",
+   "evidence": "Machine Translation: We use the English- Vietnamese translation dataset from IWSLT 2015 (Cettolo et al., 2015).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0036|Combinatory Categorial Grammar": {
+   "dataset": "CCGBank",
+   "evidence": "Combinatory Categorial Grammar (CCG) Supertagging: We use data from CCGBank (Hockenmaier and Steedman, 2007).",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "1809.08370:0036|Fine-Grained NER": {
+   "dataset": "OntoNotes",
+   "evidence": "Fine-Grained NER (FGN): We use the OntoNotes (Hovy et al., 2006) dataset.",
+   "mode": "label",
+   "kind": "task_name"
+  }
+ },
+ "1811.05021": {
+  "1811.05021:0019|": {
+   "dataset": "SwDA",
+   "evidence": "Table III: Classification accuracy on SwDA corpus, comparing our ALDMN model with other methods as described in literatures.",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "1811.09242": {
+  "1811.09242:0014|F-score": {
+   "dataset": "SemEval 2010",
+   "evidence": "For the SemEval 2010 dataset, we compare models using two unsupervised metrics: V-measure (V- M) and paired F-score (F-S).",
+   "mode": "label",
+   "kind": "metric_label"
+  },
+  "1811.09242:0014|V-M": {
+   "dataset": "SemEval 2010",
+   "evidence": "For the SemEval 2010 dataset, we compare models using two unsupervised metrics: V-measure (V- M) and paired F-score (F-S).",
+   "mode": "label",
+   "kind": "metric_label"
+  }
+ },
+ "1812.09471": {},
+ "1812.10235": {},
+ "1901.10430": {},
+ "1903.07785": {
+  "1903.07785:0022|": {
+   "dataset": "Penn Treebank",
+   "evidence": "We also report parseval F1 for Penn Treebank constituency parsing.",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "1905.03197": {},
+ "1905.12598": {},
+ "1906.05012": {
+  "1906.05012:0014|": {
+   "dataset": "Gigaword",
+   "evidence": "The dataset used for evaluation is Annotated English Gigaword (Napoles et al., 2012), a parallel corpus formed by pairing the first sentence of an article with its headline.",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1906.05012:0016|": {
+   "dataset": "Gigaword",
+   "evidence": "The dataset used for evaluation is Annotated English Gigaword (Napoles et al., 2012), a parallel corpus formed by pairing the first sentence of an article with its headline.",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1906.05012:0018|": {
+   "dataset": "Gigaword",
+   "evidence": "Extensive experiments were conducted on the Gigaword dataset (Rush et al., 2015), a public dataset widely used for abstractive sentence summarization, and the results appear to",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1906.05012:0019|": {
+   "dataset": "Gigaword",
+   "evidence": "The dataset used for evaluation is Annotated English Gigaword (Napoles et al., 2012), a parallel corpus formed by pairing the first sentence of an article with its headline.",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1906.05012:0021|": {
+   "dataset": "Gigaword",
+   "evidence": "As the results show in Table 5, the model performs even worse than some ordinary sequence-to-sequence models in Table 3. ... The dataset used for evaluation is Annotated English Gigaword (Napoles et al., 2012), a parallel corpus formed by p",
+   "mode": "table",
+   "kind": "none"
+  },
+  "1906.05012:0023|": {
+   "dataset": "Gigaword",
+   "evidence": "The dataset used for evaluation is Annotated English Gigaword (Napoles et al., 2012), a parallel corpus formed by pairing the first sentence of an article with its headline.",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "1907.00390": {},
+ "1908.08345": {
+  "1908.08345:0031|XS": {
+   "dataset": "XSum",
+   "evidence": "All differences between BERTSUM and comparison models are statistically significant (p < 0.05), with the exception of TCONVS2S (see Table 7; XSum) in the QA evaluation setting.",
+   "mode": "table",
+   "kind": "fragment"
+  },
+  "1908.08345:0031|um": {
+   "dataset": "XSum",
+   "evidence": "All differences between BERTSUM and comparison models are statistically significant (p < 0.05), with the exception of TCONVS2S (see Table 7; XSum) in the QA evaluation setting.",
+   "mode": "table",
+   "kind": "fragment"
+  }
+ },
+ "1909.02188": {},
+ "1910.13461": {
+  "1910.13461:0016|CN": {
+   "dataset": "CNN/DailyMail",
+   "evidence": "To provide a comparison with the state-of-the-art in summarization, we present results on two summarization datasets, CNN/DailyMail and XSum, which have distinct properties.",
+   "mode": "table",
+   "kind": "fragment"
+  }
+ },
+ "1911.09483": {},
+ "1911.10390": {},
+ "1912.08777": {},
+ "2001.04063": {},
+ "2002.03184": {},
+ "2008.07772": {},
+ "2020.emnlp-main.152": {},
+ "2020.emnlp-main.523": {},
+ "2020.findings-emnlp.378": {},
+ "2105.03654": {},
+ "2203.16804": {},
+ "C18-1139": {
+  "C18-1139:0013|NER-English": {
+   "dataset": "CONLL03",
+   "evidence": "In particular, we significantly outperform previous work on English and German named entity recognition (NER), allowing us to report new state-of-the-art F1-scores on the CONLL03 shared task.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "C18-1139:0013|NER-German": {
+   "dataset": "CONLL03",
+   "evidence": "In particular, we significantly outperform previous work on English and German named entity recognition (NER), allowing us to report new state-of-the-art F1-scores on the CONLL03 shared task.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "C18-1139:0013|Chunking": {
+   "dataset": "CONLL2000",
+   "evidence": "chunking in the CONLL2000 setup (Tjong Kim Sang and Buchholz, 2000)",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "C18-1139:0018|NER-English": {
+   "dataset": "CONLL03",
+   "evidence": "In particular, we significantly outperform previous work on English and German named entity recognition (NER), allowing us to report new state-of-the-art F1-scores on the CONLL03 shared task.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "C18-1139:0018|NER-German": {
+   "dataset": "CONLL03",
+   "evidence": "In particular, we significantly outperform previous work on English and German named entity recognition (NER), allowing us to report new state-of-the-art F1-scores on the CONLL03 shared task.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "C18-1139:0018|Chunking": {
+   "dataset": "CONLL2000",
+   "evidence": "chunking in the CONLL2000 setup (Tjong Kim Sang and Buchholz, 2000)",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "C18-1139:0020|NER": {
+   "dataset": "CONLL03",
+   "evidence": "In particular, we significantly outperform previous work on English and German named entity recognition (NER), allowing us to report new state-of-the-art F1-scores on the CONLL03 shared task.",
+   "mode": "label",
+   "kind": "task_name"
+  }
+ },
+ "D18-1105": {},
+ "D18-1279": {
+  "D18-1279:0015|Spanish NER": {
+   "dataset": "CoNLL-2002",
+   "evidence": "CoNLL-2002 and CoNLL2003 datasets (Tjong Kim Sang, 2002; Tjong Kim Sang and De Meulder, 2003) contain named entity labels for Spanish, Dutch, English and German as separate datasets.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "D18-1279:0015|Dutch NER": {
+   "dataset": "CoNLL-2002",
+   "evidence": "CoNLL-2002 and CoNLL2003 datasets (Tjong Kim Sang, 2002; Tjong Kim Sang and De Meulder, 2003) contain named entity labels for Spanish, Dutch, English and German as separate datasets.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "D18-1279:0015|Chunking": {
+   "dataset": "CoNLL 2000",
+   "evidence": "The CoNLL 2000 chunking task (Tjong Kim Sang and Buchholz, 2000) uses sections 15-18 from the Wall Street Journal corpus for training and section 20 for testing.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "D18-1279:0015|English NER": {
+   "dataset": "CoNLL2003",
+   "evidence": "CoNLL-2002 and CoNLL2003 datasets (Tjong Kim Sang, 2002; Tjong Kim Sang and De Meulder, 2003) contain named entity labels for Spanish, Dutch, English and German as separate datasets.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "D18-1279:0015|German NER": {
+   "dataset": "CoNLL-2003",
+   "evidence": "CoNLL-2002 and CoNLL2003 datasets (Tjong Kim Sang, 2002; Tjong Kim Sang and De Meulder, 2003) contain named entity labels for Spanish, Dutch, English and German as separate datasets.",
+   "mode": "label",
+   "kind": "task_name"
+  },
+  "D18-1279:0018|Chunking": {
+   "dataset": "CoNLL 2000",
+   "evidence": "The CoNLL 2000 chunking task (Tjong Kim Sang and Buchholz, 2000) uses sections 15-18 from the Wall Street Journal corpus for training and section 20 for testing.",
+   "mode": "label",
+   "kind": "task_name"
+  }
+ },
+ "D18-1523": {
+  "D18-1523:0012|Fuzzy B-Cubed": {
+   "dataset": "SemEval 2013 Task 13",
+   "evidence": "Table 2: Evaluation Results on the SemEval 2013 Task 13 Dataset.",
+   "mode": "label",
+   "kind": "metric_label"
+  },
+  "D18-1523:0012|Average": {
+   "dataset": "SemEval 2013 Task 13",
+   "evidence": "Table 2: Evaluation Results on the SemEval 2013 Task 13 Dataset.",
+   "mode": "label",
+   "kind": "metric_label"
+  },
+  "D18-1523:0013|": {
+   "dataset": "SemEval 2013 Task 13",
+   "evidence": "We evaluate our method on the SemEval 2013 Task 13 dataset (Jurgens and Klapaftis, 2013)",
+   "mode": "table",
+   "kind": "none"
+  },
+  "D18-1523:0019|": {
+   "dataset": "SemEval 2013 Task 13",
+   "evidence": "We evaluate our method on the SemEval 2013 Task 13 dataset (Jurgens and Klapaftis, 2013)",
+   "mode": "table",
+   "kind": "none"
+  }
+ },
+ "D19-1367": {},
+ "K19-1036": {},
+ "N19-1373": {},
+ "wang19f": {}
+}
