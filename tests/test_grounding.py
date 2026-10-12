@@ -112,3 +112,30 @@ def test_without_a_table_or_a_matching_cell_nothing_is_changed():
     p = prof("BERT", "SQuAD", 80.8, setting="baseline")
     assert not ground(p, "BERT-BASE achieved an exact match score of 80.8 on SQuAD.") and enriched(p, ground(p, "no table")) == p
     assert not ground(prof("BERT", "SQuAD", 12.3), ALBERT)
+
+
+XNLI_CITED = """Table 1: Results on cross-lingual classification (XNLI accuracy).
+| Model | en | fr | sw |
+| Fine-tune multilingual model on English training set (Cross-lingual Transfer) |  |  |  |
+| Devlin et al.(2018) | 81.4 | 73.8 | 50.4 |
+| XLM-R | 85.8 | 79.7 | 66.5 |"""
+
+
+def test_a_row_labelled_by_a_citation_fits_the_system_that_the_paper_says_it_is(monkeypatch):
+    from cgrag.pipeline import grounding
+    monkeypatch.setattr(grounding, "_model_resolutions", lambda: {"p": {"devlinetal2018": "mBERT"}})
+    ok = ground(ConditionProfile(profile_id="c:1#0", paper_id="p", chunk_id="c:1", model="mBERT", dataset="XNLI", metric="accuracy", value=50.4, language="Swahili"), XNLI_CITED)
+    assert ok and ok.row_label == "Devlin et al.(2018)" and not ok.suspect
+    raw = ground(ConditionProfile(profile_id="c:1#1", paper_id="p", chunk_id="c:1", model="Devlin et al.(2018)", dataset="XNLI", metric="accuracy", value=50.4,
+                                  language="Swahili"), XNLI_CITED)
+    assert raw and not raw.suspect
+    wrong = ground(ConditionProfile(profile_id="c:1#2", paper_id="p", chunk_id="c:1", model="XLM-R", dataset="XNLI", metric="accuracy", value=50.4, language="Swahili"),
+                   XNLI_CITED)
+    assert "model" in wrong.suspect
+
+
+def test_a_bare_citation_without_a_resolution_gives_no_verdict_about_the_model(monkeypatch):
+    from cgrag.pipeline import grounding
+    monkeypatch.setattr(grounding, "_model_resolutions", lambda: {})
+    g = ground(ConditionProfile(profile_id="c:1#0", paper_id="p", chunk_id="c:1", model="mBERT", dataset="XNLI", metric="accuracy", value=50.4, language="Swahili"), XNLI_CITED)
+    assert g and "model" not in g.suspect
