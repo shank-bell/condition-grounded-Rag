@@ -17,7 +17,7 @@ from collections import Counter
 
 from cgrag.config import get_settings
 from cgrag.ingestion.profile_extractor import _is_result, _normalize
-from cgrag.ingestion.tables import GARBLE_LIMIT, garble_ratio, is_structured_table
+from cgrag.ingestion.tables import GARBLE_LIMIT, garble_ratio, is_structured_table, rescue_tables
 from cgrag.schemas import ExtractedProfile
 from cgrag.stores.vector_store import VectorStore
 
@@ -31,7 +31,8 @@ def main() -> None:
     db = sqlite3.connect(get_settings().paths.profile_db)
     db.row_factory = sqlite3.Row
     rows = db.execute(f"SELECT profile_id, paper_id, chunk_id, {','.join(FIELDS)} FROM profiles").fetchall()
-    garbled = {c.chunk_id for c in VectorStore().all_chunks() if is_structured_table(c.text) and garble_ratio(c.text) >= GARBLE_LIMIT}
+    garbled = {c.chunk_id for c in VectorStore().all_chunks()
+               if is_structured_table(c.text) and garble_ratio(c.text) >= GARBLE_LIMIT and rescue_tables(c.text) is None}
     updates: list[tuple[str, dict]] = []
     deletes: list[tuple[str, str]] = []
     changed_fields: Counter[str] = Counter()
