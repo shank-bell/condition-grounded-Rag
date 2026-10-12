@@ -1,0 +1,623 @@
+{
+ "split": "all",
+ "papers": {
+  "1804.07461": {
+   "title": "GLUE: A MULTI-TASK BENCHMARK AND ANALYSIS PLATFORM FOR NATURAL LANGUAGE UNDERSTAND-",
+   "split": "test",
+   "match": "contains",
+   "rows": 2
+  },
+  "1809.05053": {
+   "title": "XNLI: Evaluating Cross-lingual Sentence Representations",
+   "split": "dev",
+   "match": "exact",
+   "rows": 1
+  },
+  "1810.04805": {
+   "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+   "split": "dev",
+   "match": "exact",
+   "rows": 69
+  },
+  "1901.07291": {
+   "title": "Cross-lingual Language Model Pretraining",
+   "split": "dev",
+   "match": "exact",
+   "rows": 9
+  },
+  "1906.08237": {
+   "title": "XLNet: Generalized Autoregressive Pretraining for Language Understanding",
+   "split": "test",
+   "match": "exact",
+   "rows": 52
+  },
+  "1907.10529": {
+   "title": "SpanBERT: Improving Pre-training by Representing and Predicting Spans",
+   "split": "dev",
+   "match": "exact",
+   "rows": 27
+  },
+  "1907.11692": {
+   "title": "RoBERTa: A Robustly Optimized BERT Pretraining Approach",
+   "split": "test",
+   "match": "exact",
+   "rows": 69
+  },
+  "1908.10084": {
+   "title": "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks",
+   "split": "test",
+   "match": "exact",
+   "rows": 16
+  },
+  "1909.10351": {
+   "title": "TinyBERT: Distilling BERT for Natural Language Understanding",
+   "split": "test",
+   "match": "exact",
+   "rows": 24
+  },
+  "1909.11942": {
+   "title": "ALBERT: A LITE BERT FOR SELF-SUPERVISED LEARNING OF LANGUAGE REPRESENTATIONS",
+   "split": "dev",
+   "match": "exact",
+   "rows": 30
+  },
+  "1910.01108": {
+   "title": "DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter",
+   "split": "dev",
+   "match": "exact",
+   "rows": 25
+  },
+  "1910.10683": {
+   "title": "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer",
+   "split": "test",
+   "match": "exact",
+   "rows": 130
+  },
+  "2003.10555": {
+   "title": "ELECTRA: PRE-TRAINING TEXT ENCODERS AS DISCRIMINATORS RATHER THAN GENERATORS",
+   "split": "test",
+   "match": "exact",
+   "rows": 2
+  },
+  "2004.02984": {
+   "title": "MobileBERT: a Compact Task-Agnostic BERT for Resource-Limited Devices",
+   "split": "dev",
+   "match": "exact",
+   "rows": 1
+  },
+  "2004.04906": {
+   "title": "Dense Passage Retrieval for Open-Domain Question Answering",
+   "split": "test",
+   "match": "exact",
+   "rows": 6
+  },
+  "2004.05150": {
+   "title": "Longformer: The Long-Document Transformer",
+   "split": "dev",
+   "match": "exact",
+   "rows": 9
+  },
+  "2005.11401": {
+   "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+   "split": "test",
+   "match": "exact",
+   "rows": 4
+  },
+  "2005.14165": {
+   "title": "Language Models are Few-Shot Learners",
+   "split": "test",
+   "match": "exact",
+   "rows": 70
+  },
+  "2006.03654": {
+   "title": "DEBERTA: DECODING-ENHANCED BERT WITH DIS- ENTANGLED ATTENTION",
+   "split": "test",
+   "match": "exact",
+   "rows": 30
+  },
+  "2010.11934": {
+   "title": "mT5: A Massively Multilingual Pre-trained Text-to-Text Transformer",
+   "split": "dev",
+   "match": "exact",
+   "rows": 17
+  },
+  "2302.13971": {
+   "title": "LLaMA: Open and Efficient Foundation Language Models",
+   "split": "dev",
+   "match": "exact",
+   "rows": 160
+  },
+  "2307.09288": {
+   "title": "Llama 2: Open Foundation and Fine-Tuned Chat Models",
+   "split": "test",
+   "match": "exact",
+   "rows": 49
+  }
+ },
+ "variants": {
+  "stored (raw extraction)": {
+   "aggregate": {
+    "gold": 802,
+    "recoverable": 534,
+    "covered": 456,
+    "dataset": 407,
+    "metric": 380,
+    "model": 409,
+    "identity": 324,
+    "task": 337,
+    "recoverable_pct": 66.6,
+    "coverage_pct": 85.4,
+    "dataset_pct": 89.3,
+    "metric_pct": 83.3,
+    "model_pct": 89.7,
+    "identity_pct": 71.1,
+    "task_pct": 73.9,
+    "identity_end_to_end_pct": 60.7
+   },
+   "per_paper": {
+    "1804.07461": {
+     "gold": 2,
+     "recoverable": 2,
+     "covered": 1,
+     "dataset": 0,
+     "metric": 1,
+     "model": 0,
+     "identity": 0,
+     "task": 1
+    },
+    "1809.05053": {
+     "gold": 1,
+     "recoverable": 1,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 1,
+     "model": 1,
+     "identity": 1,
+     "task": 1
+    },
+    "1810.04805": {
+     "gold": 69,
+     "recoverable": 25,
+     "covered": 20,
+     "dataset": 19,
+     "metric": 20,
+     "model": 13,
+     "identity": 13,
+     "task": 14
+    },
+    "1901.07291": {
+     "gold": 9,
+     "recoverable": 9,
+     "covered": 9,
+     "dataset": 9,
+     "metric": 9,
+     "model": 3,
+     "identity": 3,
+     "task": 9
+    },
+    "1906.08237": {
+     "gold": 52,
+     "recoverable": 44,
+     "covered": 31,
+     "dataset": 29,
+     "metric": 30,
+     "model": 31,
+     "identity": 28,
+     "task": 26
+    },
+    "1907.10529": {
+     "gold": 27,
+     "recoverable": 24,
+     "covered": 24,
+     "dataset": 24,
+     "metric": 23,
+     "model": 23,
+     "identity": 22,
+     "task": 17
+    },
+    "1907.11692": {
+     "gold": 69,
+     "recoverable": 18,
+     "covered": 16,
+     "dataset": 14,
+     "metric": 13,
+     "model": 15,
+     "identity": 13,
+     "task": 14
+    },
+    "1908.10084": {
+     "gold": 16,
+     "recoverable": 16,
+     "covered": 15,
+     "dataset": 14,
+     "metric": 14,
+     "model": 13,
+     "identity": 13,
+     "task": 14
+    },
+    "1909.10351": {
+     "gold": 24,
+     "recoverable": 18,
+     "covered": 17,
+     "dataset": 13,
+     "metric": 12,
+     "model": 15,
+     "identity": 11,
+     "task": 10
+    },
+    "1909.11942": {
+     "gold": 30,
+     "recoverable": 20,
+     "covered": 16,
+     "dataset": 15,
+     "metric": 14,
+     "model": 14,
+     "identity": 13,
+     "task": 15
+    },
+    "1910.01108": {
+     "gold": 25,
+     "recoverable": 8,
+     "covered": 2,
+     "dataset": 1,
+     "metric": 2,
+     "model": 2,
+     "identity": 1,
+     "task": 1
+    },
+    "1910.10683": {
+     "gold": 130,
+     "recoverable": 103,
+     "covered": 82,
+     "dataset": 77,
+     "metric": 73,
+     "model": 77,
+     "identity": 68,
+     "task": 52
+    },
+    "2003.10555": {
+     "gold": 2,
+     "recoverable": 2,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 1,
+     "model": 1,
+     "identity": 1,
+     "task": 1
+    },
+    "2004.02984": {
+     "gold": 1,
+     "recoverable": 1,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 1,
+     "model": 1,
+     "identity": 1,
+     "task": 0
+    },
+    "2004.04906": {
+     "gold": 6,
+     "recoverable": 5,
+     "covered": 5,
+     "dataset": 5,
+     "metric": 3,
+     "model": 5,
+     "identity": 3,
+     "task": 5
+    },
+    "2004.05150": {
+     "gold": 9,
+     "recoverable": 3,
+     "covered": 3,
+     "dataset": 3,
+     "metric": 3,
+     "model": 1,
+     "identity": 1,
+     "task": 3
+    },
+    "2005.11401": {
+     "gold": 4,
+     "recoverable": 3,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 0,
+     "model": 1,
+     "identity": 0,
+     "task": 1
+    },
+    "2005.14165": {
+     "gold": 70,
+     "recoverable": 53,
+     "covered": 43,
+     "dataset": 35,
+     "metric": 33,
+     "model": 39,
+     "identity": 26,
+     "task": 25
+    },
+    "2006.03654": {
+     "gold": 30,
+     "recoverable": 23,
+     "covered": 16,
+     "dataset": 11,
+     "metric": 12,
+     "model": 11,
+     "identity": 8,
+     "task": 10
+    },
+    "2010.11934": {
+     "gold": 17,
+     "recoverable": 6,
+     "covered": 4,
+     "dataset": 0,
+     "metric": 0,
+     "model": 4,
+     "identity": 0,
+     "task": 0
+    },
+    "2302.13971": {
+     "gold": 160,
+     "recoverable": 115,
+     "covered": 115,
+     "dataset": 109,
+     "metric": 95,
+     "model": 107,
+     "identity": 85,
+     "task": 95
+    },
+    "2307.09288": {
+     "gold": 49,
+     "recoverable": 35,
+     "covered": 33,
+     "dataset": 25,
+     "metric": 20,
+     "model": 32,
+     "identity": 13,
+     "task": 23
+    }
+   }
+  },
+  "repaired (shipped)": {
+   "aggregate": {
+    "gold": 802,
+    "recoverable": 534,
+    "covered": 456,
+    "dataset": 407,
+    "metric": 380,
+    "model": 417,
+    "identity": 329,
+    "task": 354,
+    "recoverable_pct": 66.6,
+    "coverage_pct": 85.4,
+    "dataset_pct": 89.3,
+    "metric_pct": 83.3,
+    "model_pct": 91.4,
+    "identity_pct": 72.1,
+    "task_pct": 77.6,
+    "identity_end_to_end_pct": 61.6
+   },
+   "per_paper": {
+    "1804.07461": {
+     "gold": 2,
+     "recoverable": 2,
+     "covered": 1,
+     "dataset": 0,
+     "metric": 1,
+     "model": 0,
+     "identity": 0,
+     "task": 1
+    },
+    "1809.05053": {
+     "gold": 1,
+     "recoverable": 1,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 1,
+     "model": 1,
+     "identity": 1,
+     "task": 1
+    },
+    "1810.04805": {
+     "gold": 69,
+     "recoverable": 25,
+     "covered": 20,
+     "dataset": 19,
+     "metric": 20,
+     "model": 13,
+     "identity": 13,
+     "task": 18
+    },
+    "1901.07291": {
+     "gold": 9,
+     "recoverable": 9,
+     "covered": 9,
+     "dataset": 9,
+     "metric": 9,
+     "model": 3,
+     "identity": 3,
+     "task": 9
+    },
+    "1906.08237": {
+     "gold": 52,
+     "recoverable": 44,
+     "covered": 31,
+     "dataset": 29,
+     "metric": 30,
+     "model": 31,
+     "identity": 28,
+     "task": 27
+    },
+    "1907.10529": {
+     "gold": 27,
+     "recoverable": 24,
+     "covered": 24,
+     "dataset": 24,
+     "metric": 23,
+     "model": 23,
+     "identity": 22,
+     "task": 17
+    },
+    "1907.11692": {
+     "gold": 69,
+     "recoverable": 18,
+     "covered": 16,
+     "dataset": 14,
+     "metric": 13,
+     "model": 15,
+     "identity": 13,
+     "task": 14
+    },
+    "1908.10084": {
+     "gold": 16,
+     "recoverable": 16,
+     "covered": 15,
+     "dataset": 14,
+     "metric": 14,
+     "model": 13,
+     "identity": 13,
+     "task": 14
+    },
+    "1909.10351": {
+     "gold": 24,
+     "recoverable": 18,
+     "covered": 17,
+     "dataset": 13,
+     "metric": 12,
+     "model": 15,
+     "identity": 11,
+     "task": 12
+    },
+    "1909.11942": {
+     "gold": 30,
+     "recoverable": 20,
+     "covered": 16,
+     "dataset": 15,
+     "metric": 14,
+     "model": 16,
+     "identity": 14,
+     "task": 14
+    },
+    "1910.01108": {
+     "gold": 25,
+     "recoverable": 8,
+     "covered": 2,
+     "dataset": 1,
+     "metric": 2,
+     "model": 2,
+     "identity": 1,
+     "task": 1
+    },
+    "1910.10683": {
+     "gold": 130,
+     "recoverable": 103,
+     "covered": 82,
+     "dataset": 77,
+     "metric": 73,
+     "model": 77,
+     "identity": 68,
+     "task": 60
+    },
+    "2003.10555": {
+     "gold": 2,
+     "recoverable": 2,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 1,
+     "model": 1,
+     "identity": 1,
+     "task": 1
+    },
+    "2004.02984": {
+     "gold": 1,
+     "recoverable": 1,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 1,
+     "model": 1,
+     "identity": 1,
+     "task": 0
+    },
+    "2004.04906": {
+     "gold": 6,
+     "recoverable": 5,
+     "covered": 5,
+     "dataset": 5,
+     "metric": 3,
+     "model": 5,
+     "identity": 3,
+     "task": 5
+    },
+    "2004.05150": {
+     "gold": 9,
+     "recoverable": 3,
+     "covered": 3,
+     "dataset": 3,
+     "metric": 3,
+     "model": 1,
+     "identity": 1,
+     "task": 3
+    },
+    "2005.11401": {
+     "gold": 4,
+     "recoverable": 3,
+     "covered": 1,
+     "dataset": 1,
+     "metric": 0,
+     "model": 1,
+     "identity": 0,
+     "task": 1
+    },
+    "2005.14165": {
+     "gold": 70,
+     "recoverable": 53,
+     "covered": 43,
+     "dataset": 35,
+     "metric": 33,
+     "model": 39,
+     "identity": 26,
+     "task": 27
+    },
+    "2006.03654": {
+     "gold": 30,
+     "recoverable": 23,
+     "covered": 16,
+     "dataset": 11,
+     "metric": 12,
+     "model": 11,
+     "identity": 8,
+     "task": 9
+    },
+    "2010.11934": {
+     "gold": 17,
+     "recoverable": 6,
+     "covered": 4,
+     "dataset": 0,
+     "metric": 0,
+     "model": 4,
+     "identity": 0,
+     "task": 0
+    },
+    "2302.13971": {
+     "gold": 160,
+     "recoverable": 115,
+     "covered": 115,
+     "dataset": 109,
+     "metric": 95,
+     "model": 113,
+     "identity": 89,
+     "task": 97
+    },
+    "2307.09288": {
+     "gold": 49,
+     "recoverable": 35,
+     "covered": 33,
+     "dataset": 25,
+     "metric": 20,
+     "model": 32,
+     "identity": 13,
+     "task": 23
+    }
+   }
+  }
+ }
+}
