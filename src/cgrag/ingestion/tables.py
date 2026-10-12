@@ -427,3 +427,127 @@ def table_cells(t: ParsedTable) -> list[Cell]:
             column, _, text = pair.rpartition(" = ")
             out.append(Cell(row.label, row.context, column, text, row.index))
     return out
+
+
+_NUMTOK = r"[-+]?\d+(?:\.\d+)?"
+_MULTI = re.compile(rf"^(?:{_NUMTOK}|[-–—])(?:\s+(?:{_NUMTOK}|[-–—]))+$")
+_APOSTROPHE = re.compile(r"^[’'`]")
+_DECIMAL_TOKEN = re.compile(r"(?<![A-Za-z\-])\d+\.\d+")
+
+
+def _row_kind(cells: list[str]) -> str:
+    """data (a cell with numbers), head (two or more filled cells and no number: a header row) or label (a group label)."""
+    body = cells[1:]
+    if any(is_numeric_cell(c) or _MULTI.match(c) or _DECIMAL_TOKEN.search(c) for c in body):
+        return "data"
+    return "head" if sum(1 for c in body if c) >= 2 else "label"
+
+
+def _decimals(token: str) -> int | None:
+    m = re.fullmatch(r"[-+]?\d+(?:\.(\d+))?", token)
+    return None if m is None else len(m.group(1) or "")
+
+
+def _split_block(heads: list[list[str]], body: list[tuple[str, list[str]]], caption: str) -> str | None:
+    """One header block with merged cells as one clean table text, or None when the block is not of this layout or anything in it is doubtful (a block
+    that cannot be read cleanly is left alone, as before)."""
+    width = len(heads[0])
+    data = [r for kind, r in body if kind == "data"]
+    if len(data) < 2:
+        return None
+    expanded: dict[int, int] = {}
+    for j in range(1, width):
+        counts: list[int] = []
+        texts = 0
+        for r in data:
+            c = r[j].strip()
+            if _MULTI.match(c):
+                counts.append(len(c.split()))
+            elif is_numeric_cell(c):
+                counts.append(1)
+            elif c not in _DASHES:
+                texts += 1
+        if texts and counts:
+            return None
+        if texts:
+            continue
+        if len(set(counts)) > 1:
+            return None
+        if counts and counts[0] >= 2:
+            expanded[j] = counts[0]
+    if not expanded:
+        return None
+    head_toks = [[h[j].split() for j in range(width)] for h in heads]
+    for j in sorted(expanded):
+        m = expanded[j]
+        supported = False
+        for hi in range(len(heads)):
+            toks = head_toks[hi][j]
+            if toks and _APOSTROPHE.match(toks[0]) and j > 1 and len(toks) - 1 == m and head_toks[hi][j - 1]:
+                head_toks[hi][j - 1][-1] += toks[0]
+                toks = head_toks[hi][j] = toks[1:]
+            if len(toks) == m:
+                supported = True
+                continue
+            if len(toks) <= 1:
+                head_toks[hi][j] = (toks or [""]) * m
+                continue
+            return None
+        if not supported:
+            return None
+        if any(len(t) == 1 and t.isalpha() for hi in range(len(heads)) for t in head_toks[hi][j] if t):
+            return None
+    rows: list[list[str]] = []
+    for hi, h in enumerate(heads):
+        row = [h[0]]
+        for j in range(1, width):
+            row += head_toks[hi][j] if j in expanded else [" ".join(head_toks[hi][j])]
+        rows.append(row)
+    for kind, r in body:
+        row = [r[0]]
+        for j in range(1, width):
+            c = r[j].strip()
+            if j not in expanded:
+                row.append(c)
+            elif kind == "data":
+                parts = c.split() if _MULTI.match(c) else ([c] if is_numeric_cell(c) else [])
+                row += (parts + ["-"] * expanded[j])[:expanded[j]]
+            else:
+                row += [c] + [""] * (expanded[j] - 1)
+        rows.append(row)
+    if len({len(r) for r in rows}) != 1:
+        return None
+    for j in range(1, len(rows[0])):
+        values = [r[j] for r in rows[len(heads):] if r[j] not in _DASHES]
+        dec = [d for d in (_decimals(v) for v in values) if d is not None]
+        if dec and any(d == 0 for d in dec) and sum(1 for d in dec if d > 0) >= 0.5 * len(dec):
+            return None
+    text = (caption + "\n" if caption else "") + "\n".join("| " + " | ".join(r) + " |" for r in rows)
+    return text if garble_ratio(text) < GARBLE_LIMIT and is_structured_table(text) else None
+
+
+def rescue_tables(text: str) -> list[str] | None:
+    """For a table that `garble_ratio` skips: one clean table text per header block whose merged columns could be split without doubt, or None."""
+    if garble_ratio(text) < GARBLE_LIMIT:
+        return None
+    lines = text.split("\n")
+    idx = [i for i, ln in enumerate(lines) if is_pipe_row(ln)]
+    if len(idx) < 3:
+        return None
+    caption = " ".join(ln.strip() for ln in lines[:idx[0]] if ln.strip())
+    width = max(len(split_cells(lines[i])) for i in idx)
+    blocks: list[tuple[list[list[str]], list[tuple[str, list[str]]]]] = []
+    for i in idx:
+        cells = (split_cells(lines[i]) + [""] * width)[:width]
+        kind = _row_kind(cells)
+        if kind == "head":
+            if blocks and not blocks[-1][1]:
+                blocks[-1][0].append(cells)
+            else:
+                blocks.append(([cells], []))
+        elif blocks:
+            blocks[-1][1].append((kind, cells))
+        else:
+            return None
+    pieces = [p for p in (_split_block(h, b, caption) for h, b in blocks if b) if p]
+    return pieces or None
