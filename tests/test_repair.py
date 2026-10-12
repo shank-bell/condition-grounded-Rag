@@ -1,5 +1,5 @@
 """Profile repair (ingestion/repair.py) and the benchmark list (knowledge/benchmarks.py): each rule on a small table written like the stored chunks."""
-from cgrag.ingestion.repair import fix_name, paper_context, repair
+from cgrag.ingestion.repair import _order_languages, fix_name, paper_context, repair, repair_paper
 from cgrag.ingestion.tables import parse_table, table_cells
 from cgrag.knowledge.benchmarks import is_language, lookup, lookup_cut, task_fits
 from cgrag.schemas import ConditionProfile
@@ -188,3 +188,49 @@ def test_store_overlay_leaves_raw_rows_and_can_be_switched_off(tmp_path):
     assert [p.setting for p in ProfileStore(tmp_path / "p.sqlite", repaired=False).for_paper("a")] == ["test set", "dev set"]
     store.delete_paper("a")
     assert store.repair_count() == 0
+
+
+STACKED_LANGUAGES = """Table 17: Results on a COPA task. Metric: accuracy.
+|  | as | bn | gom | gu | hi | kn |
+| mBERT | 53.6 | 52.0 | 50.2 | 51.6 | 49.2 | 49.0 |
+| XLMR | 58.0 | 62.6 | 56.4 | 60.7 | 59.9 | 60.8 |
+|  |  | or | pa | sa | sat | ta | Avg. |
+| mBERT |  | 48.8 | 51.8 | 47.2 | 52.0 | 51.8 | 50.3 |
+| XLMR |  | 59.4 | 58.8 | 54.6 | 53.8 | 64.8 | 58.3 |"""
+
+
+def _stacked_profiles(model: str, values: list[float], languages: list[str | None], first: int) -> list[ConditionProfile]:
+    return [_p(profile_id=f"x:0001#{first + k}", chunk_id="x:0001", model=model, value=v, language=lang, dataset="IndicCOPA")
+            for k, (v, lang) in enumerate(zip(values, languages))]
+
+
+def test_repeated_values_in_a_stacked_language_table_are_read_by_order():
+    """The extractor gave the second half the first half's names by position ("Dogri" for the gom column's place, which is the pa cell); 51.8 occurs twice in
+    mBERT's second row, so the value alone cannot tell pa from ta. The order of the results (ids count along the row) can."""
+    profiles = (_stacked_profiles("mBERT", [53.6, 52.0, 50.2, 51.6, 49.2, 49.0], ["Assamese", "Bengali", "Konkani", "Gujarati", "Hindi", "Kannada"], 0)
+                + _stacked_profiles("XLMR", [58.0, 62.6, 56.4, 60.7, 59.9, 60.8], ["Assamese", "Bengali", "Konkani", "Gujarati", "Hindi", "Kannada"], 6)
+                + _stacked_profiles("mBERT", [48.8, 51.8, 47.2, 52.0, 51.8, 50.3], ["Bengali", "Dogri", "Gujarati", "Hindi", "Kannada", "Maithili"], 12)
+                + _stacked_profiles("XLMR", [59.4, 58.8, 54.6, 53.8, 64.8, 58.3], ["Bengali", "Dogri", "Gujarati", "Hindi", "Kannada", "Maithili"], 18))
+    got = _order_languages(profiles, {"x:0001": STACKED_LANGUAGES})
+    mbert_second = [got.get(i, profiles[i].language) for i in range(12, 18)]
+    assert mbert_second == ["Odia", "Punjabi", "Sanskrit", "Santali", "Tamil", None]
+    xlmr_second = [got.get(i, profiles[i].language) for i in range(18, 24)]
+    assert xlmr_second == ["Odia", "Punjabi", "Sanskrit", "Santali", "Tamil", None]
+    assert not any(i < 12 for i in got)
+
+
+def test_the_order_rule_does_nothing_when_the_numbers_do_not_line_up():
+    profiles = _stacked_profiles("mBERT", [48.8, 51.8, 47.2, 52.0], ["Bengali", "Dogri", "Gujarati", "Hindi"], 0)
+    assert _order_languages(profiles, {"x:0001": STACKED_LANGUAGES}) == {}
+    swapped = (_stacked_profiles("mBERT", [53.6, 52.0, 50.2, 51.6, 49.2, 49.0], ["Assamese", "Bengali", "Konkani", "Gujarati", "Hindi", "Kannada"], 0)
+               + _stacked_profiles("mBERT", [51.8, 48.8, 47.2, 52.0, 51.8, 50.3], ["Bengali", "Dogri", "Gujarati", "Hindi", "Kannada", "Maithili"], 12))
+    assert _order_languages(swapped, {"x:0001": STACKED_LANGUAGES}) == {}
+
+
+def test_the_order_rule_can_be_switched_off():
+    profiles = (_stacked_profiles("mBERT", [53.6, 52.0, 50.2, 51.6, 49.2, 49.0], ["Assamese", "Bengali", "Konkani", "Gujarati", "Hindi", "Kannada"], 0)
+                + _stacked_profiles("mBERT", [48.8, 51.8, 47.2, 52.0, 51.8, 50.3], ["Bengali", "Dogri", "Gujarati", "Hindi", "Kannada", "Maithili"], 12))
+    on, counts_on = repair_paper(profiles, {"x:0001": STACKED_LANGUAGES})
+    off, counts_off = repair_paper(profiles, {"x:0001": STACKED_LANGUAGES}, frozenset({"language_order"}))
+    assert counts_on["language_order"] > 0 and counts_off["language_order"] == 0
+    assert [p.language for p in on[6:]] == ["Odia", "Punjabi", "Sanskrit", "Santali", "Tamil", None]
