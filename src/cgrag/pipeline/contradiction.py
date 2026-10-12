@@ -99,7 +99,7 @@ def classify(a: ConditionProfile, b: ConditionProfile, cfg: ContradictionConfig 
                 return "NOT_COMPARABLE", [], (f"The results differ ({values}) but the stored {what} of the {who} result does not fit its own table cell "
                                               f"(row '{g.row_label}', column '{g.column}'), so the two numbers may not be about the same thing.")
         a, b = enriched(a, ga) if ga else a, enriched(b, gb) if gb else b
-    differing = differing_conditions(a, b)
+    differing = differing_conditions(a, b, aligned=cfg.setting_dimensions)
     if cfg.mnli_split_tags and "setting" not in differing:
         sa, sb = _split_words(a), _split_words(b)
         if sa and sb and sa != sb and {"matched", "mismatched"} & (sa | sb):
@@ -107,7 +107,7 @@ def classify(a: ConditionProfile, b: ConditionProfile, cfg: ContradictionConfig 
     if differing:
         detail = "; ".join(f"{_LABEL[f]} ({_val(a, f)} vs {_val(b, f)})" for f in differing)
         return "EXPLAINED", differing, f"Explained difference ({values}): {detail}."
-    missing = unrecorded_conditions(a, b)
+    missing = unrecorded_conditions(a, b, aligned=cfg.setting_dimensions)
     if missing:
         names = ", ".join(_LABEL[f] for f in missing)
         if cfg.one_sided_conditions_explain:
