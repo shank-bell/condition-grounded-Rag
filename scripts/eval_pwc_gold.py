@@ -132,15 +132,28 @@ def recoverable(row: dict, numbers: set[str], text_compact: str = "") -> bool:
         return False
     if re.search(r"param|size|flops|speed|latency|time|memory|throughput", row["metric"], re.I):
         return False
+    return bool(printed_forms(row) & numbers)
+
+
+def printed_forms(row: dict) -> set[str]:
+    """The ways in which the paper may print this leaderboard value (see `recoverable`)."""
     v = row["value"]
-    forms = {f"{v:g}", f"{v:.1f}", f"{v:.2f}", f"{round(v):d}"}
-    if abs(v) <= 1.0:
-        forms |= {f"{v * 100:.1f}", f"{v * 100:.2f}", f"{v * 100:g}"}
+    m = re.search(r"\d+(?:\.(\d+))?", row["raw"].replace(",", "."))
+    n = len(m.group(1)) if m and m.group(1) else 0
+    forms = {m.group(0)} if m else {f"{v:g}"}
+    if n >= 3:
+        forms |= {f"{v:.1f}", f"{v:.2f}"}
+    if abs(v) <= 1.0 and n >= 2:
+        forms |= {f"{v * 100:.{n - 2}f}"} | ({f"{v * 100:.1f}"} if n >= 4 else set())
     forms |= {f.rstrip("0").rstrip(".") for f in forms if "." in f}
-    return bool(forms & numbers)
+    return forms
+
+
+PWC_DATASET_NAMES = {"mml": "MMLU"}
 
 
 def canon_dataset(name: str | None) -> str:
+    name = PWC_DATASET_NAMES.get(_norm(name), name)
     s = re.sub(r"([A-Za-z])(\d)", r"\1 \2", name or "")
     s = re.sub(r"\((?:[^)]*)\)", " ", s) if len(s) > 14 else s
     return re.sub(r"\s+", " ", s).strip()
@@ -163,16 +176,27 @@ def canon_metric(name: str | None) -> str:
     return re.sub(r"\([^)]*\)", " ", s).strip()
 
 
-def metric_agrees(pred: str | None, gold: str | None) -> bool | None:
-    """None when the gold 'metric' is a split name that says nothing about the measure ("Matched", "Test", "Average")."""
+def metric_agrees(pred: str | None, gold: str | None, gold_dataset: str | None = None) -> bool | None:
+    """None when the gold 'metric' is a split name that says nothing about the measure ("Matched", "Test", "Average").
+    Two definitional mappings (a sixth revision of the scorer, 12 Oct, made when the repair began to write the benchmark's own measure into CoLA and STS-B profiles whose
+    paper never names it): Papers with Code files CoLA's results under "Accuracy" although the numbers are Matthews correlations (GLUE defines CoLA by it), and a stored
+    "correlation" that does not say which one agrees with a leaderboard's Pearson / Spearman correlation (it is less specific, not different)."""
     g = canon_metric(gold)
     if _norm(g) in UNSPECIFIED_METRICS or not _norm(g):
         return None
-    return bool(pred) and E.metrics_agree(canon_metric(pred), g)
+    p = canon_metric(pred)
+    if bool(pred) and E.metrics_agree(p, g):
+        return True
+    if _norm(canon_dataset(gold_dataset)) == "cola" and _norm(g) in {"accuracy", "acc"} and "matthews" in _norm(p):
+        return True
+    if _norm(p) == "correlation" and re.search(r"pearson|spearman|correlation", g, re.I):
+        return True
+    return False
 
 
 def _expand(name: str | None) -> str:
-    return " ".join(ABBREVIATIONS.get(w.lower(), w) for w in re.findall(r"[A-Za-z0-9\-+\.]+", name or ""))
+    s = re.sub(r"\b(ens|sgl)\b\.?", lambda m: ABBREVIATIONS[m.group(1).lower()], name or "", flags=re.I)
+    return " ".join(ABBREVIATIONS.get(w.lower(), w) for w in re.findall(r"[A-Za-z0-9\-+\.]+", s))
 
 
 def model_agrees(pred: str | None, gold: str | None) -> bool:
@@ -188,14 +212,16 @@ def score_paper(gold: list[dict], profiles: list, numbers: set[str], text_compac
     cov = d = m = mo = ident = t = 0
     misses, bad = [], []
     for g in rec:
-        cands = [p for p in profiles if p.value is not None and E.values_match(float(g["value"]), float(p.value))]
+        printed = [float(f) for f in printed_forms(g) & numbers]
+        cands = [p for p in profiles if p.value is not None
+                 and (E.values_match(float(g["value"]), float(p.value)) or any(abs(f - float(p.value)) <= 0.0051 for f in printed))]
         if not cands:
             misses.append(g)
             continue
         cov += 1
 
         def fit(p):
-            return (dataset_agrees(p.dataset, g["dataset"]), metric_agrees(p.metric, g["metric"]) is not False, model_agrees(p.model, g["model"]),
+            return (dataset_agrees(p.dataset, g["dataset"]), metric_agrees(p.metric, g["metric"], g["dataset"]) is not False, model_agrees(p.model, g["model"]),
                     E.tasks_agree(p.task, g["task"]))
 
         best = max(cands, key=lambda p: sum(fit(p)))
