@@ -150,3 +150,13 @@ def test_a_metric_made_of_a_long_run_of_letters_is_a_misread_header_not_a_metric
         assert not _junk_metric(real)
     junk = ExtractedProfile(model="MuRIL", metric="mniorpasasatsdtateuravg", value=68.2)
     assert not _is_result(junk) and _is_result(junk.model_copy(update={"metric": "average"}))
+
+
+def test_a_result_with_a_model_and_a_data_set_but_no_metric_is_kept_as_a_score():
+    """T5's ablation tables have headers that name tasks ("GLUE | CNNDM | SQuAD") and no metric: every profile was dropped as "not a result" (found 12 Oct)."""
+    p = _normalize(ExtractedProfile(model="i.i.d. corruption objective", dataset="GLUE", metric=None, value=82.82))
+    assert p.metric == "score" and _is_result(p)
+    assert _normalize(ExtractedProfile(model=None, dataset="GLUE", metric=None, value=82.82)).metric is None
+    assert not _is_result(_normalize(ExtractedProfile(model=None, dataset="GLUE", metric=None, value=82.82)))
+    assert _normalize(ExtractedProfile(model="BERT", dataset=None, metric=None, value=1.0)).metric is None
+    assert _normalize(ExtractedProfile(model="BERT", dataset="SQuAD", metric="EM", value=80.0)).metric == "EM"
