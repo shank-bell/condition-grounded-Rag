@@ -1,0 +1,1756 @@
+{
+ "generated_at": "2026-10-12T16:55:06+00:00",
+ "frozen_at_commit": "0fe71204a24f76a2849676e3ccc908ce4027aa6d",
+ "modified_files_at_that_time": [
+  " M NOTES.md",
+  " M README.md",
+  " M docs/evaluation_ai_annotated.md",
+  " M docs/ingestion_report.md",
+  " M docs/reproducibility.md",
+  " M eval/labels/stage7_variants_repaired.json",
+  " M scripts/eval_pwc_gold.py",
+  " M scripts/rescue_garbled.py",
+  " M scripts/resolve_datasets.py",
+  " M src/cgrag/ingestion/profile_extractor.py",
+  " M src/cgrag/ingestion/repair.py",
+  " M src/cgrag/ingestion/tables.py",
+  " M src/cgrag/knowledge/benchmarks.py",
+  " M src/cgrag/pipeline/conditions.py",
+  " M src/cgrag/pipeline/grounding.py",
+  " M src/cgrag/stores/profile_store.py",
+  " M tests/test_extraction_helpers.py",
+  " M tests/test_repair.py",
+  " M tests/test_structured_tables.py",
+  "?? eval/labels/ablate_stage6.oct11g.json",
+  "?? eval/labels/ablate_stage6.oct11i.json",
+  "?? eval/labels/ablate_stage6.oct11j.json",
+  "?? eval/labels/ablate_stage6.oct12a.json",
+  "?? eval/labels/ablate_stage6.oct12c.json",
+  "?? eval/labels/ablate_stage6.oct12d.json",
+  "?? eval/labels/ablate_stage6.oct12e.json",
+  "?? eval/labels/ablate_stage6.oct12f.json",
+  "?? eval/labels/absent_flagged.oct11g.json",
+  "?? eval/labels/absent_flagged.oct11i.json",
+  "?? eval/labels/absent_flagged.oct11j.json",
+  "?? eval/labels/absent_flagged.oct12a.json",
+  "?? eval/labels/absent_flagged.oct12c.json",
+  "?? eval/labels/absent_flagged.oct12d.json",
+  "?? eval/labels/absent_flagged.oct12e.json",
+  "?? eval/labels/absent_flagged.oct12f.json",
+  "?? eval/labels/absent_flagged.top5sig.json",
+  "?? eval/labels/absent_flagged.top7.json",
+  "?? eval/labels/absent_flagged.top7sig.json",
+  "?? eval/labels/answer_quality_gold_b.oct11g.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct11g.json",
+  "?? eval/labels/answer_quality_gold_b.oct11h.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct11h.json",
+  "?? eval/labels/answer_quality_gold_b.oct11i.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct11i.json",
+  "?? eval/labels/answer_quality_gold_b.oct11j.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct11j.json",
+  "?? eval/labels/answer_quality_gold_b.oct11k.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct12a.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct12a.json",
+  "?? eval/labels/answer_quality_gold_b.oct12c.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct12c.json",
+  "?? eval/labels/answer_quality_gold_b.oct12d.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct12d.json",
+  "?? eval/labels/answer_quality_gold_b.oct12e.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct12e.json",
+  "?? eval/labels/answer_quality_gold_b.oct12f.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.oct12f.json",
+  "?? eval/labels/answer_quality_gold_b.top5sig.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.top5sig.json",
+  "?? eval/labels/answer_quality_gold_b.top7.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.top7.json",
+  "?? eval/labels/answer_quality_gold_b.top7sig.corrected_key.json",
+  "?? eval/labels/answer_quality_gold_b.top7sig.json",
+  "?? eval/labels/extraction_extraction_test3.json",
+  "?? eval/labels/extraction_extraction_test3.labels_after_fixes.json",
+  "?? eval/labels/extraction_extraction_test4.json",
+  "?? eval/labels/extraction_extraction_test5.json",
+  "?? eval/labels/extraction_extraction_test6.json",
+  "?? eval/labels/metalead_eval.oct12.json",
+  "?? eval/labels/pwc_gold.json",
+  "?? eval/labels/pwc_gold.oct12a.json",
+  "?? eval/labels/pwc_gold.oct12c.json",
+  "?? eval/labels/pwc_gold.oct12d.json",
+  "?? eval/labels/pwc_gold.oct12e.json",
+  "?? eval/labels/questions_gold.oct11g_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct11g_main.scores.json",
+  "?? eval/labels/questions_gold.oct11i_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct11i_main.scores.json",
+  "?? eval/labels/questions_gold.oct11j_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct11j_main.scores.json",
+  "?? eval/labels/questions_gold.oct11k_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct12a_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct12a_main.scores.json",
+  "?? eval/labels/questions_gold.oct12c_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct12c_main.scores.json",
+  "?? eval/labels/questions_gold.oct12d_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct12d_main.scores.json",
+  "?? eval/labels/questions_gold.oct12e_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct12e_main.scores.json",
+  "?? eval/labels/questions_gold.oct12f_main.results.jsonl",
+  "?? eval/labels/questions_gold.oct12f_main.scores.json",
+  "?? eval/labels/questions_gold.results.jsonl",
+  "?? eval/labels/questions_gold.scores.json",
+  "?? eval/labels/questions_gold.top5sig_main.results.jsonl",
+  "?? eval/labels/questions_gold.top5sig_main.scores.json",
+  "?? eval/labels/questions_gold.top7_main.results.jsonl",
+  "?? eval/labels/questions_gold.top7_main.scores.json",
+  "?? eval/labels/questions_gold.top7sig_main.results.jsonl",
+  "?? eval/labels/questions_gold.top7sig_main.scores.json",
+  "?? eval/labels/retrieval_gold.oct11g.json",
+  "?? eval/labels/retrieval_gold.oct11i.json",
+  "?? eval/labels/retrieval_gold.oct11j.json",
+  "?? eval/labels/retrieval_gold.oct12a.json",
+  "?? eval/labels/retrieval_gold.oct12c.json",
+  "?? eval/labels/retrieval_gold.oct12d.json",
+  "?? eval/labels/retrieval_gold.oct12e.json",
+  "?? eval/labels/retrieval_gold.oct12f.json",
+  "?? eval/labels/retrieval_gold.signal_k12.json",
+  "?? eval/labels/retrieval_gold.signal_k20.json",
+  "?? eval/labels/retrieval_gold.signal_k4.json",
+  "?? eval/labels/retrieval_gold.signal_k8.json",
+  "?? eval/labels/retrieval_gold.signal_off.json",
+  "?? eval/labels/scope_baselines_gold.oct11g.json",
+  "?? eval/labels/scope_baselines_gold.oct11i.json",
+  "?? eval/labels/scope_baselines_gold.oct11j.json",
+  "?? eval/labels/scope_baselines_gold.oct12a.json",
+  "?? eval/labels/scope_baselines_gold.oct12c.json",
+  "?? eval/labels/scope_baselines_gold.oct12d.json",
+  "?? eval/labels/scope_baselines_gold.oct12e.json",
+  "?? eval/labels/sources_gold.oct11g.json",
+  "?? eval/labels/sources_gold.oct11i.json",
+  "?? eval/labels/sources_gold.oct11j.json",
+  "?? eval/labels/sources_gold.oct12a.json",
+  "?? eval/labels/sources_gold.oct12c.json",
+  "?? eval/labels/sources_gold.oct12d.json",
+  "?? eval/labels/sources_gold.oct12e.json",
+  "?? eval/labels/sources_gold.oct12f.json",
+  "?? eval/labels/sources_gold.top5sig.json",
+  "?? eval/labels/sources_gold.top7.json",
+  "?? eval/labels/sources_gold.top7sig.json",
+  "?? scripts/cell_recall.py",
+  "?? scripts/fix_continued_headers.py",
+  "?? scripts/make_extraction_sample.py",
+  "?? scripts/pass_table.py"
+ ],
+ "truth": "gold",
+ "questions": 30,
+ "scores": {
+  "plain_rag": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 19,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0,
+   "tn": 11,
+   "questions": 30,
+   "warnings_given": 0,
+   "should_warn": 19,
+   "should_not_warn": 11,
+   "accuracy": 0.3667,
+   "extrapolation_rate": 1.0,
+   "false_warning_rate": 0.0,
+   "right_condition_named": null,
+   "seconds_per_question": 3.13
+  },
+  "abstain_on_weak_retrieval": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 19,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0,
+   "tn": 11,
+   "questions": 30,
+   "warnings_given": 0,
+   "should_warn": 19,
+   "should_not_warn": 11,
+   "accuracy": 0.3667,
+   "extrapolation_rate": 1.0,
+   "false_warning_rate": 0.0,
+   "right_condition_named": null,
+   "seconds_per_question": 3.13
+  },
+  "sufficient_context": {
+   "tp": 17,
+   "fp": 0,
+   "fn": 2,
+   "precision": 1.0,
+   "recall": 0.8947,
+   "f1": 0.9444,
+   "tn": 11,
+   "questions": 30,
+   "warnings_given": 17,
+   "should_warn": 19,
+   "should_not_warn": 11,
+   "accuracy": 0.9333,
+   "extrapolation_rate": 0.1053,
+   "false_warning_rate": 0.0,
+   "right_condition_named": null,
+   "seconds_per_question": 4.99
+  },
+  "stage6_30sep": {
+   "tp": 4,
+   "fp": 0,
+   "fn": 15,
+   "precision": 1.0,
+   "recall": 0.2105,
+   "f1": 0.3478,
+   "tn": 11,
+   "questions": 30,
+   "warnings_given": 4,
+   "should_warn": 19,
+   "should_not_warn": 11,
+   "accuracy": 0.5,
+   "extrapolation_rate": 0.7895,
+   "false_warning_rate": 0.0,
+   "right_condition_named": 3,
+   "seconds_per_question": 3.49
+  },
+  "stage6_joint": {
+   "tp": 19,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "tn": 11,
+   "questions": 30,
+   "warnings_given": 19,
+   "should_warn": 19,
+   "should_not_warn": 11,
+   "accuracy": 1.0,
+   "extrapolation_rate": 0.0,
+   "false_warning_rate": 0.0,
+   "right_condition_named": 19,
+   "seconds_per_question": 3.49
+  },
+  "stage6_full": {
+   "tp": 19,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "tn": 11,
+   "questions": 30,
+   "warnings_given": 19,
+   "should_warn": 19,
+   "should_not_warn": 11,
+   "accuracy": 1.0,
+   "extrapolation_rate": 0.0,
+   "false_warning_rate": 0.0,
+   "right_condition_named": 19,
+   "seconds_per_question": 4.1
+  }
+ },
+ "rows": [
+  {
+   "id": "B-AI-01",
+   "family": "covered",
+   "question": "How well does BERT perform on the SQuAD 2.0 dataset?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.82
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.82
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 3 in context [3] provides specific scores for BERT on the SQuAD 2.0 dev and test sets (81.8 F1 and 83.0 F1 respectively).",
+     "seconds": 4.6
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.73
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.46
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.65
+    }
+   }
+  },
+  {
+   "id": "B-AI-02",
+   "family": "covered",
+   "question": "How well does XLM-R do on MLQA for Hindi?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.94
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.94
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 3 and the accompanying text in section 5.2 explicitly state that XLM-R achieves an F1 score of 69.2 and an EM (exact match) score of 51.6 on the MLQA task for Hindi (hi).",
+     "seconds": 5.12
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.14
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.96
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.88
+    }
+   }
+  },
+  {
+   "id": "B-AI-03",
+   "family": "covered",
+   "question": "What exact match does LLaMA 65B get on NaturalQuestions with the 5-shot setting?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.05
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.05
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 4 explicitly lists the exact match for the 65B model on NaturalQuestions in the 5-shot setting as 35.0.",
+     "seconds": 5.03
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.31
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.06
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.04
+    }
+   }
+  },
+  {
+   "id": "B-AI-04",
+   "family": "covered",
+   "question": "What BLEU does GPT-3 get translating German into English in the zero-shot setting?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.51
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.51
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 3.4 explicitly lists the 'GPT-3 Zero-Shot' score for the 'De→En' (German to English) task as 27.2.",
+     "seconds": 4.27
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.69
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.69
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.66
+    }
+   }
+  },
+  {
+   "id": "B-AI-05",
+   "family": "covered",
+   "question": "Compare MuRIL and mBERT on XNLI for Hindi.",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 4.05
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 4.05
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 2 provides the specific XNLI accuracy for both mBERT (60.5) and MuRIL (70.7) on the Hindi (hi) dataset.",
+     "seconds": 5.32
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 4.18
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 4.15
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 4.14
+    }
+   }
+  },
+  {
+   "id": "B-AI-06",
+   "family": "covered",
+   "question": "Compare the performance of mT5-Large and XLM-R on the TyDi QA GoldP dataset for Swahili.",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.84
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.84
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 12 provides the F1/EM scores for both mT5-Large (65.7 / 45.3) and XLM-R (66.1 / 48.1) on the TyDi QA GoldP dataset for Swahili (sw).",
+     "seconds": 6.34
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 4.06
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 4.02
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.97
+    }
+   }
+  },
+  {
+   "id": "B-AI-07",
+   "family": "covered",
+   "question": "Evaluate mBERT's accuracy on the IndicCOPA dataset for both Hindi and Tamil.",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.33
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.33
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 17 provides the accuracy for mBERT on the IndicCOPA task for both Hindi (hi) at 49.2 and Tamil (ta) at 51.8.",
+     "seconds": 5.7
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.52
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.42
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.41
+    }
+   }
+  },
+  {
+   "id": "B-AI-08",
+   "family": "covered",
+   "question": "How many parameters does mT5-XL have?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 1.25
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 1.25
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Context [2] explicitly states that the mT5-XL model has 3.7B parameters.",
+     "seconds": 3.46
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 1.38
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 1.15
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 1.13
+    }
+   }
+  },
+  {
+   "id": "B-AI-09",
+   "family": "covered",
+   "question": "How does ELECTRA's replaced token detection pre-training work?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.44
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.44
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "The context describes the process as training a discriminator (ELECTRA) to distinguish between original tokens and high-quality negative samples produced by a generator (a small MLM) using a replaced token detection task.",
+     "seconds": 4.15
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.68
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.23
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.18
+    }
+   }
+  },
+  {
+   "id": "B-AI-10",
+   "family": "covered",
+   "question": "What are the main ways to make BERT smaller and faster?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.73
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.73
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "The context describes several methods including knowledge distillation (into smaller models, shallower students, or smaller BERT models), reducing model depth, reducing model width, and parameter reduction techniques.",
+     "seconds": 5.22
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 4.1
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.69
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.66
+    }
+   }
+  },
+  {
+   "id": "B-AI-11",
+   "family": "one missing",
+   "question": "What is the accuracy of XLM-R on the XNLI dataset for the Kannada language?",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.82
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.82
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The provided context does not contain any information regarding the accuracy of XLM-R specifically for the Kannada language.",
+     "seconds": 4.42
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.93
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Kannada"
+     ],
+     "seconds": 4.13
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Kannada"
+     ],
+     "seconds": 6.95
+    }
+   }
+  },
+  {
+   "id": "B-AI-12",
+   "family": "one missing",
+   "question": "How does RoBERTa perform on the SQuAD dataset in Hindi?",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.28
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.28
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The provided context contains results for RoBERTa on the SQuAD dataset, but it does not mention the SQuAD dataset in the Hindi language.",
+     "seconds": 5.11
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.96
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Hindi"
+     ],
+     "seconds": 4.16
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Hindi"
+     ],
+     "seconds": 4.0
+    }
+   }
+  },
+  {
+   "id": "B-AI-13",
+   "family": "one missing",
+   "question": "What F1 does XLM-R get on MLQA for Tamil?",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.91
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.91
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The provided context does not mention the language 'Tamil' or its specific performance metrics for XLM-R.",
+     "seconds": 4.76
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.09
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Tamil"
+     ],
+     "seconds": 3.05
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Tamil"
+     ],
+     "seconds": 2.89
+    }
+   }
+  },
+  {
+   "id": "B-AI-14",
+   "family": "one missing",
+   "question": "What is GPT-3's few-shot score on SQuAD 1.1?",
+   "expect_warning": true,
+   "expected_missing": [
+    "dataset_version"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.67
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.67
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The provided context does not mention the SQuAD 1.1 dataset or its specific scores for GPT-3.",
+     "seconds": 4.24
+    },
+    "stage6_30sep": {
+     "warned": true,
+     "named_missing": [
+      "dataset_version"
+     ],
+     "missing": [
+      "dataset_version=1.1"
+     ],
+     "seconds": 4.52
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "dataset_version"
+     ],
+     "missing": [
+      "dataset_version=1.1"
+     ],
+     "seconds": 3.89
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "dataset_version"
+     ],
+     "missing": [
+      "dataset_version=1.1"
+     ],
+     "seconds": 6.64
+    }
+   }
+  },
+  {
+   "id": "B-AI-15",
+   "family": "one missing",
+   "question": "How does LLaMA 13B perform on MMLU in Hindi?",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.09
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.09
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context does not contain any information regarding the performance of LLaMA 13B in the Hindi language; Table 19 lists 'Humanities' (H) as a category, not 'Hindi'.",
+     "seconds": 4.89
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.72
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Hindi"
+     ],
+     "seconds": 4.25
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Hindi"
+     ],
+     "seconds": 6.54
+    }
+   }
+  },
+  {
+   "id": "B-AI-16",
+   "family": "one missing",
+   "question": "What accuracy does LLaMA 65B get on HellaSwag in the 5-shot setting?",
+   "expect_warning": true,
+   "expected_missing": [
+    "setting"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.05
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.05
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context mentions HellaSwag in a 0-shot setting (Table 5) but does not provide a 5-shot result for HellaSwag.",
+     "seconds": 4.98
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.9
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "setting"
+     ],
+     "missing": [
+      "setting=5-shot"
+     ],
+     "seconds": 3.04
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "setting"
+     ],
+     "missing": [
+      "setting=5-shot"
+     ],
+     "seconds": 3.0
+    }
+   }
+  },
+  {
+   "id": "B-AI-17",
+   "family": "covered",
+   "question": "What is DistilBERT's F1 on SQuAD 2.0?",
+   "expect_warning": false,
+   "expected_missing": [],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.53
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.53
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 5 in context [3] lists the F1 scores for DistilBERT variants on SQuAD 2.0, specifically 69.5 for DistilBERTBASE-6L→ and 68.8 for DistilBERTBASE-4L.",
+     "seconds": 4.68
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.73
+    },
+    "stage6_joint": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.55
+    },
+    "stage6_full": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.48
+    }
+   }
+  },
+  {
+   "id": "B-AI-18",
+   "family": "one missing",
+   "question": "What accuracy does BERT-base get on MNLI in the zero-shot setting?",
+   "expect_warning": true,
+   "expected_missing": [
+    "setting"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 1.47
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 1.47
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides accuracy for BERT-base on MNLI (or MNLI-m) in various settings, but it does not specify which of these results correspond to the 'zero-shot' setting.",
+     "seconds": 3.23
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 1.63
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "setting"
+     ],
+     "missing": [
+      "setting=zero-shot"
+     ],
+     "seconds": 2.02
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "setting"
+     ],
+     "missing": [
+      "setting=zero-shot"
+     ],
+     "seconds": 1.99
+    }
+   }
+  },
+  {
+   "id": "B-AI-19",
+   "family": "one missing",
+   "question": "What accuracy does MuRIL get on Tatoeba for Kannada?",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.84
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.84
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides results for Tatoeba in other languages (bn, hi, ml, mr, ta, te, ur) but does not include a result for Kannada (kn) on the Tatoeba dataset.",
+     "seconds": 4.3
+    },
+    "stage6_30sep": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Kannada"
+     ],
+     "seconds": 3.94
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Kannada"
+     ],
+     "seconds": 3.14
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Kannada"
+     ],
+     "seconds": 3.08
+    }
+   }
+  },
+  {
+   "id": "B-AI-20",
+   "family": "one missing",
+   "question": "What accuracy does MuRIL get on IndicXParaphrase for Tamil?",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.67
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 2.67
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Table 18 shows that MuRIL achieves an accuracy of 58.7 on the IndicXParaphrase task for the language code 'ta' (Tamil).",
+     "seconds": 4.41
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 2.84
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Tamil"
+     ],
+     "seconds": 2.96
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Tamil"
+     ],
+     "seconds": 2.95
+    }
+   }
+  },
+  {
+   "id": "B-AI-21",
+   "family": "partly covered",
+   "question": "Compare the performance of mBERT and GPT-3 on the XNLI dataset.",
+   "expect_warning": true,
+   "expected_missing": [
+    "model"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.58
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.58
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides performance data for mBERT on the XNLI dataset, but it does not contain any information regarding GPT-3's performance on the XNLI dataset.",
+     "seconds": 5.19
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.79
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.79
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.76
+    }
+   }
+  },
+  {
+   "id": "B-AI-22",
+   "family": "partly covered",
+   "question": "What is the accuracy of XLM-R on the XNLI and SQuAD datasets?",
+   "expect_warning": true,
+   "expected_missing": [
+    "dataset"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.42
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.42
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides several accuracy figures for XLM-R on the XNLI dataset, but it does not mention the SQuAD dataset at all.",
+     "seconds": 5.17
+    },
+    "stage6_30sep": {
+     "warned": true,
+     "named_missing": [
+      "dataset"
+     ],
+     "missing": [
+      "dataset=SQuAD"
+     ],
+     "seconds": 4.72
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "dataset"
+     ],
+     "missing": [
+      "dataset=SQuAD"
+     ],
+     "seconds": 4.85
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "dataset"
+     ],
+     "missing": [
+      "dataset=SQuAD"
+     ],
+     "seconds": 13.14
+    }
+   }
+  },
+  {
+   "id": "B-AI-23",
+   "family": "partly covered",
+   "question": "Compare mBERT, XLM-R and Mistral 7B on XNLI.",
+   "expect_warning": true,
+   "expected_missing": [
+    "model"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.86
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.86
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The provided context contains information comparing mBERT and XLM-R on XNLI, but it does not mention Mistral 7B.",
+     "seconds": 5.8
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.88
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=Mistral 7B"
+     ],
+     "seconds": 3.99
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=Mistral 7B"
+     ],
+     "seconds": 3.94
+    }
+   }
+  },
+  {
+   "id": "B-AI-24",
+   "family": "partly covered",
+   "question": "Compare LLaMA 65B and GPT-3 on HumanEval.",
+   "expect_warning": true,
+   "expected_missing": [
+    "model"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.93
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.93
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides HumanEval results for LLaMA 65B (Table 4) but does not provide any HumanEval scores for GPT-3.",
+     "seconds": 5.77
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.77
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.77
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.72
+    }
+   }
+  },
+  {
+   "id": "B-AI-25",
+   "family": "partly covered",
+   "question": "Compare BERT-base and GPT-3 on SST-2.",
+   "expect_warning": true,
+   "expected_missing": [
+    "model"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.36
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.36
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides a score for BERT-base on SST-2 (92.78), but it does not provide any results for GPT-3 on the SST-2 dataset.",
+     "seconds": 5.15
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.67
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.65
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.6
+    }
+   }
+  },
+  {
+   "id": "B-AI-26",
+   "family": "partly covered",
+   "question": "Compare Llama 2-Chat 70B and GPT-4 on TruthfulQA.",
+   "expect_warning": true,
+   "expected_missing": [
+    "model"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.57
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.57
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context mentions TruthfulQA results for Llama 2-Chat 70B in relation to its pretrained version, but it does not provide a comparison of Llama 2-Chat 70B against GPT-4 on the TruthfulQA dataset.",
+     "seconds": 5.67
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.87
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "dataset",
+      "model"
+     ],
+     "missing": [
+      "dataset=TruthfulQA",
+      "model=GPT-4"
+     ],
+     "seconds": 4.06
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "dataset",
+      "model"
+     ],
+     "missing": [
+      "dataset=TruthfulQA",
+      "model=GPT-4"
+     ],
+     "seconds": 4.06
+    }
+   }
+  },
+  {
+   "id": "B-AI-27",
+   "family": "partly covered",
+   "question": "How do mBERT and MuRIL do on Tatoeba for Hindi and Kannada?",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.63
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.63
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides results for Hindi (hi) but does not contain data for Kannada (kn) in any of the tables.",
+     "seconds": 4.9
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.81
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Kannada"
+     ],
+     "seconds": 4.13
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Kannada"
+     ],
+     "seconds": 4.09
+    }
+   }
+  },
+  {
+   "id": "B-AI-28",
+   "family": "partly covered",
+   "question": "Compare XLM-R and mT5-XL on MLQA for Hindi and Tamil.",
+   "expect_warning": true,
+   "expected_missing": [
+    "language"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 4.15
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 4.15
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides MLQA scores for XLM-R and mT5-XL for Hindi (hi), but it does not provide a score for Tamil (vi) for either model.",
+     "seconds": 6.38
+    },
+    "stage6_30sep": {
+     "warned": true,
+     "named_missing": [
+      "task"
+     ],
+     "missing": [
+      "task=MLQA"
+     ],
+     "seconds": 5.85
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "task",
+      "language"
+     ],
+     "missing": [
+      "task=MLQA",
+      "language=Tamil"
+     ],
+     "seconds": 6.13
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "language"
+     ],
+     "missing": [
+      "language=Tamil"
+     ],
+     "seconds": 8.96
+    }
+   }
+  },
+  {
+   "id": "B-AI-29",
+   "family": "partly covered",
+   "question": "Compare BERT-large and GPT-3 on MNLI.",
+   "expect_warning": true,
+   "expected_missing": [
+    "model"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.85
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.85
+    },
+    "sufficient_context": {
+     "warned": false,
+     "named_missing": null,
+     "reason": "Context [3] provides a score of 87.3 for BERT-Large on MNLI, and Context [5] states that BERT-LARGE obtained a score of 80.5 on the official GLUE leaderboard for MNLI, while OpenAI GPT (the model related to GPT-3) obtained 72.8.",
+     "seconds": 6.12
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.85
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.87
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=GPT-3"
+     ],
+     "seconds": 3.82
+    }
+   }
+  },
+  {
+   "id": "B-AI-30",
+   "family": "partly covered",
+   "question": "Compare mT5-XXL and Qwen on XQuAD.",
+   "expect_warning": true,
+   "expected_missing": [
+    "model"
+   ],
+   "systems": {
+    "plain_rag": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.33
+    },
+    "abstain_on_weak_retrieval": {
+     "warned": false,
+     "named_missing": null,
+     "seconds": 3.33
+    },
+    "sufficient_context": {
+     "warned": true,
+     "named_missing": null,
+     "reason": "The context provides information about mT5-XXL on XQuAD, but it does not mention the Qwen model at all.",
+     "seconds": 5.36
+    },
+    "stage6_30sep": {
+     "warned": false,
+     "named_missing": [],
+     "missing": [],
+     "seconds": 3.58
+    },
+    "stage6_joint": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=Qwen"
+     ],
+     "seconds": 3.57
+    },
+    "stage6_full": {
+     "warned": true,
+     "named_missing": [
+      "model"
+     ],
+     "missing": [
+      "model=Qwen"
+     ],
+     "seconds": 3.56
+    }
+   }
+  }
+ ]
+}
