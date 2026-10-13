@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
@@ -20,13 +21,14 @@ from ..pipeline.conditions import is_nullish, norm, split_dataset
 from ..schemas import Chunk, ConditionProfile, ExtractedProfile, ProfileExtraction
 from ..stores.bm25_store import tokenize
 from .pdf_loader import is_table_row
-from .tables import GARBLE_LIMIT, garble_ratio, is_statistics_table, is_structured_table, linearize, parse_table, rescue_tables, table_views
+from .tables import (GARBLE_LIMIT, garble_ratio, is_statistics_table, is_structured_table, linearize, parse_table, rescue_tables, table_views,
+                     with_carried_headers)
 
 EXTRACT_SECTIONS = {"results", "experiments", "discussion"}
 MAX_RESULTS_PER_CALL = 36
 SKIP_SECTIONS = {"abstract", "introduction", "conclusion", "references"}
 MAX_CHUNKS_PER_PAPER = 60
-MAX_OUTPUT_TOKENS = 3000
+MAX_OUTPUT_TOKENS = 4500
 MAX_PROFILES = 40
 MAX_ROWS = 4
 ROWS_PER_CALL = 3
@@ -99,19 +101,21 @@ def _table_rows(text: str) -> int:
     return sum(is_table_row(ln) and bool(re.search(r"\d+\.\d+", ln)) for ln in text.split("\n"))
 
 
-def wants_extraction(chunk: Chunk) -> bool:
+def wants_extraction(chunk: Chunk, text: str | None = None) -> bool:
     """Chunks that report results: Results / Experiments / Discussion text with a few decimals, or - because
     heading-based section tags are heuristic - a table-dense chunk in any other section (not abstract,
-    introduction, conclusion or references, which only repeat results)."""
+    introduction, conclusion or references, which only repeat results). `text` is the chunk text with the header rows of the table it
+    continues (`tables.with_carried_headers`); the chunk's own text when not given."""
+    text = chunk.text if text is None else text
     if chunk.section == "references":
         return False
-    if is_structured_table(chunk.text):
-        return not is_statistics_table(parse_table(chunk.text).caption) and (garble_ratio(chunk.text) < GARBLE_LIMIT or rescue_tables(chunk.text) is not None)
+    if is_structured_table(text):
+        return not is_statistics_table(parse_table(text).caption) and (garble_ratio(text) < GARBLE_LIMIT or rescue_tables(text) is not None)
     if chunk.section in EXTRACT_SECTIONS:
-        return len(re.findall(r"\d+\.\d+", chunk.text)) >= 3
+        return len(re.findall(r"\d+\.\d+", text)) >= 3
     if chunk.section in SKIP_SECTIONS:
         return False
-    return _table_rows(chunk.text) >= 3
+    return _table_rows(text) >= 3
 
 
 def link_methods_chunk(target: Chunk, methods: list[Chunk]) -> Chunk | None:
@@ -154,6 +158,8 @@ def _normalize(p: ExtractedProfile) -> ExtractedProfile:
                                  + ("" if p.dataset.strip().lower().endswith(" set") else " set")})
     if p.metric and p.dataset and norm(p.metric) == norm(p.dataset):
         p = p.model_copy(update={"metric": "score"})
+    if not p.metric and p.model and p.dataset and p.value is not None:
+        p = p.model_copy(update={"metric": "score"})
     if p.language and p.language.strip().lower() in _NOT_A_LANGUAGE:
         p = p.model_copy(update={"language": None})
     if p.model_size and _NOT_A_SIZE.match(p.model_size.strip()):
@@ -183,7 +189,7 @@ def _grounded(profile: ExtractedProfile, numbers_in_chunk: set[float]) -> bool:
     return profile.value is not None and any(abs(profile.value - n) < 1e-6 for n in numbers_in_chunk)
 
 
-def _views(text: str) -> list[str]:
+def _views(text: str, family: str = "") -> list[str]:
     """What the LLM reads. A chunk with one short table (or none) is read whole. Otherwise each table gets its own view,
     with only its own header and caption (a window of lines around it) so one table's caption cannot leak into another
     table's numbers, a long table is read a few rows at a time so one call never emits dozens of results, and the
@@ -191,7 +197,7 @@ def _views(text: str) -> list[str]:
     table_views: the header is applied to every number in code. A garbled table whose merged columns can be split without doubt is read block by block
     (`tables.rescue_tables`); the blocks that cannot be split are left out, as the whole table was before."""
     if garble_ratio(text) >= GARBLE_LIMIT:
-        views = [v for piece in (rescue_tables(text) or []) for v in table_views(parse_table(piece), MAX_RESULTS_PER_CALL)]
+        views = [v for piece in (rescue_tables(text, family) or []) for v in table_views(parse_table(piece), MAX_RESULTS_PER_CALL)]
         if views:
             return views
     table = parse_table(text)
@@ -253,8 +259,37 @@ def salvage_profiles(text: str) -> tuple[list[ExtractedProfile], bool]:
 NO_METHODS = "(no methods section found)"
 
 
+_FAMILY = re.compile(r"\b([A-Z][A-Za-z0-9]*(?:[-.][A-Za-z0-9]+)*)\s+(?:Small|Medium|Large|XL|XXL|Base|\d+(?:\.\d+)?\s?[BMK])\b")
+_FAMILY_STOP = frozenset({"the", "a", "an", "table", "model", "models", "layer", "layers", "batch", "size", "sizes", "parameters", "our", "in", "of", "and", "with", "for",
+                          "all", "each", "small", "large", "base", "medium", "xl", "xxl", "to", "on", "by", "from", "at", "as", "or", "is", "are"})
+
+
+def size_family(texts) -> str:
+    """The model family that the paper's text writes with its sizes ("GPT-3 Small", "GPT-3 175B": "GPT-3"), when one name does so at least four times; "" otherwise.
+    Used to name the columns of a table of model sizes, so that the extractor writes "GPT-3 Small" and not "Small" (a size word, which is dropped as no system)."""
+    found: Counter = Counter()
+    for text in texts:
+        for m in _FAMILY.finditer(text or ""):
+            if m.group(1).lower() not in _FAMILY_STOP and len(m.group(1)) >= 2:
+                found[m.group(1)] += 1
+    if not found:
+        return ""
+    word, n = found.most_common(1)[0]
+    return word if n >= 4 else ""
+
+
 def _numbers(text: str) -> set[float]:
     return {float(n) for n in _NUMBER.findall(text)}
+
+
+def _chunk_numbers(text: str, family: str = "") -> set[float]:
+    """The numbers a result of this chunk may carry: those of the text and, for a garbled table that is read block by block, those of its rescued blocks
+    (a number cut at a column border, "43" | ".8", is 43.8 only there)."""
+    found = _numbers(text)
+    if garble_ratio(text) >= GARBLE_LIMIT:
+        for piece in rescue_tables(text, family) or []:
+            found |= _numbers(piece)
+    return found
 
 
 def _read_view(chunk: Chunk, methods_text: str, view: str, numbers: set[float],
@@ -283,6 +318,20 @@ def _read_view(chunk: Chunk, methods_text: str, view: str, numbers: set[float],
     return kept, local
 
 
+def _read_view_safely(chunk: Chunk, methods_text: str, view: str, numbers: set[float],
+                      llm: OllamaLLM) -> tuple[list[ExtractedProfile], ExtractionStats]:
+    """`_read_view`, but a call that fails (a timeout of the model server on a busy queue) costs only its own view: it is counted as a failure and the completion sweep
+    (`rescue_garbled.py --complete`) reads it again, instead of the whole paper being lost (found 12 Oct: one timeout ended a re-read of LLaMA's Table 16)."""
+    try:
+        return _read_view(chunk, methods_text, view, numbers, llm)
+    except Exception as exc:
+        local = ExtractionStats()
+        local.calls += 1
+        local.failures += 1
+        local.errors.append(f"{chunk.chunk_id}: {type(exc).__name__}: {str(exc)[:80]}")
+        return [], local
+
+
 def _dedupe(profiles: list[ExtractedProfile]) -> list[ExtractedProfile]:
     seen: set[tuple] = set()
     out: list[ExtractedProfile] = []
@@ -297,7 +346,7 @@ def _dedupe(profiles: list[ExtractedProfile]) -> list[ExtractedProfile]:
 def extract_chunk(chunk: Chunk, methods: Chunk | None, llm: OllamaLLM, stats: ExtractionStats) -> list[ExtractedProfile]:
     """Profiles of one chunk, its views read one after another (extract_paper reads them in parallel)."""
     methods_text = methods.text if methods else NO_METHODS
-    numbers = _numbers(chunk.text)
+    numbers = _chunk_numbers(chunk.text)
     found: list[ExtractedProfile] = []
     for view in _views(chunk.text):
         kept, local = _read_view(chunk, methods_text, view, numbers, llm)
@@ -306,25 +355,31 @@ def extract_chunk(chunk: Chunk, methods: Chunk | None, llm: OllamaLLM, stats: Ex
     return _dedupe(found)
 
 
-def extract_paper(chunks: list[Chunk], llm: OllamaLLM) -> tuple[list[ConditionProfile], ExtractionStats]:
+def extract_paper(chunks: list[Chunk], llm: OllamaLLM, texts: dict[str, str] | None = None,
+                  family: str | None = None) -> tuple[list[ConditionProfile], ExtractionStats]:
     """Profiles for every extractable chunk of one paper.
 
     Every view of every chunk is one LLM call and all calls of the paper run in parallel, so a chunk with several
     tables does not hold up a worker while the others sit idle.
     """
     stats = ExtractionStats(chunks_seen=len(chunks))
+    if texts is None:
+        texts = dict(zip((c.chunk_id for c in chunks), with_carried_headers([c.text for c in chunks])))
+    if family is None:
+        family = size_family(c.text for c in chunks)
     methods = [c for c in chunks if c.section == "methods" and not is_structured_table(c.text)]
-    wanted = [c for c in chunks if wants_extraction(c)]
+    wanted = [c for c in chunks if wants_extraction(c, texts.get(c.chunk_id))]
     wanted.sort(key=lambda c: c.section not in EXTRACT_SECTIONS)
     jobs = [(c, link_methods_chunk(c, methods)) for c in wanted[:MAX_CHUNKS_PER_PAPER]]
 
     calls: list[tuple[int, Chunk, str, str, set[float]]] = []
     for ci, (chunk, linked) in enumerate(jobs):
-        methods_text, numbers = (linked.text if linked else NO_METHODS), _numbers(chunk.text)
-        calls += [(ci, chunk, methods_text, view, numbers) for view in _views(chunk.text)]
+        text = texts.get(chunk.chunk_id, chunk.text)
+        methods_text, numbers = (linked.text if linked else NO_METHODS), _chunk_numbers(text, family)
+        calls += [(ci, chunk, methods_text, view, numbers) for view in _views(text, family)]
 
     with ThreadPoolExecutor(max_workers=max(1, llm.cfg.parallel)) as pool:
-        results = list(pool.map(lambda c: _read_view(c[1], c[2], c[3], c[4], llm), calls))
+        results = list(pool.map(lambda c: _read_view_safely(c[1], c[2], c[3], c[4], llm), calls))
 
     per_chunk: dict[int, list[ExtractedProfile]] = {}
     for (ci, *_), (kept, local) in zip(calls, results):
