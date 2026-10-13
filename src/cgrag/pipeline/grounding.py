@@ -125,6 +125,41 @@ def _numbers(text: str) -> list[float]:
     return [float(x) for x in _NUMBER.findall(text or "")]
 
 
+_PAIR_ORDER = re.compile(r"(?<![A-Za-z0-9])([A-Za-z][A-Za-z0-9.]*(?:\s*/\s*[A-Za-z][A-Za-z0-9.]*)+)(?![A-Za-z0-9])")
+_MEASURE_NAMES = frozenset({"em", "exactmatch", "f1", "f1a", "acc", "accuracy", "pearson", "spearman", "bleu", "precision", "recall", "mcc", "p", "r"})
+
+
+def _measure_token(metric: str | None) -> str:
+    n = norm(metric).replace("score", "").replace("correlation", "").replace("rank", "")
+    return {"exactmatch": "em", "accuracy": "acc", "f1a": "f1"}.get(n, n)
+
+
+def _pair_order(*texts: str | None) -> list[str]:
+    """The measures that a header or caption lists for a cell with several numbers, in order ("F1/EM", "EM/F1", "Acc./F1"); [] when it lists none."""
+    for text in texts:
+        for m in _PAIR_ORDER.finditer(text or ""):
+            parts = [_measure_token(x) for x in re.split(r"\s*/\s*", m.group(1))]
+            if len(parts) >= 2 and all(p in _MEASURE_NAMES for p in parts):
+                return parts
+    return []
+
+
+def _carrying(p: ConditionProfile, t: ParsedTable, cells: list[Cell]) -> list[Cell]:
+    """The cells that carry the card's number; when several do, the cells in which the number stands at the position of the card's measure."""
+    hits = [c for c in cells if any(abs(n - p.value) < 1e-6 for n in _numbers(c.text))]
+    token = _measure_token(p.metric)
+    if len(hits) > 1 and token:
+        kept = []
+        for c in hits:
+            order, nums = _pair_order(c.column, t.caption), _numbers(c.text)
+            at = next((i for i, n in enumerate(nums) if abs(n - p.value) < 1e-6), None)
+            if len(nums) >= 2 and token in order and at is not None and at < len(order) and order.index(token) != at:
+                continue
+            kept.append(c)
+        hits = kept or hits
+    return hits
+
+
 _GENERIC = frozenset({"top", "bottom", "ours", "our", "baseline", "baselines", "human", "humans", "average", "avg", "mean", "total", "single", "ensemble", "ensembles",
                       "test", "dev", "development", "validation", "train", "model", "models", "system", "systems", "method", "methods", "task", "tasks", "row", "rows",
                       "overall", "published", "unpublished", "previous", "state", "art", "sota", "best", "worst", "random", "majority"})
@@ -205,7 +240,7 @@ def candidates(p: ConditionProfile, chunk_text: str) -> list[Cell]:
     t, cells = _cells(chunk_text or "")
     if t is None or p.value is None:
         return []
-    return [c for c in cells if any(abs(n - p.value) < 1e-6 for n in _numbers(c.text))]
+    return _carrying(p, t, cells)
 
 
 def model_fits(model: str | None, label: str) -> bool | None:
@@ -219,7 +254,7 @@ def ground(p: ConditionProfile, chunk_text: str) -> Grounding:
     t, cells = _cells(chunk_text or "")
     if t is None or p.value is None:
         return Grounding()
-    hits = [c for c in cells if any(abs(n - p.value) < 1e-6 for n in _numbers(c.text))]
+    hits = _carrying(p, t, cells)
     if not hits:
         return Grounding()
 
