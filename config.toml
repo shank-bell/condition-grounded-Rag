@@ -47,6 +47,8 @@ rerank_threshold = -3.0
 section_boost = 0.15
 generate_top = 5
 use_cards = true
+profile_signal = true
+profile_k = 8
 
 [applicability]
 max_reretrieve = 1
