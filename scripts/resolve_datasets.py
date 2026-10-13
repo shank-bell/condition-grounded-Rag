@@ -54,6 +54,7 @@ def main() -> None:
     ap.add_argument("--papers", nargs="*", help="paper ids (default: every paper of the store)")
     ap.add_argument("--force", action="store_true", help="redo papers that already have resolutions")
     ap.add_argument("--show", action="store_true", help="print every question's answer")
+    ap.add_argument("--fresh", action="store_true", help="with --force: discard the recorded decisions of the paper instead of keeping them and adding the new groups")
     ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args()
 
@@ -78,12 +79,14 @@ def main() -> None:
                 shown.append(f"    {key:34.34} -> {name!r:30.30} | {evidence[:90]}")
 
         found = resolve_paper(llm, fixed, chunks.get(pid, {}), titles.get(pid, ""), progress)
-        done[pid] = {k: asdict(v) for k, v in found.items()}
+        prev = {} if args.fresh else dict(done.get(pid, {}))
+        done[pid] = {**{k: asdict(v) for k, v in found.items()}, **prev}
         labels = citation_labels(fixed)
         if labels:
             sentences = paper_sentences(chunks.get(pid, {}))
             whole = compact(" ".join(chunks.get(pid, {}).values()))
-            done[pid].update(resolve_models(llm, fixed, sentences, whole, titles.get(pid, ""), progress))
+            for k, v in resolve_models(llm, fixed, sentences, whole, titles.get(pid, ""), progress).items():
+                done[pid].setdefault(k, v)
         save_resolutions(out_path, done)
         total["groups"] += len(todo) + len(labels)
         kept["resolved"] += len(done[pid])
