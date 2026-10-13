@@ -1,0 +1,65 @@
+{
+  "lenient": {
+    "items": 100,
+    "completely_right": "81/100 = 81.0 %",
+    "ci95": [
+      72.2,
+      87.5
+    ],
+    "micro_f1": 97.6,
+    "per_field_f1": {
+      "model": 93.0,
+      "dataset": 97.0,
+      "dataset_version": 100.0,
+      "metric": 97.0,
+      "value": 99.0,
+      "language": 97.0,
+      "task": 98.5,
+      "model_size": 99.0,
+      "setting": 98.0
+    },
+    "wrong_or_missing_by_field": {
+      "model": 7,
+      "dataset": 3,
+      "dataset_version": 0,
+      "metric": 3,
+      "value": 1,
+      "language": 4,
+      "task": 2,
+      "model_size": 1,
+      "setting": 3
+    }
+  },
+  "strict": {
+    "items": 100,
+    "completely_right": "49/100 = 49.0 %",
+    "ci95": [
+      39.4,
+      58.7
+    ],
+    "micro_f1": 92.0,
+    "per_field_f1": {
+      "model": 83.0,
+      "dataset": 89.0,
+      "dataset_version": 100.0,
+      "metric": 84.0,
+      "value": 99.0,
+      "language": 97.0,
+      "task": 97.5,
+      "model_size": 99.0,
+      "setting": 79.8
+    },
+    "wrong_or_missing_by_field": {
+      "model": 17,
+      "dataset": 11,
+      "dataset_version": 0,
+      "metric": 16,
+      "value": 1,
+      "language": 4,
+      "task": 3,
+      "model_size": 1,
+      "setting": 21
+    }
+  },
+  "not_a_result": 0
+}
