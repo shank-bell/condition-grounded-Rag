@@ -1,10 +1,18 @@
 # Ingestion pipeline report (offline path A-D), frozen 2026-09-30
 
-> **Update 11 Oct 2026.** The tables below describe the RAW extraction of 30 September (the `profiles` table, which is never rewritten). Since 11 Oct the
-> system reads the profiles through a code-only repair overlay (`profile_repairs`, `src/cgrag/ingestion/repair.py`, `scripts/repair_store.py`,
-> `[features] profile_repair`): 5,383 of the 10,275 profiles have at least one field corrected from their own table cell, caption, block heading or the paper's
-> own definitions (setting 3,321 fields, task 2,119, data set 915, model 467, language 433, model size 64), the retrieval cards were rebuilt from the repaired
-> fields, and the table reader reads a header row repeated in the middle of a wide table. Measured effect: `docs/evaluation_ai_annotated.md`, section 4.1b.
+> **Update 12 Oct 2026 (late evening).** After the note below: the store has **12,465 profiles** (7,374 changed by the overlay, 59.2 %) and 302 retrieval cards. Added since the note: DistilBERT's Table 2 (a row of whole columns, `tables.unglue_columns`), GPT-3's appendix Table H.1 (906 results of 36 readable rows; size columns in merged cells, `tables._scaling_table`), LLaMA's MMLU table (298 -> 407; a label cut in two), T5's Table 7 (7 -> 35; bare numbers as row labels) and 155 results found by reading partly read chunks again with the output cap raised from 3,000 to 4,500 tokens (the last result of every full view had been cut). The share of decimal cells with a profile is 93.4 % of 13,099 cells in 240 readable result tables; 10 garbled tables (2,305 decimals, 2,199 of them T5's Table 16) are still skipped. Details: `docs/evaluation_ai_annotated.md`, section 4.1i.
+>
+> **Update 12 Oct 2026 (night).** The tables below describe the RAW extraction of 30 September (the `profiles` table, which is never rewritten except for the chunks that were
+> read again). Since 11 Oct the system reads the profiles through a code-only repair overlay (`profile_repairs`, `src/cgrag/ingestion/repair.py`, `scripts/repair_store.py`,
+> `[features] profile_repair`): **6,805 of the 11,256 profiles (60.5 %)** have at least one field corrected from their own table cell, caption, block heading or the paper's own
+> definitions (setting 4,110 fields, task 2,647, data set 1,328, model 1,279, language 490, metric 424, model size 128, data set version 7; the rules `language_order`,
+> `model_citation`, `dataset_context`, `model_context`, `metric_paper_measure`, `setting_ablation`, `value_lost_decimal`, `dataset_pair`, `dataset_conll` and others were added on
+> 11-12 Oct; `dataset_context` and `model_context` read the paper's own text with the language model, once per group of profiles, and keep the evidence sentence in
+> `data/index/dataset_context.json`), the retrieval cards were rebuilt from the repaired fields, and the table reader was changed several times. **The store has 981 profiles more
+> than the 10,275 of the table below**: T5's Table 14 and ELECTRA's Table 8 (290 profiles; merged columns, `tables.rescue_tables`), 93 chunks that had no profile at all (+171),
+> a completion of 53 partly read chunks (+509 profiles, only numbers that were missing, new ids after the existing ones), two header defects (GPT-3's Table 3.8 and the LLaMA MMLU
+> table, replaced), minus the profiles of three re-read chunks that came back with fewer. The share of decimal table cells that have a profile is 91.4 % of 12,147 cells in 236
+> result tables (80.7 % in the table below). Measured effect: `docs/evaluation_ai_annotated.md`, sections 4.1b, 4.1d-4.1h and 4.9.
 
 Scope: the offline path of the architecture - A PDF loader, B section chunker, C Condition Profile Extractor (LLM), D BGE-M3
 embedder, and the three stores (ChromaDB vectors, BM25 index, SQLite Condition Profile store). Everything here was measured on
