@@ -1,0 +1,144 @@
+{
+ "questions": 30,
+ "intent": {
+  "accuracy": 0.9333,
+  "macro_f1": 0.9693
+ },
+ "complexity": {
+  "accuracy": 1.0,
+  "macro_f1": 1.0
+ },
+ "conditions": {
+  "dataset": {
+   "tp": 26,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.963,
+   "f1": 0.9811
+  },
+  "dataset_version": {
+   "tp": 3,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "language": {
+   "tp": 17,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "model": {
+   "tp": 42,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "model_size": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 6,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "setting": {
+   "tp": 5,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "task": {
+   "tp": 1,
+   "fp": 3,
+   "fn": 0,
+   "precision": 0.25,
+   "recall": 1.0,
+   "f1": 0.4
+  },
+  "ALL": {
+   "tp": 94,
+   "fp": 3,
+   "fn": 7,
+   "precision": 0.9691,
+   "recall": 0.9307,
+   "f1": 0.9495
+  }
+ },
+ "scope_warning": {
+  "tp": 19,
+  "fp": 1,
+  "fn": 0,
+  "precision": 0.95,
+  "recall": 1.0,
+  "f1": 0.9744,
+  "right_condition_named": 19,
+  "expected_warnings": 19,
+  "accuracy": 0.9667
+ },
+ "by_planned_type": {
+  "covered": {
+   "n": 11,
+   "warned": 1,
+   "expected_warning": 0,
+   "warning_correct": 10
+  },
+  "one missing": {
+   "n": 9,
+   "warned": 9,
+   "expected_warning": 9,
+   "warning_correct": 9
+  },
+  "partly covered": {
+   "n": 10,
+   "warned": 10,
+   "expected_warning": 10,
+   "warning_correct": 10
+  }
+ },
+ "seconds_per_question": {
+  "median": 3.8,
+  "max": 9.7
+ },
+ "provenance": {
+  "generated_at": "2026-10-10T20:23:03+00:00",
+  "frozen_at_commit": "2f2d1cec6a9b50709ca96cf85c8a74a197c0477d",
+  "modified_files_at_that_time": [
+   " M NOTES.md",
+   " M README.md",
+   " M config.toml",
+   " M docs/evaluation_ai_annotated.md",
+   " M eval/labels/stage7_variants_repaired.json",
+   " M scripts/eval_retrieval_gold.py",
+   " M scripts/score_stage7_variants.py",
+   " M src/cgrag/config.py",
+   " M src/cgrag/pipeline/conditions.py",
+   " M src/cgrag/pipeline/contradiction.py",
+   " M src/cgrag/pipeline/retrieval.py",
+   " M src/cgrag/pipeline/run.py",
+   " M tests/test_cards.py",
+   " M tests/test_conditions.py",
+   "?? eval/labels/absent_flagged.top7.json",
+   "?? eval/labels/absent_flagged.top7sig.json",
+   "?? eval/labels/answer_quality_gold_b.top7.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.top7.json",
+   "?? eval/labels/answer_quality_gold_b.top7sig.json",
+   "?? eval/labels/questions_gold.results.jsonl",
+   "?? eval/labels/questions_gold.scores.json",
+   "?? eval/labels/questions_gold.top7_main.results.jsonl",
+   "?? eval/labels/questions_gold.top7_main.scores.json",
+   "?? eval/labels/questions_gold.top7sig_main.results.jsonl",
+   "?? eval/labels/sources_gold.top7.json",
+   "?? eval/labels/sources_gold.top7sig.json"
+  ]
+ }
+}
