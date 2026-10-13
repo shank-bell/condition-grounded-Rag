@@ -105,6 +105,17 @@ class ProfileStore:
             self._cache = None
         self._overrides = {k: v for k, v in self._overrides.items() if not k.startswith(f"{paper_id}:")}
 
+    def replace_chunk(self, chunk_id: str, profiles: list[ConditionProfile]) -> int:
+        """Swap the raw profiles of ONE chunk for a new reading of it (a table that is now read more completely); returns how many rows were removed. The repair
+        overlay of the paper is rewritten by `repair_store.py --apply` afterwards."""
+        with self.lock, self.db:
+            removed = self.db.execute("DELETE FROM profiles WHERE chunk_id=?", (chunk_id,)).rowcount
+            self.db.executemany(f"INSERT OR REPLACE INTO profiles ({','.join(_COLS)}) VALUES ({','.join('?' * len(_COLS))})",
+                                [tuple(getattr(p, c) for c in _COLS) for p in profiles])
+            self.db.execute("DELETE FROM profile_repairs WHERE profile_id LIKE ?", (f"{chunk_id}#%",))
+            self._cache = None
+        return removed
+
     def _row(self, r: sqlite3.Row) -> ConditionProfile:
         p = ConditionProfile(**{c: r[c] for c in _COLS})
         ov = self._overrides.get(p.profile_id)
