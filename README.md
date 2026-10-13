@@ -22,13 +22,20 @@ assistant from the PDFs, so every result is "against an AI-annotated key, one la
 `docs/evaluation_ai_annotated.md` is the evaluation: method, corrections log (everything that went wrong), results, limits. Read its section 7 before
 quoting any number. In short (development and clean numbers are marked there):
 
-* Stage 6 scope warning: F1 92.7 on 30 questions (97.4 after error analysis); a simple LLM judge scores 91.4 - a tie; only the joint-coverage check matters.
-* Stage 7: 220 of 250 labelled pairs right (88.0 %; "always EXPLAINED" 80.4 %, an LLM judge 64 %), false GENUINE calls 2 % against 16 % for the judge; it finds
-  none of the 3 real contradictions in these sets. The accuracy gain over the trivial rule is small on clean sets (section 4.5f).
-* Extraction: field-level F1 94.0 lenient / 90.0 strict after the repair on a clean sample (89.9 / 85.2 before, on another sample), but only 60.6 % / 39.4 % of
-  the profiles are *completely* right. On the public MetaLead benchmark (human gold) the pipeline finds 88.4 % of the annotated results.
-* Not above 85 %: completely right profiles, data set naming against human gold (73 %), Stage 7's naming of the differing condition (58 %), the gold
-  evidence page in the retrieval stage's top 5 (78.6 %; it is among the answer's sources for 85.7 %, section 4.7c), real contradictions found (0 of 3).
+* Stage 6 scope warning on 30 questions: F1 92.7 frozen against 91.4 for a simple LLM judge (a tie); after error analysis and the last repair rule 100.0 against 88.9
+  (4 questions won, 0 lost, p = 0.125; development numbers); only the joint-coverage check matters.
+* Stage 7: 267 of 300 labelled pairs right (89.0 %; "always EXPLAINED" 81.3 %, an LLM judge 65.7 %), 5 false GENUINE calls in 296 (1.7 %) against 48 for the judge
+  (16 %), 3 of the 4 real contradictions found. The accuracy gain over the trivial rule is small on clean sets (sections 4.5f, 4.5g).
+* Extraction: on a fresh random sample of 100 stored profiles drawn from the final store after the last change of the evening of 12 Oct (E6, 99 results) 92.9 % of the
+  profiles are *completely* right on the lenient reading (interval 86-97) and 58.6 % on the strict one, field F1 99.0 / 94.6 (E5, drawn before the evening's changes:
+  79.8 / 42.4; E4: 78.4 / 48.5; the clean sample of 11 Oct on other papers: 60.6 / 39.4). Against the Papers with Code leaderboards (22 papers, 506 listed results, strict
+  reading) the number is found for 98.4 % and found with data set, metric and model all agreeing for 80.6 % (six revisions of the scorer are listed in docs 4.9: do not
+  quote it without them). On the public MetaLead benchmark (human gold) the pipeline finds 90.1 % of the annotated results and gets data set, metric and task right for
+  63.6 % end to end.
+* Not above 85 %: completely right profiles on the strict reading (58.6 %; the lenient 92.9 % is the one above), the three names together against MetaLead (70.6 %),
+  found and right against the leaderboards (80.6 %), Stage 7's naming of the differing condition (70 % exact set, 82 % with partial credit; every condition of the key is named for 84.5 % of the
+  explained pairs, the rest are extra names). The gold evidence page is in the retrieval stage's top 5 for 85.7 % (24 of 28) and among the answer's sources for
+  89.3 % (sections 4.7c to 4.7f; three levers tried in 4.7d on 11 Oct, none adopted then; the profile signal was adopted on 12 Oct evening after a size-specific table-lookup test: 11 of 24 answers with the number instead of 7, nothing changed on the 30 gold questions).
 
 ## Quick start
 
@@ -40,7 +47,7 @@ python scripts/ingest.py                                                       #
 python scripts/repair_store.py --apply ; python scripts/reindex_cards.py       # only for a store built before 11 Oct: ingest.py now repairs new papers itself
 python scripts/ask.py "Does BERT work well for Kannada question answering?"    # prints every decision of every stage
 uvicorn cgrag.api.main:app --port 8000                                         # API; then: cd frontend && npm install && npm run dev
-python -m pytest                                                               # 258 unit tests, no GPU or LLM needed
+python -m pytest                                                               # 334 unit tests, no GPU or LLM needed
 ```
 
 `config.toml` holds every default and the ablation switches (`[features]`); machine overrides go in the git-ignored `config.local.toml`;
