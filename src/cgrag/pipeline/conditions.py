@@ -222,7 +222,7 @@ _SETTING_TAGS = (
     ("translate-train", r"translate[- ]?train"), ("translate-test", r"translate[- ]?test"),
     ("dev", r"\b(?:dev|development|validation|val)\b"), ("test", r"\btest\b"), ("train", r"\btrain(?:ing)?\b"),
     ("single", r"\bsingle\b"), ("ensemble", r"\bensemble"), ("in-domain", r"in[- ]?domain"),
-    ("out-of-domain", r"out[- ]?of[- ]?domain"), ("feature-based", r"feature[- ]?based"),
+    ("out-of-domain", r"out[- ]?of[- ]?domain"), ("feature-based", r"feature[- ]?based"), ("ablation", r"\bablation\b"),
 )
 
 
