@@ -20,6 +20,7 @@ new profile and the names of the rules that changed it, so each rule can be coun
 """
 from __future__ import annotations
 
+import difflib
 import re
 from collections import Counter
 from dataclasses import dataclass, field
@@ -37,10 +38,12 @@ from .tables import parse_table, table_cells
 RULES = ("task", "model_name", "model_own", "setting_split", "setting_system", "setting_noise", "setting_regime", "dataset_split",
          "dataset_cut", "dataset_column", "dataset_signature", "metric", "language", "language_column", "language_average",
          "model_size", "dataset_version", "dataset_abbrev", "task_filler", "setting_fragment", "dataset_caption", "dataset_paper_abbrev", "metric_paper_abbrev", "task_paper",
-         "model_heading", "language_order", "dataset_context", "model_citation", "model_context")
+         "model_heading", "language_order", "dataset_context", "model_citation", "model_context", "metric_paper_measure", "metric_difference", "metric_cut",
+         "setting_ablation", "value_lost_decimal", "dataset_pair", "dataset_conll", "metric_split_word", "dataset_row_label", "metric_benchmark",
+         "metric_avg_column", "dataset_spelling")
 
 
-_ABLATION = re.compile(r"\bablation|\beffect of\b|\bdifferent (?:masking|pre-?training|mixing|training) (?:strateg|objective|data)", re.I)
+_ABLATION = re.compile(r"\bablation|\beffects? of\b|\bdifferent (?:masking|pre-?training|mixing|training) (?:strateg|objective|data)", re.I)
 _CONFIG_LABEL = re.compile(r"%|=|^\s*\d")
 
 
@@ -50,8 +53,11 @@ class PaperContext:
     prose: str
     names: dict[str, str] = field(default_factory=dict)
     own: str | None = None
+    main: str | None = None
     row_labels: set[str] = field(default_factory=set)
+    main_rows: set[str] = field(default_factory=set)
     abbrevs: dict[str, str] = field(default_factory=dict)
+    measures: dict[str, str] = field(default_factory=dict)
     datasets: dict[str, str] = field(default_factory=dict)
     task: str | None = None
 
@@ -122,12 +128,90 @@ def paper_abbreviations(prose: str) -> dict[str, str]:
     return out
 
 
+_MCC_WORD = re.compile(r"\bmatthews?\b|\bmatthew['’]s\b|\bmcc\b", re.I)
+_PEARSON_WORD = re.compile(r"\bpearson", re.I)
+_SPEARMAN_WORD = re.compile(r"\bspearman", re.I)
+
+
+def paper_measures(prose: str) -> dict[str, str]:
+    """The measure the paper itself names for the two GLUE tasks that are not scored by accuracy: CoLA by Matthews correlation, STS-B by a correlation
+    (Pearson or Spearman, named only when the paper names exactly one of them). The extractor reads such a column as "accuracy" when the header says nothing
+    more than the task's name (found 11 Oct night with the Papers with Code leaderboards: 101 CoLA and 78 STS-B results)."""
+    out: dict[str, str] = {}
+    if _MCC_WORD.search(prose):
+        out["cola"] = "Matthews correlation"
+    pearson, spearman = bool(_PEARSON_WORD.search(prose)), bool(_SPEARMAN_WORD.search(prose))
+    if pearson or spearman:
+        out["stsb"] = "Pearson correlation" if pearson and not spearman else ("Spearman correlation" if spearman and not pearson else "correlation")
+    return out
+
+
+_BENCHMARK_MEASURE = {"cola": "Matthews correlation", "stsb": "correlation"}
+
+_KNOWN_METRICS = ("Exact Match", "Spearman correlation", "Pearson correlation", "Matthews correlation", "accuracy", "precision", "recall", "perplexity")
+
+
+def complete_metric(metric: str | None) -> str | None:
+    """A metric label that is a header word cut at a column border ("Exac", "Match" of "Exact Match"; "Spea", "Pear"): the beginning (4 letters or more) or the end (5 letters or
+    more) of exactly one well-known metric name, and not a name itself. None when nothing is cut or the completion is ambiguous."""
+    m = key(re.sub(r"[.\s]+$", "", metric or ""))
+    if len(m) < 4 or m in {key(k) for k in _KNOWN_METRICS} | {"acc", "em", "f1", "exact"}:
+        return None
+    heads = [k for k in _KNOWN_METRICS if key(k).startswith(m)]
+    tails = [k for k in _KNOWN_METRICS if len(m) >= 5 and key(k).endswith(m)]
+    found = heads or tails
+    return found[0] if len(found) == 1 else None
+
+
+_N = r"[+\-−]?\s*(\d+(?:\.\d+)?)"
+_DIFF_CUE = r"(?:outperform\w*|exceed\w*|surpass\w*|beat\w*|improv\w+|better|higher|lower|worse|gain\w*|boost\w*|increas\w+|drop\w*|decreas\w+|reduc\w+|above|below|ahead|margin)"
+_DIFFERENCE_PATTERNS = (
+    re.compile(rf"\b{_DIFF_CUE}\b[^.;]{{0,80}}?\bby\s*(?:\.\.\.\s*)?(?:a\s+margin\s+of\s+)?{_N}", re.I),
+    re.compile(rf"\(\s*[+\-−]\s*(\d+(?:\.\d+)?)"),
+    re.compile(rf"(?<![\w.])\+\s*(\d+(?:\.\d+)?)\s*(?:%|points?|pts)"),
+    re.compile(rf"\b(?:gain|improvement|increase|boost|margin|difference|drop|decrease|reduction)\s+of\s+{_N}", re.I),
+    re.compile(rf"{_N}\s*(?:absolute\s+)?(?:points?|pts)\s+(?:higher|lower|better|worse|above|below|over|more|less)\b", re.I),
+    re.compile(rf"\b{_DIFF_CUE}\b(?:[^.;]|(?<=\d)\.(?=\d)){{0,120}}?\band\s+(?:by\s+)?{_N}\s*(?:%|points?|pts|F1|EM|BLEU|accuracy)", re.I),
+)
+
+
+def sentence_of(evidence: str | None, chunk_text: str | None) -> str | None:
+    """The whole sentence of the chunk that contains the stored evidence snippet (the extractor keeps a fragment: "and 1.86 F1 when trained on each language"),
+    so that a cue earlier in the sentence is seen. None when the snippet is not found."""
+    if not evidence or not chunk_text:
+        return None
+    flat = re.sub(r"\s+", " ", chunk_text)
+    snippet = re.sub(r"\s+", " ", evidence).strip()
+    i = flat.find(snippet)
+    if len(snippet) < 12 or i < 0:
+        return None
+    start = max(flat.rfind(". ", 0, i), flat.rfind("\n", 0, i)) + 1
+    end = flat.find(". ", i + len(snippet))
+    return flat[start:(end + 1 if end >= 0 else len(flat))].strip()
+
+
+def states_a_difference(evidence: str | None, value: float | None) -> bool:
+    """The sentence a profile was read from presents its number as a DIFFERENCE between two systems ("outperforms mBERT by 13.0% F1", "RACE (+8.4%)", "a gain of
+    2.0%"), not as a result: the number that follows the cue is the stored value. A result read from a table never matches (it has no such sentence)."""
+    if not evidence or value is None:
+        return False
+    for rx in _DIFFERENCE_PATTERNS:
+        for m in rx.finditer(evidence):
+            try:
+                if abs(float(m.group(m.lastindex or 1)) - abs(value)) < 1e-6:
+                    return True
+            except (TypeError, ValueError):
+                continue
+    return False
+
+
 def paper_context(paper_id: str, chunk_texts: list[str], model_names: list[str], title: str = "",
                   datasets: list[str] | None = None) -> PaperContext:
     """The prose of a paper and the system names it writes: stored model names and row labels that occur at least twice in the prose."""
     prose = "\n".join(ln for t in chunk_texts for ln in t.split("\n") if not ln.lstrip().startswith("|"))
     ctx = PaperContext(paper_id, prose)
     ctx.abbrevs = paper_abbreviations(prose)
+    ctx.measures = paper_measures(prose)
     from collections import Counter as _C
     counts = _C(d for d in (datasets or []) if d and len(key(d)) >= 3)
     ctx.datasets = {key(d): d for d, n in counts.items() if n >= 2 and _dataset_like(d)}
@@ -138,6 +222,18 @@ def paper_context(paper_id: str, chunk_texts: list[str], model_names: list[str],
     in_title = {m for m in set(model_names) if len(key(m)) >= 3 and re.search(rf"(?<![A-Za-z0-9]){re.escape(m)}(?![A-Za-z0-9])", title or "")}
     in_title = {m for m in in_title if not any(o != m and key(m) in key(o) for o in in_title)}
     ctx.own = in_title.pop() if len(in_title) == 1 else None
+    ctx.main = ctx.own
+    if ctx.main is None:
+        from collections import Counter as _Counter
+        firsts = _Counter()
+        for n in set(model_names):
+            m = re.match(r"^([A-Za-z][A-Za-z0-9]*(?:-\d+(?:\.\d+)?(?![A-Za-z0-9]))?)(?=[-\s_]|$)", (n or "").strip())
+            if m and (n or "").strip() != m.group(1):
+                firsts[m.group(1)] += 1
+        for word, count in firsts.most_common(4):
+            if count >= 3 and len(key(word)) >= 2 and key(word) not in _NOT_A_NAME and re.search(r"[A-Z0-9]", word) and not is_language(word) and lookup(word) is None                     and len(re.findall(rf"(?<![A-Za-z0-9]){re.escape(word)}(?![A-Za-z0-9])", prose)) >= 10:
+                ctx.main = word
+                break
     labels = set(model_names)
     for t in chunk_texts:
         table = parse_table(t)
@@ -145,6 +241,9 @@ def paper_context(paper_id: str, chunk_texts: list[str], model_names: list[str],
             rows = {c.row_label for c in table_cells(table)}
             labels |= rows
             ctx.row_labels |= {key(r) for r in rows if r}
+            if not _ABLATION.search(table.caption or "") and not re.search(r"\bvariants?\b", table.caption or "", re.I) \
+                    and not _FACTOR_HEADER.search((table.header[0] if table.header else "") or ""):
+                ctx.main_rows |= {key(r) for r in rows if r}
     for name in labels:
         n = (name or "").strip()
         if len(key(n)) < 3 or key(n) in _NOT_A_NAME or not re.search(r"[A-Z]", n):
@@ -290,6 +389,29 @@ def _column_code(column: str | None) -> str | None:
 _AVG_COLUMN = re.compile(r"^\s*(?:avg|average|mean|overall)\b", re.I)
 
 
+_PERCENT_METRIC = re.compile(r"accuracy|\bacc\b|f1|exact match|\bem\b|precision|recall|rouge|bleu|\bauc\b|top-?\d|pass@|correlation|\bmcc\b|truthful", re.I)
+_NOT_PERCENT = re.compile(r"perplex|loss|error|\bppl\b|param|size|flops|latency|seconds|speed", re.I)
+_FACTOR_HEADER = re.compile(r"strateg|objective|architecture|number of|hidden size|batch size|corruption|context length|sequence length|span length|masking|data pct|"
+                            r"dropout|learning rate|variant|configuration|\bsim\b|fine-tuning method|\bablation\b|\bsteps\b", re.I)
+_BASELINE_ROW = re.compile(r"^[⋆*★\s]*(?:baseline|full\b|ours?\b|proposed)", re.I)
+
+
+_SYSTEM_LIKE = re.compile(r"BERT|GPT|T5\b|Net\b|ELMo|ELECTRA|XLM|LSTM|CNN|Transformer|Longformer|Llama|LLaMA|MPT\b|Falcon|Chinchilla|PaLM|\bDPR|\bRAG|BART|MASS\b|CoVe|GloVe|BiDAF|"
+                          r"DrQA|QANet|Human|SOTA|state[- ]of[- ]the[- ]art", re.I)
+
+
+def _is_system_row(label: str, ctx: PaperContext) -> bool:
+    """The row of an ablation table that is a system, not a configuration. A label that is also a row of one of the paper's results tables is a system; a label
+    that opens with "+", "-", "w/o" or "No" is a modification of one; else it is a system when it looks like a system name (the teacher models "BERT-large" of
+    MobileBERT's ablation). (12 Oct: a first version asked whether the label was a name the prose writes, which skipped "LTR & No NSP", "AKT" and "+ BiLSTM":
+    the paper writes the names of its variants too.)"""
+    if key(label) in ctx.main_rows:
+        return True
+    if re.match(r"^\s*(?:[+\-–−]|w/o\b|without\b|no\b)", label or "", re.I):
+        return False
+    return bool(_SYSTEM_LIKE.search(label or ""))
+
+
 def _name_like_label(label: str) -> bool:
     """A row label that names a system (letters, maybe digits) and not a configuration ("E = 64", "K = 2^18", "80%: ... = 10%")."""
     return not re.search(r"[=%^]|^\s*\d", label or "")
@@ -386,6 +508,35 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
         if named:
             put("dataset_caption", dataset=named)
             ds = named
+    if cells and ds and g and g.row_label and key(ds) == key(g.row_label) and lookup(ds) is None and _caption_benchmark(caption) is not None:
+        put("dataset_row_label", dataset=_caption_benchmark(caption).name)
+        ds = _caption_benchmark(caption).name
+    if cells and ds and g and lookup(ds) is None and len(key(ds)) >= 5:
+        for label in (g.row_label, g.column):
+            named = lookup(re.sub(r"\s+", " ", label or "").strip())
+            if named is not None and key(named.name) != key(ds) and difflib.SequenceMatcher(None, key(ds), key(label)).ratio() >= 0.85:
+                put("dataset_spelling", dataset=named.name)
+                ds = named.name
+                break
+    if cells and ds and p.value is not None and key(ds) in ("mnli", "mnlim", "mnlimm"):
+        targets = set()
+        for c in cells:
+            nums = re.findall(r"\d+(?:\.\d+)?", c.text or "")
+            if re.search(r"m\s*/\s*mm", c.column or "", re.I) and len(nums) == 2 and abs(float(nums[0]) - float(nums[1])) > 1e-6:
+                targets.add("MNLI-mm" if abs(p.value - float(nums[1])) < 1e-6 else ("MNLI-m" if abs(p.value - float(nums[0])) < 1e-6 else None))
+            else:
+                targets.add(None)
+        if len(targets) == 1 and next(iter(targets)) and key(next(iter(targets))) != key(ds):
+            put("dataset_pair", dataset=next(iter(targets)))
+            ds = next(iter(targets))
+    if cells and ds and key(ds) in ("conll2002", "conll2003"):
+        codes = {_column_code(c.column) for c in cells}
+        if codes and codes <= {"en", "de"} and key(ds) != "conll2003":
+            put("dataset_conll", dataset="CoNLL-2003")
+            ds = "CoNLL-2003"
+        elif codes and codes <= {"nl", "es"} and key(ds) != "conll2002":
+            put("dataset_conll", dataset="CoNLL-2002")
+            ds = "CoNLL-2002"
 
     task = upd.get("task", p.task)
     bench = lookup(ds)
@@ -397,6 +548,8 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
             put("task_filler" if filler else "task", task=bench.task)
     elif task and lookup(task):
         put("task", task=lookup(task).task)
+    elif task and key(task) in NOT_TASKS:
+        put("task_filler", task=None)
     if not (upd.get("task", p.task)) and ctx.task:
         put("task_paper", task=ctx.task)
 
@@ -409,6 +562,11 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
             label = next(iter(rows))
             if label and _name_like_label(label) and key(label) not in _HEADING_MODELS and key(label) not in _NOT_A_NAME:
                 put("model_heading", model=label)
+    glued = re.compile(r"\s*(?<![A-Za-z])[a-z]{15,}(?![A-Za-z])\s*(?:Avg\.?\s*)?")
+    if p.model and glued.search(p.model):
+        cleaned = glued.sub(" ", p.model).strip()
+        if len(cleaned) >= 2 and cleaned != p.model:
+            put("model_name", model=cleaned)
     paren = re.search(r"\(([^)]*[=%^][^)]*)\)\s*$", p.model or "")
     if p.model and paren:
         base = re.sub(r"\s*\([^)]*\)\s*$", "", p.model).strip()
@@ -429,7 +587,7 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
             put("model_name", model=name, model_size=p.model_size or (_row_size(chunk_text, g) if g else None))
     if p.model and ctx.own and "model_name" not in fired and _CONFIG_LABEL.search(p.model) \
             and (_ABLATION.search(caption or "") or (cells and not _name_like_label(p.model))):
-        variant = re.sub(r"\s+", " ", p.model).strip()
+        variant = "ablation: " + re.sub(r"\s+", " ", p.model).strip()
         carried = f"{p.setting}; {variant}" if p.setting and variant.lower() not in p.setting.lower() else (p.setting or variant)
         put("model_own", model=ctx.own, setting=carried[:120])
 
@@ -451,6 +609,13 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
             if not re.search(r"single model|single models|singlemodel|ensemble", says):
                 setting = re.sub(r"\s{2,}", " ", _SYSTEM_WORDS.sub("", setting)).strip(" ,;")
                 put("setting_system", setting=setting or None)
+        if re.search(r"single[- ]?model", setting, re.I) and all(re.search(r"ensemble", c.block or "", re.I) for c in cells) \
+                and not any(re.search(r"single[- ]?model", f"{c.block} {c.column}", re.I) for c in cells):
+            setting = re.sub(r"\s{2,}", " ", re.sub(r"single[- ]?task single[- ]?model|single[- ]?model", "ensemble", setting, flags=re.I)).strip(" ,;")
+            put("setting_system", setting=setting)
+        if re.search(r"\btrain(?:ing)?\b", setting, re.I) and re.search(r"\bdev", setting, re.I) and all(re.search(r"\bdev", c.column or "", re.I) for c in cells):
+            setting = re.sub(r"\s{2,}", " ", re.sub(r"\btrain(?:ing)?\b", "", setting, flags=re.I)).strip(" ,;")
+            put("setting_split", setting=setting)
         mixed = any(re.search(r"fine[- ]?tun", c.column or "", re.I) and re.search(r"feature", c.column or "", re.I) for c in cells)
         columns = {c.column for c in cells}
         regime = _REGIME.search(next(iter(columns))) if len(columns) == 1 else None
@@ -481,6 +646,29 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
         setting = re.sub(r"\s{2,}", " ", re.sub(r"\bbaselines?\b", "", setting, flags=re.I)).strip(" ,;")
         put("setting_noise", setting=setting or None)
 
+    main = ctx.main
+    if table and cells and main and not {"model_name", "model_own"} & set(fired):
+        rows = {c.row_label for c in cells if c.row_label}
+        label = next(iter(rows)) if len(rows) == 1 else ""
+        head = (table.header[0] if table.header else "") or ""
+        factor = bool(_FACTOR_HEADER.search(head))
+        if label and key(label) not in ctx.main_rows and (factor or (ablation_table and not _is_system_row(label, ctx))):
+            plain = re.sub(r"\s+", " ", re.sub(r"^[⋆*★\s]+", "", label)).strip()
+            if not re.search(r"[A-Za-z]{2,}", plain):
+                plain = f"{head.strip().lower()} {plain}" if re.fullmatch(r"[A-Za-z][A-Za-z ]{3,40}", head.strip()) else ""
+            model_is_label = bool(p.model) and key(p.model) == key(label)
+            if _BASELINE_ROW.match(label):
+                if model_is_label or key(p.model) in ("baseline", ""):
+                    put("model_own", model=main)
+            elif key(plain) and (model_is_label or (p.model and key(main) in key(p.model) and key(plain) not in key(p.model))):
+                current = upd.get("setting", p.setting) or ""
+                variant = f"ablation: {plain}"
+                merged = current if key(plain) in key(current) else (f"{current}; {variant}" if current else variant)
+                fields = {"setting": merged[:120]}
+                if model_is_label:
+                    fields["model"] = main
+                put("setting_ablation", **fields)
+
     if table and (not ds or not lookup(ds)) and not caption.strip():
         cols = {_column_code(c.column) for c in table_cells(table)} - {None}
         sig = [name for name, langs in LANGUAGE_SETS.items() if cols == langs]
@@ -502,6 +690,29 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
         m2 = re.match(r"^([A-Za-z]{2,5})[\-\s]?(\d|[lL]\b)$", p.metric.strip())
         if m2 and m2.group(1).lower() in ctx.abbrevs and key(ctx.abbrevs[m2.group(1).lower()]) in ("rouge", "bleu", "meteor"):
             put("metric_paper_abbrev", metric=f"{ctx.abbrevs[m2.group(1).lower()]}-{m2.group(2).upper()}")
+    measure_bench = lookup(upd.get("dataset", p.dataset))
+    measure = (ctx.measures.get(key(measure_bench.name)) or _BENCHMARK_MEASURE.get(key(measure_bench.name))) if measure_bench else None
+    if measure and key(upd.get("metric", p.metric)) in ("accuracy", "acc") and not re.search(r"\bacc", g.column or "", re.I) \
+            and (key(measure_bench.name) != "cola" or (p.value is not None and p.value <= 80)):
+        put("metric_paper_measure", metric=measure)
+    if measure_bench is not None and measure_bench.name.startswith("WMT") and key(upd.get("metric", p.metric)) in ("score", "accuracy", "acc", "avg", "translation"):
+        put("metric_benchmark", metric="BLEU")
+    if (p.metric and key(p.metric) in ("avg", "average", "mean") and g is not None and g.column and not _AVG_COLUMN.match(g.column) and table and ds
+            and any(_AVG_COLUMN.match(h or "") for h in table.header) and key(ds) and key(ds) in key(g.column)):
+        put("metric_avg_column", metric="score")
+    if p.metric and re.fullmatch(r"(?:m|mm|m\s?acc|mm\s?acc)\.?", p.metric.strip(), re.I):
+        put("metric_split_word", metric="accuracy")
+    cut_metric = complete_metric(upd.get("metric", p.metric))
+    if cut_metric:
+        put("metric_cut", metric=cut_metric)
+    metric_now = upd.get("metric", p.metric) or ""
+    if table and cells and p.value is not None and 100 < p.value < 1000 and float(p.value).is_integer() and metric_now \
+            and (_PERCENT_METRIC.search(metric_now) or re.search(r"ccuracy", metric_now)) and not _NOT_PERCENT.search(metric_now):
+        if all(re.fullmatch(r"\d{3}", c.text.strip()) for c in cells) and sum(1 for c in table_cells(table) if re.search(r"\d\.\d", c.text)) >= 5:
+            put("value_lost_decimal", value=round(p.value / 10, 1))
+    if p.metric and not cells and (states_a_difference(p.evidence, p.value) or states_a_difference(sentence_of(p.evidence, chunk_text), p.value)) \
+            and not key(upd.get("metric", p.metric)).startswith("difference"):
+        put("metric_difference", metric=f"difference in {upd.get('metric', p.metric)}")
     if p.metric and _NOT_A_METRIC.match(p.metric.strip()):
         found = _METRIC_WORD.findall(g.column) if g else []
         if not found:
@@ -523,6 +734,8 @@ def repair(p: ConditionProfile, chunk_text: str, ctx: PaperContext, off: frozens
                 put("language_average", language=None)
             elif stored_code and _AVERAGED.search(caption) and None in codes and len(codes) == 1:
                 put("language_average", language=None)
+    elif p.language and table and cells and _AVERAGED.search(caption) and not _language_table(table):
+        put("language_average", language=None)
 
     if ds and not p.dataset_version and g:
         base = re.escape(ds)
