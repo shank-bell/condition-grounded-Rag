@@ -1,0 +1,210 @@
+{
+ "questions": 30,
+ "intent": {
+  "accuracy": 0.9333,
+  "macro_f1": 0.9693
+ },
+ "complexity": {
+  "accuracy": 1.0,
+  "macro_f1": 1.0
+ },
+ "conditions": {
+  "dataset": {
+   "tp": 26,
+   "fp": 0,
+   "fn": 1,
+   "precision": 1.0,
+   "recall": 0.963,
+   "f1": 0.9811
+  },
+  "dataset_version": {
+   "tp": 3,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "language": {
+   "tp": 17,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "model": {
+   "tp": 42,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "model_size": {
+   "tp": 0,
+   "fp": 0,
+   "fn": 6,
+   "precision": null,
+   "recall": 0.0,
+   "f1": 0.0
+  },
+  "setting": {
+   "tp": 5,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
+  },
+  "task": {
+   "tp": 1,
+   "fp": 3,
+   "fn": 0,
+   "precision": 0.25,
+   "recall": 1.0,
+   "f1": 0.4
+  },
+  "ALL": {
+   "tp": 94,
+   "fp": 3,
+   "fn": 7,
+   "precision": 0.9691,
+   "recall": 0.9307,
+   "f1": 0.9495
+  }
+ },
+ "scope_warning": {
+  "tp": 19,
+  "fp": 0,
+  "fn": 0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "right_condition_named": 19,
+  "expected_warnings": 19,
+  "accuracy": 1.0
+ },
+ "by_planned_type": {
+  "covered": {
+   "n": 11,
+   "warned": 0,
+   "expected_warning": 0,
+   "warning_correct": 11
+  },
+  "one missing": {
+   "n": 9,
+   "warned": 9,
+   "expected_warning": 9,
+   "warning_correct": 9
+  },
+  "partly covered": {
+   "n": 10,
+   "warned": 10,
+   "expected_warning": 10,
+   "warning_correct": 10
+  }
+ },
+ "seconds_per_question": {
+  "median": 3.8,
+  "max": 9.8
+ },
+ "provenance": {
+  "generated_at": "2026-10-12T09:59:38+00:00",
+  "frozen_at_commit": "0fe71204a24f76a2849676e3ccc908ce4027aa6d",
+  "modified_files_at_that_time": [
+   " M NOTES.md",
+   " M README.md",
+   " M docs/evaluation_ai_annotated.md",
+   " M docs/ingestion_report.md",
+   " M docs/reproducibility.md",
+   " M scripts/eval_pwc_gold.py",
+   " M scripts/rescue_garbled.py",
+   " M scripts/resolve_datasets.py",
+   " M src/cgrag/ingestion/profile_extractor.py",
+   " M src/cgrag/ingestion/repair.py",
+   " M src/cgrag/ingestion/tables.py",
+   " M src/cgrag/stores/profile_store.py",
+   " M tests/test_extraction_helpers.py",
+   " M tests/test_repair.py",
+   " M tests/test_structured_tables.py",
+   "?? eval/labels/ablate_stage6.oct11g.json",
+   "?? eval/labels/ablate_stage6.oct11i.json",
+   "?? eval/labels/ablate_stage6.oct11j.json",
+   "?? eval/labels/ablate_stage6.oct12a.json",
+   "?? eval/labels/ablate_stage6.oct12b.json",
+   "?? eval/labels/absent_flagged.oct11g.json",
+   "?? eval/labels/absent_flagged.oct11i.json",
+   "?? eval/labels/absent_flagged.oct11j.json",
+   "?? eval/labels/absent_flagged.oct12a.json",
+   "?? eval/labels/absent_flagged.top5sig.json",
+   "?? eval/labels/absent_flagged.top7.json",
+   "?? eval/labels/absent_flagged.top7sig.json",
+   "?? eval/labels/answer_quality_gold_b.oct11g.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.oct11g.json",
+   "?? eval/labels/answer_quality_gold_b.oct11h.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.oct11h.json",
+   "?? eval/labels/answer_quality_gold_b.oct11i.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.oct11i.json",
+   "?? eval/labels/answer_quality_gold_b.oct11j.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.oct11j.json",
+   "?? eval/labels/answer_quality_gold_b.oct11k.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.oct12a.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.oct12a.json",
+   "?? eval/labels/answer_quality_gold_b.oct12b.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.oct12b.json",
+   "?? eval/labels/answer_quality_gold_b.top5sig.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.top5sig.json",
+   "?? eval/labels/answer_quality_gold_b.top7.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.top7.json",
+   "?? eval/labels/answer_quality_gold_b.top7sig.corrected_key.json",
+   "?? eval/labels/answer_quality_gold_b.top7sig.json",
+   "?? eval/labels/pwc_gold.json",
+   "?? eval/labels/pwc_gold.oct12a.json",
+   "?? eval/labels/questions_gold.oct11g_main.results.jsonl",
+   "?? eval/labels/questions_gold.oct11g_main.scores.json",
+   "?? eval/labels/questions_gold.oct11i_main.results.jsonl",
+   "?? eval/labels/questions_gold.oct11i_main.scores.json",
+   "?? eval/labels/questions_gold.oct11j_main.results.jsonl",
+   "?? eval/labels/questions_gold.oct11j_main.scores.json",
+   "?? eval/labels/questions_gold.oct11k_main.results.jsonl",
+   "?? eval/labels/questions_gold.oct12a_main.results.jsonl",
+   "?? eval/labels/questions_gold.oct12a_main.scores.json",
+   "?? eval/labels/questions_gold.oct12b_main.results.jsonl",
+   "?? eval/labels/questions_gold.oct12b_main.scores.json",
+   "?? eval/labels/questions_gold.oct12c_main.results.jsonl",
+   "?? eval/labels/questions_gold.results.jsonl",
+   "?? eval/labels/questions_gold.scores.json",
+   "?? eval/labels/questions_gold.top5sig_main.results.jsonl",
+   "?? eval/labels/questions_gold.top5sig_main.scores.json",
+   "?? eval/labels/questions_gold.top7_main.results.jsonl",
+   "?? eval/labels/questions_gold.top7_main.scores.json",
+   "?? eval/labels/questions_gold.top7sig_main.results.jsonl",
+   "?? eval/labels/questions_gold.top7sig_main.scores.json",
+   "?? eval/labels/retrieval_gold.oct11g.json",
+   "?? eval/labels/retrieval_gold.oct11i.json",
+   "?? eval/labels/retrieval_gold.oct11j.json",
+   "?? eval/labels/retrieval_gold.oct12a.json",
+   "?? eval/labels/retrieval_gold.oct12b.json",
+   "?? eval/labels/retrieval_gold.oct12c.json",
+   "?? eval/labels/retrieval_gold.signal_k12.json",
+   "?? eval/labels/retrieval_gold.signal_k20.json",
+   "?? eval/labels/retrieval_gold.signal_k4.json",
+   "?? eval/labels/retrieval_gold.signal_k8.json",
+   "?? eval/labels/retrieval_gold.signal_off.json",
+   "?? eval/labels/scope_baselines_gold.oct11g.json",
+   "?? eval/labels/scope_baselines_gold.oct11i.json",
+   "?? eval/labels/scope_baselines_gold.oct11j.json",
+   "?? eval/labels/scope_baselines_gold.oct12a.json",
+   "?? eval/labels/sources_gold.oct11g.json",
+   "?? eval/labels/sources_gold.oct11i.json",
+   "?? eval/labels/sources_gold.oct11j.json",
+   "?? eval/labels/sources_gold.oct12a.json",
+   "?? eval/labels/sources_gold.top5sig.json",
+   "?? eval/labels/sources_gold.top7.json",
+   "?? eval/labels/sources_gold.top7sig.json",
+   "?? scripts/pass_table.py",
+   "?? src/cgrag/ingestion/_tables_before.py"
+  ]
+ }
+}
