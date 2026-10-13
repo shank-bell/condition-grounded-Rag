@@ -19,12 +19,12 @@ RTX 4050 6 GB, so the paper needs a footnote on the machine.
 
 | Claim | What the data say | How sure |
 |---|---|---|
-| 1. Extraction | 97 % of 320 sampled profiles are real results and the numbers in them are right 99.7 % of the time. Names are weaker (F1: task 78, model 85, dataset 87). Field F1 89.9 % lenient / 85.2 % strict. About half of the profiles are completely right (50 % lenient, 37 % strict); hard papers are worse (43 % / 26 %). A second sheet of 170 rows gave the same picture as the first (F1 89.4 vs 90.5), and the 20 profiles that are on both sheets got the same verdict 19 times out of 20 (kappa 0.91; one labeller twice). **11 Oct (sections 4.1b and 4.1c): a code-only repair of the stored profiles (raw rows kept, no model called) lifts the share of completely right profiles on 94 results of 34 papers of an external benchmark, drawn after the code was frozen, from 37 % to 61 % (strict 22 to 39 %; 23 fixed, 1 broken, p < 0.0001) and the field F1 from 90.3 to 94.0 (strict 84.9 to 90.0); the completely-right share stays below 85 %. On the public MetaLead benchmark (3,568 human-annotated results, 43 papers) the pipeline finds 88.4 % of the results against 79.0 % for the same model with the benchmark's own prompt on the raw text, and agrees with the annotators' data set, metric and task names for 54.3 % of the results it finds (plain LLM 38.3 %; repaired 62.8 %, a development number).** | 320 profiles, CI about +-5.5 points; 94 clean results for the repair (CI of the 61 %: 50-70); a baseline only on the benchmark, scored with a looser matcher of mine. |
-| 2. Stage 6 scope warning | **11 Oct (section 4.7c, repaired store and three fixes; development numbers): 19 / 1 / 0, F1 97.4, condition named 19 of 19; the silver regression stays 32 of 32.** Warns on 19 of 19 questions that need it, falsely on 1 of 11 after the fixes (3 of 11 frozen); F1 97.4 after fixes, 92.7 frozen. A simple LLM judge scores F1 91.4: a tie on this sample (question by question p = 0.63), but the judge answers only yes / no and misses 3 of 19, while Stage 6 names the missing condition (17 of 19 right). Plain RAG and abstain-on-weak-retrieval never warn. | 30 questions: one question moves F1 by about 3 points. |
+| 1. Extraction | **12 Oct, evening (section 4.1i; development changes and one clean check): the store has 12,465 profiles, the share of table cells with a profile is 93.4 % (79.4 % counting the garbled tables that are still skipped); the leaderboard key: 98.4 % found, 80.6 % found right (506 listed results); MetaLead end to end 63.6 %; a fresh random sample drawn from the final store after the last change (E6, 99 results) is 92.9 % completely right lenient (interval 86-97) and 58.6 % strict, field F1 99.0 / 94.6: the first lenient figure above 85 %, the strict one is not.** **12 Oct (sections 4.1f-4.1h and 4.9; development changes): the store grew from 10,275 to 11,256 profiles (unread chunks read, 509 missing cells added, header and ablation-label defects fixed), the share of table cells with a profile rose from 80.7 to 91.4 %; a fresh random sample drawn after the last code change (E5, 99 results) is 79.8 % completely right (lenient; interval 71-87) and 42.4 % strict, field F1 97.8 / 92.4 (E4 before the last fixes: 78.4 / 48.5); against the Papers with Code leaderboards 95.8 % of 501 listed results are found and 75.8 % found with data set, metric and model agreeing (six scorer revisions, listed in 4.9); on MetaLead coverage 89.8 %, end to end 63.4 %. Still below 85 %: completely right profiles.** 97 % of 320 sampled profiles are real results and the numbers in them are right 99.7 % of the time. Names are weaker (F1: task 78, model 85, dataset 87). Field F1 89.9 % lenient / 85.2 % strict. About half of the profiles are completely right (50 % lenient, 37 % strict); hard papers are worse (43 % / 26 %). A second sheet of 170 rows gave the same picture as the first (F1 89.4 vs 90.5), and the 20 profiles that are on both sheets got the same verdict 19 times out of 20 (kappa 0.91; one labeller twice). **11 Oct (sections 4.1b and 4.1c): a code-only repair of the stored profiles (raw rows kept, no model called) lifts the share of completely right profiles on 94 results of 34 papers of an external benchmark, drawn after the code was frozen, from 37 % to 61 % (strict 22 to 39 %; 23 fixed, 1 broken, p < 0.0001) and the field F1 from 90.3 to 94.0 (strict 84.9 to 90.0); the completely-right share stays below 85 %. On the public MetaLead benchmark (3,568 human-annotated results, 43 papers) the pipeline finds 88.4 % of the results against 79.0 % for the same model with the benchmark's own prompt on the raw text, and agrees with the annotators' data set, metric and task names for 54.3 % of the results it finds (plain LLM 38.3 %; repaired 62.8 %, a development number).** | 320 profiles, CI about +-5.5 points; 94 clean results for the repair (CI of the 61 %: 50-70); a baseline only on the benchmark, scored with a looser matcher of mine. |
+| 2. Stage 6 scope warning | **12 Oct, evening (section 4.7f, `oct12f`): the same 19 / 0 / 0, F1 100.0, named 19 of 19, silver 32 of 32.** **12 Oct (section 4.7f): the whole pass repeated after every store change (oct12a, c, d, e): 19 / 0 / 0, F1 100.0, condition named 19 of 19, silver 32 of 32 each time; the LLM judge varies between runs (F1 85.7 to 94.4) and Stage 6 never loses on these 30 questions (p between 0.06 and 0.5).** **11 Oct, last (section 4.7e; development numbers): after one more repair rule 19 / 0 / 0, F1 100.0, condition named 19 of 19, no false warning on the 11 answerable questions, silver 32 of 32; the LLM judge 16 / 1 / 3, F1 88.9, shipped Stage 6 against it 4 won, 0 lost (p = 0.125).** **11 Oct (section 4.7c, repaired store and three fixes; development numbers): 19 / 1 / 0, F1 97.4, condition named 19 of 19; the silver regression stays 32 of 32.** Warns on 19 of 19 questions that need it, falsely on 1 of 11 after the fixes (3 of 11 frozen); F1 97.4 after fixes, 92.7 frozen. A simple LLM judge scores F1 91.4: a tie on this sample (question by question p = 0.63), but the judge answers only yes / no and misses 3 of 19, while Stage 6 names the missing condition (17 of 19 right). Plain RAG and abstain-on-weak-retrieval never warn. | 30 questions: one question moves F1 by about 3 points. |
 | 2b. Which parts matter | Only the joint-coverage check: without it F1 falls to 48. The two LLM agents (as fixed rules), escalation, retrieval cards and profile-guided retrieval change no decision on 30 questions. | "Not detected at this size", not "useless". |
-| 3. Stage 7 | **11 Oct (section 4.5f; stored profiles repaired, policy B on): 220 of 250 labelled pairs right (88.0 %, CI 83-92) against 206 (82.4 %) for table grounding alone, 201 (80.4 %) for "always EXPLAINED" and 160 (64 %) for the Gemma 12B judge. On the third fresh set (50 new pairs, clean) 46 right (92 %) against 42 for grounding alone, 45 for "always EXPLAINED" and 31 for Gemma; macro-F1 51 against 46, 32 and 33. The clean evidence for the policy is small (5 gained, 1 lost, p = 0.22); the shipped Stage 7 calls a pair GENUINE falsely 5 times in 250 (Gemma 12B: 40 times) and finds none of the 3 real contradictions of the five sets.** **With table grounding (10 Oct evening, section 4.5e; 50 new pairs built and labelled blind after the design was frozen, scored once): 44 of 50 right (88 %) against 34 (68 %) without it (11 gained, 1 lost, p = 0.006); the Gemma 12B judge 34 (68 %); "always EXPLAINED" 39 (78 %, the difference p = 0.23); macro-F1 83 against 60 / 42 / 44; 8 of the 11 not-comparable pairs found (both baselines 0); no false genuine call (Gemma 6 of 50). Over all 200 labelled pairs 82.5 % right against 65.5 % before; false genuine calls 2 % against 17 % for Gemma. The cause of the earlier mistakes was the stored cards (a block heading that never reached its rows, a lost split, a row stored under another system's name), read again from the cards' own tables.** Before that, a fresh test (10 Oct, section 4.5d; 50 new pairs labelled blind by one AI labeller, scored once): 66 % accuracy (CI 52-78; "always EXPLAINED" 70 %, Gemma 64 %), macro-F1 57 against 41 for the Gemma judge and for "always EXPLAINED", no false genuine call (Gemma 6 of 50), 5 of the 15 not-comparable pairs found (0 and 0). Over all 150 pairs the frozen Stage 7 calls a pair a real contradiction wrongly 7 times of 148 (5 %), the Gemma judge 28 times (19 %). A "one-sided condition" policy found on the first two sets lifts accuracy to the base rate (81 % over 150 pairs) only by calling nearly every pair EXPLAINED, so it is off; fix A does not generalise (it changes no verdict on the held-out or the fresh set).** Held-out test (50 new pairs, scored once, section 4.5c): 58 % accuracy (CI 44-71), the same as on the first 50; the Gemma 12B judge 66 % (no significant difference, p = 0.50); "always explained" 82 %. Over all 100 pairs Stage 7 wrongly calls a pair a real contradiction 7 times of 98 (7 %), the Gemma judge 21 of 98 (21 %, p = 0.003), plain NLI 95 of 98. It found 0 of the 2 real contradictions (n = 2). Three rules added after the first 50 pairs lifted accuracy there from 58 to 70 %, but changed none of the 50 held-out verdicts (section 6).** First 50 pairs: calls 7 of 50 pairs GENUINE where the key has none, against 13 for the Gemma baseline and 48 for plain NLI. But accuracy is 62 % (Gemma baseline 60 %, "always explained" 82 %), so it is not more accurate than the baseline. A second AI labeller (The second AI, all 50 pairs) agrees with the first on 80 % (kappa 0.40, below the 0.6 target); on the settled key Stage 7 scores 58.0 % and the Gemma baseline 60.0 %. | 250 pairs in five sets, **only 3 genuine pairs** (low confidence, one labeller): finding a real contradiction is essentially untested; only the third fresh set is clean for policy B. |
-| 4. Answer quality | 8 of 9 correct with and without the profile stages, 0 of 9 for the language model alone (p = 0.008), after correcting three key entries that asked for one table cell but listed a whole row (before the correction: 5 / 5 / 0). The correction was made after seeing the results: **not held-out**. The profile stages neither help nor hurt answer correctness (parity). | 9 questions; CI for 8 of 9 is 57-98 %. |
-| 5. Retrieval and questions the papers cannot answer (9 Oct, section 4.7) | **11 Oct (section 4.7c, repaired store and three fixes): the gold page is in the top 5 for 78.6 % (85.7 % before the repair), among the answer's sources for 85.7 %, the right paper for 92.9 %; 100 % of the 20 out-of-corpus questions end with a warning.** Against the gold evidence pages (28 questions): the page that holds the answer is among the sources the answer is written from for **85.7 %** (covered and one-condition-missing questions 100 %, partly covered comparisons 60 %); the right paper for 96.4 %. The reranker's own top 5 held the page for 75 %; with `bge-reranker-base` (swapped in on 10 Oct, section 4.7b) it is **85.7 %** (store-made questions 87.8 to 93.1 %), but the end-to-end 85.7 % does not move. **20 of 20 questions about things that are not in the corpus end with a warning (100 %; 19 of 20 before a Stage 1 fix of 10 Oct)**; the scope warning alone catches all 20, the reranker's weak-evidence flag alone 50 % (70 % with the old reranker). | 28 and 20 questions; the 10 Oct changes were made after reading these very questions (development numbers). The earlier store-made retrieval test (language + task questions: 60 % at the top 5) was circular. |
+| 3. Stage 7 | **12 Oct, evening (`oct12f`): the replay is still 267 of 300 right (always EXPLAINED 244), 26 of 52 not-comparable found, 8 GENUINE calls.** **12 Oct (section 4.7f): the replay of the 300 labelled pairs stays at 267 right (89.0 %; always EXPLAINED 244) and not-comparable found 26 of 52 through the store changes of the day.** **11 Oct, settings compared by kind (section 4.5g): on the clean sixth set (50 new pairs, rule frozen before labelling) 45 of 50 right against 44 before and 43 for "always EXPLAINED" (judge 37), the one real contradiction found with no false GENUINE call, the explaining condition named exactly for 72 % (65 %); over all six sets the system names every condition of the key for 84.5 % of the 238 explained pairs (exact set 70.2 %, a condition beyond the key 19.3 %; the Gemma judge 39.4 % / 36.8 %); over all 300 pairs 267 right (89.0 %; "always EXPLAINED" 81.3 %), 3 of 4 real contradictions found, 5 false GENUINE calls in 296.** **11 Oct (section 4.5f; stored profiles repaired, policy B on): 220 of 250 labelled pairs right (88.0 %, CI 83-92) against 206 (82.4 %) for table grounding alone, 201 (80.4 %) for "always EXPLAINED" and 160 (64 %) for the Gemma 12B judge. On the third fresh set (50 new pairs, clean) 46 right (92 %) against 42 for grounding alone, 45 for "always EXPLAINED" and 31 for Gemma; macro-F1 51 against 46, 32 and 33. The clean evidence for the policy is small (5 gained, 1 lost, p = 0.22); the shipped Stage 7 calls a pair GENUINE falsely 5 times in 250 (Gemma 12B: 40 times) and finds none of the 3 real contradictions of the five sets.** **With table grounding (10 Oct evening, section 4.5e; 50 new pairs built and labelled blind after the design was frozen, scored once): 44 of 50 right (88 %) against 34 (68 %) without it (11 gained, 1 lost, p = 0.006); the Gemma 12B judge 34 (68 %); "always EXPLAINED" 39 (78 %, the difference p = 0.23); macro-F1 83 against 60 / 42 / 44; 8 of the 11 not-comparable pairs found (both baselines 0); no false genuine call (Gemma 6 of 50). Over all 200 labelled pairs 82.5 % right against 65.5 % before; false genuine calls 2 % against 17 % for Gemma. The cause of the earlier mistakes was the stored cards (a block heading that never reached its rows, a lost split, a row stored under another system's name), read again from the cards' own tables.** Before that, a fresh test (10 Oct, section 4.5d; 50 new pairs labelled blind by one AI labeller, scored once): 66 % accuracy (CI 52-78; "always EXPLAINED" 70 %, Gemma 64 %), macro-F1 57 against 41 for the Gemma judge and for "always EXPLAINED", no false genuine call (Gemma 6 of 50), 5 of the 15 not-comparable pairs found (0 and 0). Over all 150 pairs the frozen Stage 7 calls a pair a real contradiction wrongly 7 times of 148 (5 %), the Gemma judge 28 times (19 %). A "one-sided condition" policy found on the first two sets lifts accuracy to the base rate (81 % over 150 pairs) only by calling nearly every pair EXPLAINED, so it is off; fix A does not generalise (it changes no verdict on the held-out or the fresh set).** Held-out test (50 new pairs, scored once, section 4.5c): 58 % accuracy (CI 44-71), the same as on the first 50; the Gemma 12B judge 66 % (no significant difference, p = 0.50); "always explained" 82 %. Over all 100 pairs Stage 7 wrongly calls a pair a real contradiction 7 times of 98 (7 %), the Gemma judge 21 of 98 (21 %, p = 0.003), plain NLI 95 of 98. It found 0 of the 2 real contradictions (n = 2). Three rules added after the first 50 pairs lifted accuracy there from 58 to 70 %, but changed none of the 50 held-out verdicts (section 6).** First 50 pairs: calls 7 of 50 pairs GENUINE where the key has none, against 13 for the Gemma baseline and 48 for plain NLI. But accuracy is 62 % (Gemma baseline 60 %, "always explained" 82 %), so it is not more accurate than the baseline. A second AI labeller (The second AI, all 50 pairs) agrees with the first on 80 % (kappa 0.40, below the 0.6 target); on the settled key Stage 7 scores 58.0 % and the Gemma baseline 60.0 %. | 250 pairs in five sets, **only 3 genuine pairs** (low confidence, one labeller): finding a real contradiction is essentially untested; only the third fresh set is clean for policy B. |
+| 4. Answer quality | **12 Oct, evening (`oct12f`): 7 of 9 on the original key, 9 of 9 on the corrected key (5 and 8 without Stages C / 6 / 7, 0 alone).** **12 Oct (section 4.7f): 7 of 9 on the original key and 9 of 9 on the corrected key for the full pipeline (4 and 7 without Stages C / 6 / 7, 0 alone); n = 9, the 5 to 9 range over passes is noise.** 8 of 9 correct with and without the profile stages, 0 of 9 for the language model alone (p = 0.008), after correcting three key entries that asked for one table cell but listed a whole row (before the correction: 5 / 5 / 0). The correction was made after seeing the results: **not held-out**. The profile stages neither help nor hurt answer correctness (parity). | 9 questions; CI for 8 of 9 is 57-98 %. |
+| 5. Retrieval and questions the papers cannot answer (9 Oct, section 4.7) | **12 Oct, evening (4.7d update): the profile signal is on by default (size-specific table lookups: 11 of 24 answers carry the number instead of 7; nothing changes on the 30 gold questions).** **12 Oct, evening (`oct12f`): gold page in the top 5 for 85.7 %, among the answer's sources 85.7 % (89.3 % before: one question), the right paper 96.4 %, out-of-corpus 20 of 20.** **12 Oct (section 4.7f): retrieval alone has the gold page in the top 5 for 85.7 % (24 of 28; one question more than before, caused by a store change), the right paper for 92.9 %; the gold page is among the answer's sources for 89.3 %, the right paper for 96.4 %; out-of-corpus questions warned 20 of 20.** **11 Oct (section 4.7d): three levers tried against the fall of the top-5 hit (7 passages for the writer, a profile signal in Stage 4, fusing the cross-encoder with the Stage 4 rank) gain one or two questions of 28 at best (p >= 0.5) and none is adopted.** **11 Oct (section 4.7c, repaired store and three fixes): the gold page is in the top 5 for 78.6 % (85.7 % before the repair), among the answer's sources for 85.7 %, the right paper for 92.9 %; 100 % of the 20 out-of-corpus questions end with a warning.** Against the gold evidence pages (28 questions): the page that holds the answer is among the sources the answer is written from for **85.7 %** (covered and one-condition-missing questions 100 %, partly covered comparisons 60 %); the right paper for 96.4 %. The reranker's own top 5 held the page for 75 %; with `bge-reranker-base` (swapped in on 10 Oct, section 4.7b) it is **85.7 %** (store-made questions 87.8 to 93.1 %), but the end-to-end 85.7 % does not move. **20 of 20 questions about things that are not in the corpus end with a warning (100 %; 19 of 20 before a Stage 1 fix of 10 Oct)**; the scope warning alone catches all 20, the reranker's weak-evidence flag alone 50 % (70 % with the old reranker). | 28 and 20 questions; the 10 Oct changes were made after reading these very questions (development numbers). The earlier store-made retrieval test (language + task questions: 60 % at the top 5) was circular. |
 | 6. Faithfulness and the optional rewrite loop (9-10 Oct, section 4.8) | **99 % of the decimal numbers in the shipped answers occur in the text they were written from** (120 of 121; no language model involved), the Gemma 12B judge finds **90 %** of the statements supported and the NLI critic of Stage 9 accepts 85 % of the claims. The independent judge (Llama 3.1 8B) gave 0.60, but a hand check showed that it misreads results tables, so that figure is not evidence about the answers. The optional rewrite loop (off by default) raises the score of the judge it uses and nothing judge-free (numbers grounded 99 to 100 %, right numbers 8 to 9 of 9), and it doubles the time per question (10 to 21 s): **no benefit demonstrated**. | 30 questions, one run per set. No valid independent judge was found; the Gemma judge is of the writer's own family. |
 
 **Honest reading for the paper.** The condition store works as a scope checker, and the one idea that carries the result is the joint-coverage check. The data do not show that the LLM agents or Stage 7 beat simple alternatives **on accuracy**, and claims should be worded to that. What Stage 7 does show, on 100 pairs and with a paired test, is that it raises about a third as many false "real contradiction" alarms as an LLM judge (7 % against 21 %) and names the condition that explains a difference more often than the LLM judge (61 % against 45 % on the held-out pairs, 50 % against 40 % on the first 50, with the two names that the labelling instructions give to "dev against test" counted as one); its weak point is that it gives up when the stored profiles lack a model size or a setting (section 4.5c). On 50 fresh pairs (section 4.5d) it again separated the three classes better than the baselines but its accuracy (66 %) was below the base rate (70 %), and a rule that always says EXPLAINED reaches 78 % or more on this kind of data and tells nothing apart. The mistakes turned out to be mistakes of the stored cards, not of the rules: with each card checked against its own table cell (section 4.5e) Stage 7 gets 88 % of 50 new pairs right (68 % before, p = 0.006), 82.5 % over all 200 labelled pairs, finds 8 of 11 not-comparable pairs where the baselines find none, and raises almost no false alarm. That is the first Stage 7 accuracy above the trivial rule with a reason behind it, on new pairs of this corpus (not on new table layouts).
@@ -123,6 +123,98 @@ The second pass was made by **the second AI** (web app; the model name and the a
 24. **Policy B adopted as a default (11 Oct), a departure from 10 Oct.** On 10 Oct policy B was left OFF because it equalled "always EXPLAINED" (item 20). With grounding it does not: fresh-2 47 against 44 of 50 (a post-hoc reading of a test set), then a confirmation on a new set (fresh-3, section 4.5f): 46 against 42, "always EXPLAINED" 45. Because the first look at fresh-2 was post-hoc the clean evidence for the switch is fresh-3 alone (gained 5, lost 1, p = 0.22) plus the pooled reading (8 / 1, p = 0.039); the switch can be turned off (`[contradiction] one_sided_conditions_explain`) and the numbers without it are in the same table.
 25. **Three fixes after the first system run on the repaired store (11 Oct), section 4.7c.** (a) Stage 1 kept no N-shot setting (`setting_tags` has no tag for "5-shot", so `clean_conditions` deleted it) and a task that is only a setting word ("zero-shot") stayed in the task field; (b) Stage 6's joint check did not include a named setting, so "5-shot" was covered by any passage that mentions 5-shot (it now includes a regime setting, not a dev / test split); (c) retrieval cards did not name the data set version. All three are general, were found by reading single questions (B-AI-16, B-AI-18, B-AI-01) and were applied before the final run; the gold questions are therefore development material for them (not held-out). The first system run on the repaired store was kept in the files (`*.oct11.*`) and is reported next to the final one; the API-part evaluations (sources, out-of-corpus) were only run after the fixes. (d) Two further changes came from a probe of ten questions outside the gold set (4.7c): the joint check was first made for every setting and warned falsely on a dev / test split that the store did not record, so it was restricted to regime settings; and a recorded "Cross-lingual Transfer" setting now covers a requested "zero-shot" in Stage 6's matching (`setting_tags`, which Stage 7 compares, is unchanged: a replay of all 250 pairs changed no verdict). The whole evaluation pass was repeated after (d) (`*.oct11f.*`) and gave the numbers of 4.7c without any difference.
 26. **Why two of the "one missing" questions had a right warning on 10 Oct.** B-AI-16 (5-shot HellaSwag) was warned because the stored data set was "ellaSwag" and B-AI-18 (zero-shot MNLI) because Stage 1 had filed "zero-shot" as a task: both warnings were correct in the key's sense (a warning was due) but named a wrong condition (the 10 Oct count of 17 of 19 right conditions named already showed it). With the repaired names and the fixes of item 25 they are warned for the right reason (condition named: 19 of 19).
+27. **Stage 7 settings compared by kind (11 Oct), section 4.5g.** The rule came from an error analysis of the 250 pairs of the first five sets, among them the four sets that earlier changes were designed on: their numbers are development numbers. It was frozen before a sixth set (fresh-4, K01-K50, `make_heldout_pairs.py --seed 1020 --prefix K --name fresh4`) was labelled blind (table text and captions, no PDFs) and scored once. Two labels were revised before the system was scored: K26 and K39 became NOT COMPARABLE after the metric of the cells (F1 of the test server against accuracy or a mean of the two) was read from other tables of the same papers; K33 got the condition "other" ticked because the workbook requires one for an EXPLAINED pair. Candidate rules that were tried on the first five sets and dropped are listed in 4.5g. The older variants are replayed unchanged (`setting_dimensions` off for them in `scripts/score_stage7_variants.py`).
+28. **Retrieval levers after the repair (11 Oct), section 4.7d.** Seven passages for the writer, a profile signal in Stage 4 and a fusion of the cross-encoder with the Stage 4 rank were tried because the reranker's top-5 hit on the gold pages had fallen from 85.7 to 78.6 % after the repair. The grid (7 passages; signal at 4 / 8 / 12 / 20 chunks; four z-weights and two rank weights) was written before the runs and every point is reported; none was adopted. Two of the earlier statements about this lever, "+1 question at 8 and 20 chunks, none at 4 and 12", come from runs that printed to the screen only; they were repeated for this section so that result files exist (4 and 8 and 12 chunks reproduce; 20 is in the table). The Stage 7 scoring also gained a recall / precision split of the condition naming (section 4.5g); no stored verdict or earlier number changed (checked: every existing field of `stage7_variants_repaired.json` is identical).
+29. **One more repair rule, `language_order` (11 Oct), section 4.7e.** The last false scope warning of the 30 gold questions (B-AI-07) came from the stored languages of the stacked IndicCOPA table, where one row repeats a number three times. The rule reads the languages from the order of the extraction and changes 25 profiles of 4 tables (each checked by hand; list in `eval/labels/repair_language_order.json`). The clean sample E2 was NOT re-labelled: the rule changes 0 profiles of the benchmark store, so E2's numbers stand for the code with and without it. The whole evaluation pass was repeated on the new store (tags `oct11g`); Stage 6 went from 19 / 1 / 0 to 19 / 0 / 0, nothing else moved beyond noise; the number is a development number. An earlier version of the rule that matched stored languages by their position in the first half's header was discarded before it was applied, because it could not place "Dogri" (a name the extractor invented for the gom column).
+30. **The writer lists the recorded result of every named language or system (11 Oct), section 4.7e.** Found by asking the question of B-AI-07 through the API after the store fix: the answer said that no Tamil result is recorded. `generate._relevance` counted a condition as satisfied only by the first value the question names (six recorded results are shown per source); it now accepts any named value. No number of the tables changed (answers 8 / 6 / 0 of 9 before and after, noise), the case is a development case, and the fix is a ranking change in Stage 8 only.
+31. **The data set of a table and the system behind a citation, read from the paper's own text (11 Oct, evening), section 4.1d.** Two steps of the repair call the language model (once
+per group of profiles) and are therefore not code only; their decisions are stored with an evidence sentence and can be switched off (`[features] dataset_context`, `--off
+dataset_context model_context`). They were designed after reading the 784 data set disagreements of the public benchmark (409 were a missing data set or a task name), so the
+benchmark numbers are development numbers. A first version had nine wrong decisions on the 28 papers; guards were added after reading them (a label that already carries the name, a
+suite for a member task, a fragment only to its own name, a known benchmark of another task, generic words as systems). The stored `metalead_eval.json` was re-written with today's
+code (the repaired row moved from 73.3 to 74.4 data set agreement for a reason I did not trace to one rule). While re-counting the clean sample for the write-up I corrected three
+figures of my first draft: 34 (not 35) items change, 25 (not 24) system names lose a citation, 21 items had a flagged field in the repaired version (strict reading; 12 by the lenient
+one). The section was written twice: the first draft was lost in a restart of the machine and was rewritten from the result files on 12 Oct.
+32. **Stage 6 order bug (11 Oct, night), section 4.7f.** The repeated pass showed one question (B-AI-28) with its gold page missing from the sources and a false "model not recorded" for
+the second system. The cause was not the new steps but the order of the named languages (Tamil before Hindi after a change of Stage 1's reading); the check of a further system used
+only the first language. Fixed with a unit test; a development fix. In the 24 earlier runs the languages came in the favourable order, so the Stage 6 and sources figures of this
+question were right for a reason that depended on that order.
+33. **The language model server changed under the evaluation (11-12 Oct), section 4.7f.** After the restart of 11 Oct 17:07 the server reported 0.35.0 (0.34.4 before) and three of the
+30 questions got another Stage 1 reading, identically in two later runs; after the restart of 12 Oct 13:03 it reports 0.40.3. Everything measured before 4.7f is on 0.34.4, `oct11i` to
+`oct11k` on 0.35.0, `oct12a` on 0.40.3; `docs/reproducibility.md` records the versions. A second repeatability defect (a set of data set names iterated in hash order in Stage 1) was
+fixed in the same pass.
+34. **Stage 7 grounding and the renamed citation rows (11 Oct, night), section 4.7f.** The replay of the 300 labelled pairs on the store with the new steps gave 266 right where 267
+had been right: one card (P20) was renamed correctly by the citation step and then called suspect by table grounding, which compared the new name with the row's citation label.
+Found only because the replay was re-run after the store changed; fixed with a test; the replay is 267 again. A development fix.
+35. **Merged-column rescue and the Papers with Code key (11-12 Oct), sections 4.1e and 4.9.** At the project lead's order to "work toward increasing the metrics" and to use outside
+data if useful, the leaderboards of Papers with Code were used as an answer key that the system's author did not write (Kaggle needs a login and the public listing had nothing
+suitable; no account or token was created or used). The key showed that T5's main table was not in the store. A rescue for tables with merged columns was written AFTER reading T5's
+Table 14 and ELECTRA's Table 8, which makes both development material although T5 and ELECTRA sit in the set-aside half of the key; the rescue was made stricter after a unit test
+showed that a first version accepted a table with a cut number as two columns. Every other garbled table was left as it was. The scorer of 4.9 was revised twice after its first
+output (third-party rows and naming conventions; four more revisions followed on 12 Oct, item 37), and the first output was not kept. The 290 new profiles are raw extraction by the same model as the rest; the repair overlay and the
+cards were rebuilt for the whole store and the evaluation pass was repeated on it.
+36. **Two more defects that single questions to the live system exposed (11-12 Oct).** "What GLUE average does T5-11B reach?" was read as the data set "Average" and Stage 6 warned that
+no source reports it; an aggregate word in the data set field is dropped (`_AGGREGATE_WORDS`, with a test). The CoLA / STS-B measure rule (4.1e) came from reading the metric
+disagreements of the key. Both are general rules, but both were found on this corpus: development changes.
+37. **The Papers with Code scorer was revised six times, four of them on 12 Oct (section 4.9).** Revision 3 (what "printed in the paper" means: the exact form, no integer
+rounding), 4 (an abbreviation with a "." or "+" attached is expanded: "Ens.+TriviaQA"; Papers with Code's "MML" is MMLU), 5 (a stored 87.4 matches the leaderboard's 87.433 when the
+paper prints 87.4) and 6 (the leaderboard's "Accuracy" for CoLA is a Matthews correlation; a stored "correlation" agrees with a Pearson / Spearman correlation) were each found by
+reading the output of the previous revision and each raised the numbers; none touched the system. Revision 6 was needed because a repair rule (the benchmark-defined measure of CoLA and
+STS-B, 4.1f) made the stored metric right where the key's convention is wrong, and the metric figure fell from 84.0 to 82.9 % until the scorer was told. On one store, revisions 4 to 6 moved
+found-and-right by 7 points. All revisions are in the table of 4.9 so that the figure is never quoted without it; the first scorer's output was not kept.
+38. **The completion sweep must not change a profile id (12 Oct), section 4.1f.** The first version of the sweep replaced the profiles of a partly read chunk by the new reading
+and was stopped before it was applied: the 300 labelled Stage 7 pairs refer to profile ids, and a new numbering would have changed what they point at. The mode that was kept adds only
+numbers that are not stored, with new ids after the existing ones; `data/index/_logs/pair_ids_check.py` (600 references, compared with the value in the key files) reports "changed: 0"
+after each store change, including the header fix (the four chunks that pairs refer to were completed, never replaced).
+39. **The data set resolver kept discarding a reviewed decision (12 Oct).** A forced re-run of `resolve_datasets.py` dropped the decision that the rows "Devlin et al. (2018)" of the
+XLM-R table are mBERT. It was restored and the resolver now keeps recorded decisions (`--fresh` discards them, `--force` redoes the papers and adds groups).
+40. **A reader defect found only by reading the key's disagreements (12 Oct), section 4.1f.** GPT-3's SuperGLUE table (Table 3.8) had been in the store since 30 Sep with 18 of 27
+profiles carrying the data sets "CB y" and "E BoolQ". The hand check of 4 Oct had listed "two stacked table blocks mixed up (GPT-3 SuperGLUE Table 3.8)" among the extractor's error
+patterns and the table was left as a known limitation; it was the leaderboard key (12 of its listed results lived in this table) that made it worth a cause analysis, which found a
+reader defect rather than a model failure. The fix is general (a second header block, header words cut at a column border) and changes exactly seven table views in the corpus; it is a development change, and every one of the seven was
+read before the chunks were re-read. A first version also changed a table of benchmark names whose second row lists the models, and one garbled table of T5; a measure-word gate and a
+length rule removed both, and a unit test now pins the first.
+41. **A pass was stopped and repeated (12 Oct).** The pass `oct12b` was started at 15:08 and killed at 15:19 when the reader defect of item 40 was found, because the store was going to
+change under it; `oct12c` was run on the store after the fix and `oct12d` after the benchmark-measure rule and the benchmark sweep of 4.1g, so `oct12d` is the pass of the final store. The partial files of `oct12b` (retrieval, questions, Stage 6 ablation, answers) are not used anywhere and are not part of the
+results.
+42. **A sample that was read for its errors is development material afterwards (12 Oct), section 4.1g.** The 100 profiles of E3 were drawn at 16:30 from the store as it was; the
+reader and repair changes written from its 38 faulty profiles make its later 81 / 49 % a development number, not a test. E4 (drawn at 17:00, after those changes) is the check
+(78.4 / 48.5 %); once its own errors were fixed it became development material too (88.7 / 54.6 %). No third clean sample was drawn. Every change made from a sample has a unit test and
+is general (it fires on a pattern, not on a profile); none was written for a single profile.
+43. **The first system-row test of the ablation rule was wrong, and the 17:00 pass ran with it (12 Oct).** It asked whether a row label is a name that the paper writes in its prose;
+variants are written in prose too ("LTR & No NSP", "AKT", "+ BiLSTM"), so they were taken for systems and kept as the model (3 items of E4). The test now asks whether the label is a
+row of one of the paper's results tables (an ablation or variant table does not count). A first choice of the paper's own system also picked "C4" for T5 (a data set stored as a model,
+15 mentions); it was replaced by the family name that the stored systems share ("T5-Base", "T5-Large", "T5-11B").
+44. **Which pass belongs to which code (12 Oct), section 4.7f.** `oct12c` is the pass of the code of 15:20 (after the header fix of GPT-3's table), `oct12d` of 17:00 (after the block
+heading, ablation and lost-decimal changes; the clean sample E4 was drawn from this store), `oct12e` of the code after the E4 fixes. The three passes agree on every measured figure
+(4.7f), so the later changes were neither seen nor harmful at the size of these tests; this is not evidence that they are harmless elsewhere.
+45. **A dry run of the repair without the data set decisions shows data sets that the real run does not (12 Oct).** `repair_paper` without the decisions of `dataset_context.json`
+returned "None" for a data set that the stored overlay has; a regression was suspected for a moment and traced to the dry run. Only `scripts/repair_store.py --apply` applies the decisions.
+46. **The extractor's output cap cut the last result of every full view, and the completion sweeps could not repair it (12 Oct, evening), section 4.1i.** A call writes at most 3,000
+tokens; a profile with its verbatim evidence is about 86 tokens and a view holds up to 36 results, so the reply was cut after the 35th result. A test call on T5's Table 14 kept 35 of 36
+results with `truncated = 1`, and the missing one (T5-11B's ROUGE-L, 40.69) was missing again after the completion sweep, because the same view was cut at the same place. 208 of
+the 566 views of the readable tables have 31 results or more. The cap is 4,500 tokens now; the chunks with such a view were read again with `--complete` (only results whose number is
+not stored are added, with new ids). It added 124 results in 99 chunks (21 of them in SuperGLUE's Table 4, which had kept 23 of 44).
+47. **A table printed as one row of whole columns was never read (12 Oct), section 4.1i.** DistilBERT's Table 2 (IMDb accuracy, SQuAD EM / F1) arrived as one pipe row in which each
+cell is a header followed by the values of its column. One row is not a table, so the chunk was not read and "DistilBERT on IMDb" got a scope warning. It is the only chunk of the 28
+papers with this layout; `tables.unglue_columns` turns it into a table when every cell is explained.
+48. **GPT-3's per-size appendix table was skipped as garbled, and two of its three chunks had no names row (12 Oct), section 4.1i.** Several size columns in one cell, a header
+word cut across two cells, two result rows printed as one, glued numbers in some rows. `tables._scaling_table` reads a row only when every cell of it is explained (36 of 59 rows) and
+never guesses; `tables.with_carried_headers` and `scripts/fix_continued_headers.py` give the continuation chunks the names row (5 stored chunks); the chunker's header measure knows
+such a row now. A row that holds two result rows in one line is split only when every cell has the same count (the SOTA cell of the En-Ro translation rows holds one number for two
+rows: dropped).
+49. **A group label cut in two cost 54 results of LLaMA 33B and 65B (12 Oct), section 4.1i.** "LLa" | "MA" over 13B | 33B (the 7B and 65B columns blank) was read as "LLa 13B", "MA
+33B", "MA 65B"; the extractor dropped the "MA" results as the piece of a row label. The same fault was in the test that was written for it ("MA 65B" was asserted as the expected
+header: a known limitation encoded as a test). Fixed in the reader; the table was read again.
+50. **A data set name cut across two header cells, and its version (12 Oct), section 4.1i.** "SQuA EM" | "D 1.1 F1" (TinyBERT's Table 6: stored as the data set "D", 16 results),
+"SQu EM" | "AD 2.0 F1", "MASSIV" | "E (Intent)". The cut part is completed from the benchmark list and the version is copied to both columns. Five chunks read differently after
+the change (3 labelled-pair chunks were not read again).
+51. **Bare numbers as row labels were dropped (12 Oct), section 4.1i.** T5's Table 7 (span lengths 2, 3, 5, 10) kept 7 of its 35 results: a row label that is a number is "no
+system" for the junk filter. A level of a factor now carries the factor's name from the header ("Span length 3"). 
+52. **Two metric rules, a plural, a glued run, aliases (12 Oct), section 4.1i.** A WMT column with a generic measure is BLEU (208 profiles); "Avg" on a data set's column is not
+the average column (64 profiles); a caption that says "the effects of" marks an ablation table (SpanBERT's Table 7: E5 F007); a run of header letters glued into a model label is
+cut off (18 profiles); the leaderboard spellings of Yelp and the WMT pairs are known names. All found on the independent key and on E5, so all are development changes.
+53. **A size-specific table lookup reached the table for a quarter of the questions (12 Oct, evening), section 4.7d (update).** The new per-size table of GPT-3 is only useful when retrieval finds it, and a question that names a size is not ranked by size. The profile signal of 11 Oct (off, "not adopted": +1 question of 28 at best) was tested on 24 generated lookups: 7 -> 11 correct, table among the sources 6 -> 10, no change on the 30 gold questions, +1.2 s. Adopted as the default. The test is built from the table itself and small (p = 0.22).
 
 ## 4. Results
 
@@ -171,7 +263,7 @@ states.**
 87.0, setting 88.2 / 72.2 strict; 157 of 311 real results, 50.5 %, completely right). The errors repeat in a few patterns and each pattern is settled by the table
 the number came from (or by a definition the paper itself writes), so a repair can be pure code and every correction can be traced to the text that states it.
 
-*What it does* (`src/cgrag/ingestion/repair.py`, 25 named rules, each switchable; `src/cgrag/knowledge/` holds the small lists it uses):
+*What it does* (`src/cgrag/ingestion/repair.py`, 26 named rules, each switchable; `src/cgrag/knowledge/` holds the small lists it uses):
 (1) **task** from the benchmark (MRPC is paraphrase detection, not sentiment analysis; "EnDe" is machine translation; a training regime or a filler word such as
 "multi-task" is not a task) unless the caption itself calls it so; (2) **model**: a name printed vertically beside a group of rows arrives in pieces ("L" +
 "lama 1") and is joined by the table reader, an anagram or fragment of a system name that the paper writes ("aLLMA", "coFaln", "Fln") is matched to it, a
@@ -182,7 +274,7 @@ compared); (4) **language** from the cell's own column when the table is a table
 "avg" column or a sentence such as "Results averaged across languages"; (5) **data set**: the split prefix ("Dev Set SST-2"), a name cut at a column border
 ("SQuA"), a name expanded from the paper's own definition ("WN16" = WNUT-16), the benchmark that a set of language columns identifies when a caption was lost
 (XQuAD, MLQA, TyDi QA, XNLI, PAWS-X), a data set named in the caption; (6) metric abbreviations that the paper defines ("scc" = Spearman correlation
-coefficient), and a model size that is not a size is removed or reduced to its size word ("DeBERTa V3 Large" -> large). **Table reader**: a header row that is
+coefficient), and a model size that is not a size is removed or reduced to its size word ("DeBERTa V3 Large" -> large); (7) **language from the order of the extraction** when a number repeats inside one row of a stacked table of languages (added 11 Oct after E2, section 4.7e: 25 stored languages in 4 tables, none in the benchmark store). **Table reader**: a header row that is
 repeated in the middle of a wide table (two halves printed one above the other) now switches the column names; before, the second half's values got the first
 half's language names.
 
@@ -207,8 +299,8 @@ Per field on E2 (lenient F1, stored -> repaired): setting 58.4 -> 87.1, model_si
 model 92.6, metric 93.6, language 98.4, value 100. Of the 37 profiles that are still not completely right (lenient), the wrong or missing field is the data set in 16, the setting in 13, the task in 8, the model in 7, the metric in 6, the language in 2 and the model size in 1 (a profile can have more than one). Six of the 100 profiles were not results (a figure axis, a speed-up of the
 reference system itself, a case-study example).
 
-*What it does to the system.* In the 28-paper store 5,383 of 10,275 profiles change (52.4 %): setting 3,321 fields, task 2,119, data set 915, model 467, language
-433, model size 64. Stage 7's shipped configuration is unchanged by it (165 against 164 of 200 pairs; fresh-2 44 against 44), because table grounding already
+*What it does to the system.* In the 28-paper store 5,387 of 10,275 profiles change (52.4 %; 5,383 before the `language_order` rule of 4.7e): setting 3,321 fields, task 2,119, data set 915, model 467, language
+458 (433 before that rule), model size 64. Stage 7's shipped configuration is unchanged by it (165 against 164 of 200 pairs; fresh-2 44 against 44), because table grounding already
 corrected the cards at query time; the variants without grounding gain (frozen rules 122 to 137, fix A 131 to 144 of 200): the repair does in the store what
 grounding does at query time. The system switch is `[features] profile_repair` (on); the raw profiles stay in `profiles`, the corrections in `profile_repairs`.
 
@@ -262,6 +354,290 @@ task for a missing task) lift the pipeline's three names from 54.3 to 62.8 %; th
 benchmark's gold names were read while repair rules that read the paper's own text were designed (item 23 of section 3), which is why the repaired row is a development number. The
 reference results of the benchmark's authors (GPT-4.1, Gemini-2.5-Pro, Llama 3.3 70B) were not re-run: no external API is part of the system, and a 70B model does not
 fit the machine.
+
+### 4.1d Two steps that read the paper's own text: the data set of a table and the system behind a citation (11 Oct, evening)
+
+**Verdict: on the public benchmark the data set names that agree with the human annotators rise from 74.4 % (repaired) to 84.7 %, and the three names together from 63.9 to
+71.2 %, when a table that names no data set is given the one the paper itself states for it (the stored profiles: 67.9 and 54.3 %; the plain LLM: 60.7 and 38.3 %). On the 28
+development papers 21 of 84 questions lead to a decision (14 data sets, 7 systems behind a citation), all of them read by me and plausible. The completely-right share of the clean
+sample E2 moves by only 2 to 3 points (57 to 59 of 94 lenient, 37 to 40 strict) because most remaining errors are in other fields. A development number: the steps were designed
+after reading this benchmark's disagreements (784 of its 3,153 matched results have a data set name that disagrees with the annotators; 409 of them are a missing data set or a task
+name in its place).**
+
+*What the steps are.* (1) `ingestion/dataset_context.py`: for every group of profiles of a paper whose data set is missing, a task name ("Chunking", "NER-English"), a metric or
+split label ("AVG", "V-M") or a cut-off fragment ("L00 Chunking"), one question to the local LLM (gemma4:12b, temperature 0) with the paper's own sentences about data sets, the
+sentences that mention the table, the caption and the first rows: which data set were these numbers measured on? The answer is kept only when the paper carries it: the name occurs
+in the paper's text and in what the model was shown or quoted, it is one name (not "ATIS and Snips"), not a task, metric or language word, not a benchmark suite for a label that
+names a member task ("CB" is not "SuperGLUE"), not a name that the stored label already carries with a year or a category ("StoryCloze 2016", "MASSIVE (Intent)"), a cut fragment
+only to the name it is a piece of ("XS" to "XSum", not "CNN"), and a known benchmark only for a task it fits. Every decision keeps its evidence sentence
+(`eval/labels/dataset_context_28papers.json`, `dataset_context_metalead.json`). (2) `ingestion/model_context.py`: a model name that is followed by a citation ("Adaptive
+(Sukhbaatar et al., 2019)") loses the citation (code only, rule `model_citation`, 80 profiles of the 28 papers); a bare citation ("Devlin et al. (2018)") is resolved by one question
+per label and paper to the system the paper writes next to it, with the same grounding (rule `model_context`, 165 profiles). The repair applies the data set decisions as the rule
+`dataset_context` (136 profiles); `[features] dataset_context` switches the LLM part off; `scripts/resolve_datasets.py` produces the decisions and `ingestion/pipeline.py` runs it for
+a new paper. Unlike the rest of the repair this part is not code only: it needs the language model once per group (about 3 s).
+
+| System (MetaLead, 43 papers, 3,568 human-annotated results) | coverage | data set | metric | task | all three agree | end to end |
+|---|---|---|---|---|---|---|
+| Plain LLM (gemma4:12b, MetaLead prompt, text windows) | 79.0 | 60.7 | 78.4 | 67.9 | 38.3 | 30.3 |
+| Pipeline, stored profiles (clean) | 88.4 | 67.9 | 90.0 | 84.6 | 54.3 | 48.0 |
+| + repair, today's code (**development**) | 88.4 | 74.4 | 91.9 | 86.3 | 63.9 | 56.5 |
+| **+ data set context** (**development**) | 88.4 | **84.7** | 91.9 | 86.3 | **71.2** | **62.9** |
+
+*Reading.* (1) 109 groups were asked on the benchmark and 62 decisions kept. The results that sit in groups with a decision and that match a gold result number 410, of which 343
+(83.7 %) agree with the annotators' data set; the strict matcher counts "Penn Treebank WSJ" and "WSJ" against "Penn Treebank (PTB)", and a task's data set that the extractor
+attached to the wrong column, as wrong, which is many of the remaining 67. (2) By the scorer's own count the step fixes 326 of 807 data set disagreements, in 11 of the 43 papers and
+in none for the worse; the 8 papers with the most disagreements hold 70 % of the 807 and 95 % of the 326 that were fixed, so the benchmark is clustered and the gain is not 43
+independent observations. (3) The repaired row of 12 Oct (74.4 / 63.9 / 56.5) is 1.1 points above the one of 4.1c (73.3 / 62.8 / 55.5, computed on 10 October); switching off the
+two newest rules (`language_order`, `model_citation`) does not change it and I did not trace the difference to one rule. (4) Metric and task agreement do not move: the steps touch
+the data set only. (5) The data set agreement is now just below the 85 % that was asked for; the three names together (71.2 %) and the end-to-end share (62.9 %) are not.
+
+*The 28 development papers.* 14 data set decisions in 65 groups (SQuAD for the three result tables of the SQuAD paper, CoNLL-2003 for BERT's NER table, OntoNotes for SpanBERT's
+coreference table, GLUE for the "Average" columns of RoBERTa, ALBERT and MobileBERT, SentEval for SBERT, Meta Helpful / Meta Safety for Llama 2's reward model ablations), 7 system
+decisions in 19 citation labels. A whole-store read found no decision that I judged wrong and two arguable ones ("A2" to "Word Scrambling", "SAT-math" to "AGI Eval": the sub-set
+label is replaced by the benchmark's name). The first version, run on the same papers, had made nine mistakes that the guards now remove (e.g. "SOP" to "SQuAD1.1", "MASSIVE (Intent)"
+and "MASSIVE (Slotfill)" both to "MASSIVE", "CB" to "SuperGLUE", "NMT" and "SOTA" as the system behind a citation).
+
+*Clean sample E2 (100 profiles of the benchmark papers, labelled blind on 11 Oct).* 34 of the 100 items change under the new rules: 11 data set names and 25 system names that lose a
+citation (two items have both). In the repaired version that the rules started from, 21 of the 34 had a field flagged by the blind labels (12 by the lenient reading, where a true
+but vague value counts as right). Of the 11 data set changes 8 agree with the human gold of the benchmark ("L00 Chunking" to "CoNLL 2000", None to "CoNLL03" / "CoNLL-2003" /
+"Gigaword", "Dutch NER" to "CoNLL-2002"), one ("V-M" to "SemEval 2010") agrees with the table's caption and my own note but not with the gold's "SemEval 2013 Task 13", and two
+have no matching gold result and agree with my note. The items completely right go from 57 to 59 of 94 (60.6 to 62.8 %, lenient) and from 37 to 40 (39.4 to 42.6 %, strict). That
+is a re-score of a set on which the benchmark was known to the rules' author, so it is a development number as well.
+
+*Limits.* The rules were designed on the benchmark they are scored on (43 papers, clustered: 8 papers hold 70 % of the disagreements); the benchmark's human gold is the only judge
+of the data set decisions, and my matcher counts the benchmark's normalised names ("CoNLL-2003 - English") against the paper's own ("CoNLL03") leniently but not "WSJ" against "Penn
+Treebank"; the LLM decides, and one decision stands for all profiles of its group, so a group that mixes two data sets is wrong for one of them (SemEval-2010 and 2013 columns under
+one label); on the 28 papers only 14 groups were decided, so the effect on Stage 6 is small. A plain LLM given the same context could do the same job in the extraction itself; this
+is the repair for stores that were extracted without it.
+
+### 4.1e Tables with merged columns: a rescue for what was skipped as garbled, and the measure of CoLA and STS-B (11-12 Oct)
+
+**Verdict: 14 table chunks of the 28 papers were skipped because their numbers were glued, split or merged (`garble_ratio` at or above 0.10; 3,817 decimals in all). Two of them could
+be read without doubt: T5's Table 14 (the paper's main results: all five header blocks, 203 profiles) and ELECTRA's Table 8 (the GLUE test results, 87 profiles). The store has 290
+profiles more (10,565). On the independent key of 4.9 the results found for T5 rose from 5 to 92 of 103 and the key's coverage from 71.0 to 87.3 %. A development change: it was
+designed after reading these two tables, which the key had pointed to.**
+
+*The problem.* The layout model sometimes puts several columns of one header block into ONE cell: T5 prints "SST-2 MRPC MRPC" over "97.1 93.6 91.5", and stacks six such blocks, each with
+its own two header rows, in one table (a cell "'s Accuracy F1 Accuracy" even carries the 's of "Matthew's"). The table was skipped, which was right: read with the header of its first
+block, the rows of the others would have been given the wrong columns. *The rescue* (`ingestion/tables.py: rescue_tables`) is called only for a table that is skipped today, so a
+table that is read cannot change. It cuts the table into header blocks. In a block it splits a cell of k numbers into k columns only when every row of that column has k numbers, a
+header row names k columns in words (a header that merely repeats one label is not enough), the block has at least two data rows, a column is wholly text or wholly numbers, and no
+integer sits among decimals (a number cut at a column border: "22.82 8" over "7.16"). A second reading (`_stream_block`) handles a block whose borders are unreliable but whose
+rows are regular as streams: T5's last block has "43" | ".8" for 43.8 and the header words "EnD" | "e" and "BL" | "EU"; every row must give the same count of numbers and the header
+rows exactly that many names. A block that fails any test is left out as before. Each rescued block is a clean table text that the extractor reads like any other
+(`profile_extractor._views`, `wants_extraction`), whose numbers ground its profiles (`_chunk_numbers`; a first run dropped 5 results because "43.8" occurs only in the rescued block),
+that table grounding uses for its cells (`grounding._cells`), and that `reclean_profiles` no longer removes. `scripts/rescue_garbled.py` reads the chunks (`--replace` re-reads a
+chunk that was only partly read, and swaps its profiles only when the new reading has at least as many).
+
+*What it does and what it does not.* All five blocks of T5's Table 14 come back, none dropped; ELECTRA's "Avg." column was not extracted by the language model (8 of 9 task columns per
+row). Not rescued: T5's Table 16 (five chunks), GPT-3's appendix tables (four), LLaMA's MMLU table, the RAG and Llama 2 chunks (leading dots and cut numbers in many cells): 12 of the 14
+chunks remain skipped. DistilBERT's Tables 2 and 3 are a different case, a flattened single row that yields no profile (the only chunk of that kind in the corpus). Tests: `tests/test_structured_tables.py` (4 new: the T5 layout block by block, a block read as streams,
+a table with a ragged row stays skipped, a table that is read today is never changed); a regression caught while writing them: a first version accepted a one-row table in which a number
+was cut at a border ("53.84 9") as two columns.
+
+*The measure of CoLA and STS-B.* The same key showed 179 results of these two GLUE tasks stored with the metric "accuracy" although CoLA is scored by Matthews correlation and STS-B by a
+correlation. A repair rule `metric_paper_measure` (`repair.paper_measures`) sets the measure the paper itself names: Matthews correlation for CoLA when the paper's text names
+Matthews or MCC, Pearson or Spearman correlation for STS-B when it names exactly one of them (else "correlation"), never when the grounded column says accuracy, and for CoLA only
+below 80 (above, it may really be an accuracy). 99 profiles change; the other 80 are left as stored (the paper names no measure, or the grounded column says accuracy). On the key the
+metric agreement moves from 83.3 to 83.7 % with this rule and the last T5 block together: most of the remaining disagreements are the leaderboard's own conventions ("pass@1" filed as
+"Accuracy", "% true" for TruthfulQA), not errors.
+
+### 4.1f What the leaderboard key pointed at next: unread chunks, partly read tables, cut header words, and three metric rules (12 Oct)
+
+**Verdict: four more changes to the reader and the store, all made after reading where the key of 4.9 disagreed with the store, so all DEVELOPMENT changes. The store grew from 10,565
+to 11,280 profiles (+715), the share of decimal result cells that have a stored profile with the same number rose from 86.5 to 91.4 % (of 12,147 cells in 236 result tables), and the
+found-and-right figure of 4.9 from 67.3 to about 69 % on the same scorer (to 75.8 % with the three later corrections of the scorer, see the table there).**
+
+*1. Chunks that were never read, and a result without a metric (+171 profiles).* 93 chunks that the extractor wants (result tables and result prose) had no profile at all: a first
+reading had failed, or the table's headers name no metric (T5's ablation tables: "GLUE | CNNDM | SQuAD" are data sets, the measure is in the text). The profile cleaner dropped a
+result that has a model and a data set but no metric; it is now kept with the metric "score" (`_normalize`), so a result is not lost for want of a word, and the metric stays an honest
+"score". 631 of the 11,280 profiles carry it (T5's ablations 435, Llama 2's grouped table 92, RAG 52). The 93 chunks were read again (`rescue_garbled.py --empty`): +171 profiles (T5
++137, IndicXTREME +15, GPT-3 +5, LLaMA +5, DeBERTa +9); DeBERTa's SuperGLUE table (chunk 2006.03654:0024) was then replaced by a reading that splits its merged row (57 -> 83
+profiles; one printed line holds two systems, "DeBERTa1.5_B+SiFT DeBERTa_Ensemble" over cells of two numbers; `_split_merged_rows`, only when the label has exactly k name-like words and
+every filled cell exactly k numbers).
+
+*2. Partly read tables (+509 profiles).* A table can be read, yet have many cells without a profile (the model stops, a long row is cut). The 53 chunks with the lowest cell recall were
+read again with `rescue_garbled.py --complete`: only the results whose number is NOT among the stored ones are added, and with NEW ids after the existing ones. A first sweep that
+replaced the profiles of such a chunk by the new reading would have shifted profile ids, and the 300 labelled Stage 7 pairs refer to profile ids; it was stopped before it was applied,
+and `data/index/_logs/pair_ids_check.py` (600 references checked against the value stored in the key files) now reports "changed: 0" after every store change. 21 of the 53 chunks got
+additions (Llama 2's Tables 22, 45 and 3: 87, 61, 58; T5 and IndicXTREME 31 and 27). Cell recall 87.8 -> 91.4 %. The rest is mostly statistics tables that are skipped on purpose and the
+four garbled GPT-3 appendix tables.
+
+*3. A second header block, and header words cut at a column border (7 chunks).* Found by reading the leaderboard disagreements for GPT-3 (10 % of the key): 18 of the 27 profiles of its
+SuperGLUE table (Table 3.8) carried the data sets "CB y" and "E BoolQ". The table prints two header blocks one above the other; the reader gave all rows the first block's names (so WSC
+was stored as BoolQ), and the layout model had cut header words at column borders and moved the last letter into the next cell ("SuperGLU Average" | "E BoolQ Accurac" | "CB y
+Accurac"). Two small additions to `ingestion/tables.py`: `_stitch_cut_words` moves a lone letter back onto a cut word of the previous cell when the word with the letter is a word the
+table spells whole elsewhere (its caption or another header row; the piece at least three letters, the word at least five, so "LU" + "E" is not SuperGLUE), and
+`_named_header_row` takes a SECOND header block whose cells are data set + measure names ("WiC Accuracy", "MultiRC F1a") as the new column names for the rows below it (the row has no
+number, the cells name at least 70 % of the columns, at least 70 % of them contain a measure word, and at least three differ; a row of model names under benchmark columns is not
+taken). Over all 1,385 chunks the new reader changes exactly 7 table views (GPT-3 Table 3.8, four SQuAD tables whose "SQuA | D" header was cut, a retrieval table, IndicXTREME's
+Table 4) and no rescued block; a first version also changed IndicXTREME's Table 1 (a row of model names taken as a header) and one of T5's garbled tables, which the measure-word test
+and the length rule removed. Re-read: three chunks that no labelled pair refers to were REPLACED (GPT-3 27 -> 36 profiles, all right now; the two others unchanged in number), the four
+SQuAD chunks that pairs do refer to only COMPLETED (+9). Four tests were added (301 in all).
+
+*4. Three metric rules, from the disagreements of the key.* (a) `metric_paper_measure` (4.1e) now also falls back on the benchmark's own definition when the paper's prose names no
+measure: CoLA is scored by Matthews correlation and STS-B by a correlation, a regression task has no accuracy (XLNet's, RoBERTa's and ALBERT's GLUE tables had STS-B stored as
+accuracy because their text never says "Pearson"); the paper's word, when it has one, wins, and a column that says "acc" is kept. The rule now fires on 180 profiles (99 by the paper's own words, 81 by the definition); it costs
+agreement with the leaderboard where the leaderboard files CoLA under "Accuracy" (9 results), which is why the scorer of 4.9 maps that convention (revision 6). (b) `metric_difference`: a number that its sentence
+presents as a difference ("RACE (+8.4%)", "outperforms mBERT by 13.0% F1") is typed "difference in accuracy", not as the result; only when no table cell carries the number (36
+profiles; four of them had cost Stage 7 not-comparable pairs). (c) `metric_cut`: "Exac" / "Match" printed over two header cells are "Exact Match", "Spea" / "Pear" the correlations
+(unique completion of a well-known name only).
+
+*Limits.* Every number here is on the corpus the rules were written from. The cleaner measure on an outside, human-annotated benchmark is in 4.1g. GPT-3's per-size appendix table
+(three to five numbers in a cell, two metrics in one row) and XLM's transposed translation table remain unread / misread; the data set resolver of 4.1d settled 21 of 85 groups of the
+corpus and 3 of 24 groups of the new chunks, so a data set name that is a header fragment still stands where the paper's text does not name it in one clear sentence.
+
+### 4.1g Three fresh random samples after the changes of 12 Oct (E3, E4, E5), and what they showed
+
+**Verdict: on a fresh random sample of 100 profiles of the 28-paper store drawn AFTER the last code change (E5; 99 real results), 79.8 % of the profiles are completely right on the
+lenient reading (95 % interval 71-87) and 42.4 % on the strict one (33-52); the field-level micro-F1 is 97.8 / 92.4 %. The share of completely right profiles is therefore still BELOW
+85 % on both readings (the interval of the lenient one reaches 87), the field F1 is above it on the lenient one. Two earlier samples gave the path: E3, drawn at 16:30, was 62 / 36 %;
+the changes written from reading its errors raised the same 100 profiles to 81 / 49 % (a development number); E4, drawn at 17:00 from the store after those changes, was 78.4 / 48.5 %
+(97 results); its errors were fixed in nine further changes (the same 97 items would now score 88.7 / 54.6 %, development), and E5 was drawn from the store after them and read with
+no change afterwards. The strict figure of E5 is lower than E4's mainly because 15 of its 100 profiles come from tables whose columns or rows are groups of one data set (BOLD's professions,
+ToxiGen's demographic groups, MMLU's subjects): the group is not a field of the profile, which the strict reading counts wrong (19 data set fields, 22 settings).**
+
+*The samples.* Uniform random over the profiles of the store that are on no earlier hand-checked list (the two job-A sheets, E1, and for E4 also E3), `scripts/make_extraction_sample.py`
+(seeds 12102026 and 20261012). The labeller sees the paper, the caption, the table's header and the source row, the grounded cell and the repaired fields that the system uses, and
+writes OK / WRONG / MISSING per field, with "imprecise" for a value that is true but vague or incomplete (the same policy as job A): lenient counts it right, strict wrong. One AI
+labeller, no kappa; the labeller of E3 and E4 also wrote the rules. A split ("test set") that the paper states in general but the table, its caption and its sentence do not is
+marked imprecise, which is more lenient than E2's policy (wrong); E2 is therefore not directly comparable, and E2 was drawn from another store (the benchmark papers).
+
+| Sample | results | drawn | completely right, lenient | strict | field micro-F1, lenient / strict |
+|---|---|---|---|---|---|
+| E2 (benchmark papers, clean at the time, 4.1b) | 94 | 11 Oct | 60.6 % | 39.4 % | 94.0 / 90.0 |
+| E3 as drawn (28 papers; before the changes it triggered) | 100 | 12 Oct 16:30 | 62.0 % (52-71) | 36.0 % | 95.6 / 89.6 |
+| E3 after those changes (same profiles; **development**) | 100 | | 81.0 % | 49.0 % | 97.6 / 92.0 |
+| **E4 (new profiles; clean for the changes read from E3)** | 97 (3 were not results) | 12 Oct 17:00 | **78.4 %** (69-85) | **48.5 %** (39-58) | **97.1 / 91.8** |
+| E4 after the fixes read from it (same profiles; **development**) | 97 | | 88.7 % | 54.6 % | not computed |
+| **E5 (new profiles, drawn after the last code change; the final check)** | 99 (1 was not a result) | 12 Oct ~18:45 | **79.8 %** (71-87) | **42.4 %** (33-52) | **97.8 / 92.4** |
+
+Per field on E4 (lenient F1 / strict F1): model 90.7 / 81.4, data set 96.9 / 85.6, metric 95.9 / 85.6, value 100 / 100, language 95.3 / 95.3, task 99.5 / 96.4, model size 99.0 /
+99.0, setting 96.3 / 82.5. Wrong or missing fields (lenient): model 9, setting 6, language 5, metric 4, data set 3, task 1, size 1.
+
+*What E3 showed* (38 of 100 profiles had a wrong or missing field, 15 of them for one reason). (1) A configuration row stored as the model, or lost: T5's "4x size, 1x training
+steps", "MASS-style", "2: Repeats = 256", mT5's ablations of mT5-Large whose row ("Dropout0.1", "Sequence length512") never reached the setting, so an ablation result read as the
+base model's own number (15 items). (2) A block heading directly under the column names was glued to them, so the regime was lost: "Cross-lingual zero-shot transfer" of mT5's
+WikiAnn table, "Single-Task Training" of GLUE's baselines (3 missing, 3 imprecise). (3) A setting word stored as the metric ("1-shot" for SQuAD's EM, 3). (4) A header
+word cut at a column border ("T-en (w/o Psg.)" for SAT-en: 1 item, 12 results of that table). (5) A lost decimal point (906 for 90.6: 22 profiles of the store, 18 repaired). (6) A pair "88.9/89.0" under "MNLI-m/mm"
+stored with the first set's name for the second number; English CoNLL results filed under CoNLL-2002. (7) "Single model" stored where the block says "Ensembles on test".
+
+*What was changed from it* (all general; every one has a unit test; section 3, item 42): **reader** (`ingestion/tables.py`): a block heading under the names row is a heading, not
+part of the column names; a bracketed measure ("(EM)") after a group label joins the label; the rest of a word that opens the next cell moves back onto the previous cell when the
+whole word stands there; **repair** (`ingestion/repair.py`): `setting_ablation` (the row of an ablation or factor table is a setting of the paper's own system, written "ablation:
+<label>"; the system comes from the title, or, when the title names none, from the family name the stored systems share: T5), `value_lost_decimal`, `dataset_pair`,
+`dataset_conll`, an ensemble block against a "single model" setting; **Stage 7** reads "ablation" as a setting tag (so an ablation result is a one-sided condition against another
+paper's number and not a genuine contradiction). about 790 profiles change by the ablation rule; the replay of the 300 labelled pairs stays at 267 (4.7f).
+
+*What E4 showed* (21 of 97 profiles with a wrong or missing field). (1) Variant labels that the first version of the system-row test skipped because the paper writes them in its prose:
+"LTR & No NSP", "AKT", "+ BiLSTM" (3). (2) A group label cut in two ("LLa" | "MA") over four columns whose first cell is blank: LLaMA 7B was stored as "Chinchilla 7B", about 100
+profiles of Table 16 (3 items). (3) A language kept for results that are averages over languages (IndicXTREME's Table 4; 2 items, and E3's F005). (4) Two cells carrying one number under
+"(F1/EM)": the stored F1 was given the language of the cell where the number is an EM (1). (5) The metric "mm" (1). (6) A difference typed as a result ("outperforms mBERT by 2.42
+F1 ..., and 1.86 F1 ...": one of the 3 non-results). (7) "train dev set" (1). Not fixed (10 items): an "Avg" column given a benchmark name (2); a row label cut to "L 2" (1); two rows with the same number, so the ablation row cannot be chosen (1); XLM's
+two-column row label "EMB | EMB" (1); glued language codes as the row label of a language-identification table (1); MRPC's F1 stored as accuracy because the metric is stated
+in another table (1); "gom" read as Dogri where two cells carry the number (1); a rating bucket ("Slightly Better") stored as the data set (1); a benchmark group without a task (1).
+
+*Changes made from E4* (also general, also tested): `grounding._carrying` (a cell that carries the number is kept only where the number stands at the position of the card's
+measure), `language_average` for tables whose columns are tasks, the system-row test (a label that is a row of one of the paper's results tables is a system; a label that opens with
++ / - / w/o / No is a variant), group labels do not span a smaller model, "m" / "mm" are splits, `dataset_row_label` (the subject of an MMLU row is not the data set), and a
+sentence-level difference test for prose profiles; the LLaMA table was read again (298 profiles, 305 before). The repeat of the whole pass after them is in 4.7f.
+
+*What E5 showed* (20 of 99 profiles with a wrong or missing field; nothing was changed after reading them). Metric (6): BLEU stored as "accuracy" in a T5 fine-tuning table, "Avg" kept as the measure of a column of the AGI Eval table (2), a pair "GPS / Acc" read as accuracy (2), MRPC's F1 stored as accuracy (a statement in another table). Data set (4): a merged header cell "MRPC STS" kept as the data set, the cut cells "M Sf" / "Mt Hlfl" of Llama 2's Table 8 (Meta Safety for a Meta Helpfulness result), an MMLU subject kept as the data set, IndicXTREME's Table 4 column shifted (Naamapadam read as paraphrase). Language (3): the fine-tuning language of a transfer table read as the test language (2), an average over languages given "English". Model (3): an auxiliary objective as the model, a row label made of header fragments, "lama 2hat". Setting (3), task (2), version (1). None of these classes is new: they are the not-fixed list of E4 or its relatives (a header cut by the layout, two figures in one cell, a column that the LLM shifts).
+
+*Limits.* The labeller is the author of the rules; E4 is clean only for the changes written from E3 and earlier, E5 for all of them. n = 97 to 99, intervals about +-8 points. Many "imprecise" items are the
+setting ("test set" stated for the paper but not the table: 13 on E4) and the model of GLUE's baselines ("+ELMo" for "BiLSTM+ELMo"), which the strict reading counts wrong. Not above
+85 %: completely right profiles.
+
+### 4.1h The benchmark store read again with the changes of 12 Oct (MetaLead, human gold)
+
+**Verdict: the same improvements applied to the 43 benchmark papers (3,568 human-annotated results; separate index, `config/bench_metalead.toml`; the papers were not used to write
+the rules, except the four text rules named in 4.1b) raise the share of annotated results that the store finds from 88.4 to 89.8 % (+52 results), and the end-to-end share (number,
+data set, metric and task all agree) from 62.9 to 63.4 %; the agreement of the three names on the results found falls from 71.2 to 70.5 %, because the added profiles are named a
+little worse than the old ones. None of the figures reaches 85 % except coverage and the metric.**
+
+What was done there (`data/index/_logs/bench_sweep.sh`): the 81 chunks that the extractor wants and that had no profile were read (with the "score" fallback of 4.1f), two chunks
+whose table view changed were read again, the 41 chunks with the lowest table-cell recall were completed (only missing numbers added), the data set resolver of 4.1d was run again
+and the repair overlay applied. 88 profiles were added (4,343 to 4,431), the table-cell recall of the benchmark tables rose from 80.0 to 81.5 % (the old tables are mostly
+statistics tables and layouts the reader does not know: much less than on the 28 papers, where the same steps gave 86.5 to 91.4 %).
+
+| Variant (43 papers, 3,568 gold results) | coverage | data set | metric | task | all three | end to end |
+|---|---|---|---|---|---|---|
+| stored, before / after | 88.4 / 89.8 | 67.9 / 67.8 | 90.0 / 89.0 | 84.6 / 83.6 | 54.3 / 53.6 | 48.0 / 48.2 |
+| repaired, before / after | 88.4 / 89.8 | 74.4 / 74.2 | 91.9 / 91.2 | 86.3 / 85.8 | 63.9 / 63.4 | 56.5 / 57.0 |
+| **repaired + data set context, before / after** | **88.4 / 89.8** | **84.7 / 84.4** | **91.9 / 91.2** | **86.3 / 85.8** | **71.2 / 70.5** | **62.9 / 63.4** |
+
+(The plain-LLM baseline of 4.1c was not run again: coverage 79.0 %, end to end 30.3 %.) The matcher is mine and looser than the benchmark's own; the end-to-end figure is a
+development number for the benchmark papers because the data set context step was tuned on them (4.1d). Not above 85 %: the three names together and end to end.
+
+### 4.1i Table layouts the reader did not know, an output cap that cut the last result of every full view, and metric rules (12 Oct, evening)
+
+**Verdict: three table layouts that the reader did not know were read, an output cap that cut the last result of every full view was raised, a few rules were added to the repair, and the store has 1,209 profiles more (12,465). The table-cell recall of the readable tables rose from 91.4 to 93.4 % (13,099 cells in 240 tables; counting the 10 garbled tables that are still skipped it is 79.4 %). On the independent leaderboard key coverage rose from 95.8 to 98.4 % and found-and-right from 75.8 to 80.6 % (a development number: the key's gaps were read to find these changes; 5 of its rows joined the denominator because the benchmark list learned their spelling, 501 -> 506); on MetaLead coverage went from 89.8 to 90.1 % and end to end from 63.4 to 63.6 %. On a fresh random sample drawn from the final store after the last change (E6), 92 of 99 profiles are completely right on the lenient reading (92.9 %, interval 86-97, field F1 99.0) and 58 of 99 (58.6 %, 49-68) on the strict one: the first lenient figure above 85 %, and still a strict one far below it. The whole evaluation pass repeated gives the same results as the pass before on every measure but one (the gold page among the answer's sources 89.3 -> 85.7 %, one question of 28, inside the range of the eight earlier passes).****
+
+*How it was found.* The results of the Papers with Code list that are printed in the papers but not in the store (4.9, 21 of 501), and the chunks with the lowest cell recall
+(`scripts/cell_recall.py`), were read one by one. Most of what was missing came from a handful of layouts that the reader did not know, and from one defect that touched every dense
+table:
+
+1. **The output cap (the largest effect).** One extraction call could write at most 3,000 tokens. A profile with its verbatim evidence is about 86 tokens and a view holds up to 36
+   results, so the reply of every full view was cut and its last result (sometimes the last two) was lost: T5's Table 14 lost the ROUGE-L of T5-11B in three readings in a row, and a
+   test call kept 35 of 36 results with `truncated = 1`. The completion sweeps of 12 Oct could not repair it, because the same view was cut at the same place. 208 of the 566 views of
+   the readable tables have 31 results or more (101 chunks). The cap is now 4,500 tokens (the prompt still fits the 8,192-token context), the number of parallel workers matches the
+   server's two slots (with 8 workers the requests queued past the 240 s request timeout on dense tables and one timeout ended a paper; a failed view now costs only itself), and the
+   99 chunks with such a view were read again with `rescue_garbled.py --complete`, which adds only the results whose number is not stored, with new ids (the labelled Stage 7
+   pairs refer to profile ids; `pair_ids_check.py`: 600 references checked, 0 changed). It added 124 results.
+2. **A table printed as one row of whole columns** (DistilBERT's Table 2: "| Model BERT-base DistilBERT DistilBERT (D) | IMDb (acc.) 93.46 92.82 - | SQuAD (EM/F1) 81.2/88.5 ... |
+   Model ELMo ... | # param. ... |": every cell is a header followed by the values of its column, two tables side by side). One row is not a table for `parse_table`, so the chunk was never
+   read and "DistilBERT on IMDb" got a scope warning. `tables.unglue_columns` turns such a row into a header and k rows when EVERY cell is explained (a label cell whose words make
+   exactly k labels, value cells with exactly k values each) and drops a group whose columns are all statistics (parameters, time). It is the only such chunk of the 28 papers; the
+   table now gives 8 results (IMDb 92.82; SQuAD EM 77.7, F1 85.8; BERT-base and the distilled variant).
+3. **GPT-3's per-size appendix table H.1** (565 + 563 + 201 numbers in three chunks, skipped as garbled): several size columns in one cell ("Med Large" over "43.6 51.0"; "XL 2.7B 6.7B
+   13B 175B" over five numbers), a header word cut across two cells ("Med Larg" | "e XL ..."), two result rows printed as one (LAMBADA's accuracy and perplexity: every cell then holds
+   k x m numbers, row by row), glued numbers ("68.073.0") and lost decimals ("455") in some rows. `tables._scaling_table` reads a row only when EVERY cell of it is explained by
+   the names row (k x m clean numbers, k the same in all cells), cuts only glued numbers of one fixed width (two digits and one decimal), drops every other row instead of guessing, and
+   reads the table at all only when the three settings name the same sizes. The model family that the paper's text writes with its sizes (`profile_extractor.size_family`: "GPT-3")
+   is written into the columns ("GPT-3 Small (Zero-Shot)"): a first reading without it gave "Small", "Med" and "175B" as models, and 145 of the results were dropped as no system. The
+   result: 906 results from 36 of 59 of the table's rows; the values that the leaderboard key listed and the store lacked are there (LAMBADA 70.3 and 67.1 accuracy, 3.56 and 4.60
+   perplexity, HellaSwag 51.0, StoryCloze 72.4, ReCoRD 82.1, COPA 73.0 and 91.0). The continuation chunks of a long table repeat only the first header row, and the chunker's header
+   measure stopped at this names row because its cells are wider than a sub-header: the second and third chunk had no names row at all. `_is_subheader` knows such a row now (new papers
+   are cut correctly), `tables.with_carried_headers` gives the extractor the names row of the chunk before, and `scripts/fix_continued_headers.py` repaired the 5 stored chunks that
+   were cut without it (the two GPT-3 chunks and three of T5's garbled Table 16: text and vector updated, ids and profiles unchanged).
+4. **A group label cut in two over a family of columns** (LLaMA's MMLU Table 16: "LLa" | "MA" over 13B | 33B, the 7B and 65B columns blank). The header read "LLa 13B", "MA 33B", "MA
+   65B", and the extractor dropped every result of LLaMA 33B and 65B as the piece of a row label (54 of the table's 368 results); the unit test written for the first fix even asserted "MA
+   65B" as the expected header. The whole word goes over the first column of its family when another cell of the row spells it ("LLaMA-I"); the table has 407 profiles instead of 298.
+5. **A data set name cut across two header cells** ("SQuA EM" | "D 1.1 F1": stored as the data set "D", 16 results of TinyBERT's Table 6; "SQu EM" | "AD 2.0 F1"; "MASSIV" | "E
+   (Intent)"): completed from the benchmark list of `knowledge/` (not only from a word that the table spells whole elsewhere), and the version that follows the cut part is written into
+   both columns ("SQuAD 1.1 EM", "SQuAD 1.1 F1"). Five chunks read differently after this; three of them are labelled-pair chunks and were not read again.
+6. **Bare numbers as row labels** (T5's Table 7, span lengths 2, 3, 5 and 10: 7 of 35 results kept): a row label that is a number is "no system" for the junk filter. A level of a
+   factor now carries the factor's name from the header ("Span length 3"); the table has 35 results.
+7. **Rules in the repair** (`repair.py`): a WMT column whose header names only the language pair and whose stored measure is a generic word ("score", "accuracy") is scored by BLEU
+   (208 profiles; E5's F031); the metric "Avg" of a cell that sits in a data set's column of a table that also has an "Avg" column is not that average (64 profiles; Llama 2's AGI
+   Eval table, E5's F039 and F100); a spelling that differs by one or two letters from the label of its own table row, where the label is a known benchmark, is corrected ("LAMBDA" for
+   "LAMBADA": 30 profiles); a caption that says "the effects of" marks an ablation table (SpanBERT's Table 7, E5's F007); a run of header letters glued into a model label is cut
+   off (18 profiles). The leaderboard's spellings of Yelp and the WMT pairs are known names now ("Yelp Fine-grained classification", "WMT2014 English-German"): five rows of the key
+   joined the printed-and-listed set because of that (501 to 506).
+
+*What was read again* (`stage_reread_oct12f.sh`, `stage_complete_oct12f.sh`, `final_oct12f.sh`; logs in `data/index/_logs/`): DistilBERT's Table 2 (8 results; the ablation chunk next to it gave 3 more), GPT-3's Table H.1 (906 results of 36 rows: 854 at the first complete reading, 52 more when the glued COPA / CB rows were cut), TinyBERT's Table 6 (30 results again, now named SQuAD 1.1 / 2.0), LLaMA's Table 16 (298 -> 407), T5's Table 7 (7 -> 35), the 99 chunks with a dense view (+124) and, before the output cap was found, a sweep of 38 partly read chunks (+31). The store has 12,465 profiles instead of 11,256; the overlay of the repair changes 7,374 of them (59.2 %), the cards are 302.
+
+| Measure (AI-annotated key unless it says otherwise) | before (store of `oct12e`, 12 Oct 18:45) | after (store of `oct12f`, 12 Oct 22:00) |
+|---|---|---|
+| Profiles in the store / changed by the overlay | 11,256 / 6,805 (60.5 %) | 12,465 / 7,374 (59.2 %) |
+| Retrieval cards | 297 | 302 |
+| Readable result tables / decimal cells / cells with a profile | 236 / 12,147 / 91.4 % | 240 / 13,099 / 93.4 % |
+| Garbled tables still skipped (decimals in them) | 13 (3,506) | 10 (2,305; T5's Table 16: 2,199) |
+| Leaderboard key (22 papers): printed and listed / coverage / found and right | 501 / 95.8 % / 75.8 % | 506 / 98.4 % / 80.6 % |
+| ... names agree on the found: data set / metric / model / all three | 94.0 / 85.4 / 94.4 / 79.2 % | 96.0 / 85.9 / 95.4 / 81.9 % |
+| ... found and right on the development / the set-aside papers | 78.6 / 73.9 % | 81.6 / 80.0 % |
+| MetaLead (human gold): coverage / data set / metric / task / all three / end to end | 89.8 / 84.4 / 91.2 / 85.8 / 70.5 / 63.4 % | 90.1 / 84.6 / 91.3 / 85.8 / 70.6 / 63.6 % |
+| Clean random sample, completely right lenient / strict | E5: 79.8 / 42.4 % (drawn before the changes) | E6: 92.9 / 58.6 % (drawn after them) |
+| Stage 6 scope warning (30 gold questions), silver regression, out-of-corpus warnings | 19 / 0 / 0, F1 100.0; 32 of 32; 20 of 20 | the same |
+| Gold page among the answer's sources / right paper | 89.3 / 96.4 % | 85.7 / 96.4 % |
+| Answers right of 9: original key / corrected key | 7 / 9 | 7 / 9 |
+| Stage 7 replay of the 300 labelled pairs (always EXPLAINED: 244) | 267 | 267 (26 of 52 not-comparable found, 8 GENUINE calls) |
+| Unit tests | 317 | 334 |
+
+*What this does not show.* The changes were found by reading the leaderboard key and the errors of E5, so their effect on those two is a development number. The labeller of E6 is the author of the rules and reads with the same policy as before (a value that is true but vague is "imprecise": lenient counts it right, strict wrong); one AI labeller, no kappa, n = 99, interval about +-5 points. E5 (79.8 / 42.4 %, drawn before these changes) is a development set now: its errors were part of what was fixed, so the two figures are not a before / after of the same profiles. The failures of E6 (7 of 99) are listed in the summary of the sample: four model names that a vertical label or a block heading broke ("L C", "Pretrained", a Falcon with a 30B that belongs to MPT), the metric and size of ELECTRA's merged "MRPC STS" column, a MMLU subject stored as the data set, and two prose sentences (a placeholder model, a human-study figure). The cell recall counts the readable tables; with the 10 garbled tables that are still skipped (2,305 decimals, 2,199 of them T5's Table 16) it is 79.4 %. The sample says nothing about papers that are not in the corpus.
+
+*A live probe of the new table* (the API, 12 Oct 23:10, three questions about GPT-3 sizes): "zero-shot accuracy of GPT-3 175B on HellaSwag" was answered 78.9 from the table; "few-shot accuracy of GPT-3 175B on LAMBADA" and "LAMBADA perplexity of GPT-3 13B zero-shot" retrieved only main-text chunks, and the second was answered with the 175B figure (3.00; the table has 3.56 for 13B). The profiles are there; a question that names a size was not ranked by size, so the profile signal of 4.7d, which adds such a chunk, was tested on 24 generated lookups and turned on (4.7d, update: the table among the sources for 10 questions instead of 6). "DistilBERT on IMDb" is answered 92.82 from the new table with no scope warning (it had one before).
+
 
 ### 4.2 Question understanding (Stage 1, the same 30 questions)
 
@@ -521,6 +897,66 @@ labeller, the same that wrote the rules; the pairs come from the same GLUE / SQu
 83.8 in the RoBERTa paper against 85.9 in the DeBERTa paper, two versions of the same result) is read by Stage 7 as a difference of setting ("single-task vs dev set");
 the NOT COMPARABLE class of fresh-3 is small (4 pairs), so its macro-F1 moves by a few points with a single pair.
 
+### 4.5g Stage 7 compares settings by kind (11 Oct; error analysis on five sets, clean test on a sixth)
+
+**Verdict: reading the 30 wrong verdicts and the 81 wrong condition names of the shipped Stage 7 over the first five labelled sets (28 and 59 after the change) showed
+one general cause that was independent of the stored profiles: two settings were compared as whole tag sets, so "single-task single-model dev set" against "dev set",
+or "zero-shot" against "test set", counted as a difference of setting. Comparing settings by kind (split, system kind, regime, domain) and calling a condition
+one-sided only where an informative tag is stated by one paper and not by the other gave, on those five sets (development numbers: all were read), 220 -> 222 of
+250 pairs right, the exact naming of the explaining condition 58.5 -> 69.7 %, the real contradictions found 0 -> 2 of 3, and the same 5 false GENUINE calls. The
+rule was then frozen, a sixth set of 50 new pairs (fresh-4) was built and labelled blind to the system, and scored once: 45 of 50 right (90 %) against
+44 for the 10-11 Oct rule and 43 for "always EXPLAINED", macro-F1 74 against 41 and 31, the one real contradiction of the set found with no false GENUINE call
+(the Gemma 12B judge: 9 GENUINE calls, 8 false; 37 of 50 right), naming 72 % against 65 % exact
+(81 against 75 with partial credit). Over all 300 labelled pairs: 267 right (89.0 %) against 264 before, 244 for
+"always EXPLAINED" and 197 for the judge; 8 GENUINE calls, 3 of the 4 real contradictions found and 5 false calls in 296 (1.7 %) against 48 false
+calls of the judge in 296 (16 %).**
+
+| Set (50 pairs each) | pairs right (macro-F1), before -> after | GENUINE calls | naming exact % | naming Jaccard % |
+|---|---|---|---|---|
+| first 50 (development) | 46 (92) -> **46 (92)** | 2 -> 2 | 54 -> **68** | 71 -> **81** |
+| held-out 50 (development) | 41 (30) -> **43 (58)** | 1 -> 3 | 63 -> **71** | 78 -> **84** |
+| fresh 50 (development for grounding) | 40 (73) -> **40 (73)** | 2 -> 2 | 62 -> **79** | 78 -> **90** |
+| fresh-2 50 (clean test of grounding) | 47 (90) -> **47 (90)** | 0 -> 0 | 46 -> **59** | 68 -> **78** |
+| fresh-3 50 (clean test of the repair) | 46 (51) -> **46 (51)** | 0 -> 0 | 66 -> **73** | 80 -> **82** |
+| **fresh-4 50 (clean test of this rule, labelled after it was frozen)** | 44 (41) -> **45 (74)** | 0 -> 1 | 65 -> **72** | 75 -> **81** |
+| **all 300** | 264 -> **267** | 5 -> 8 | 59.7 -> **70.2** | 75.1 -> **82.4** |
+
+*What the analysis found.* (1) **Setting differences between different kinds of setting.** The key lists the setting as a difference only where the two papers
+disagree about the same thing. 40 of the names the system gave were setting differences that the key does not list, among them "fine-tuned" against "single-task",
+"zero-shot" against "test set" (the mBERT results of the multilingual tables) and "single dev set" against "dev set". (2) **The three real contradictions of the
+first five sets were read as setting differences.** OpenAI GPT's RTE and CoLA test scores (56.0 against 69.1; 45.4 against 47.2: "single model test set" against
+"fine-tuned test set") are two papers' numbers for one system on one split; with the kinds compared separately both are GENUINE. The third (XLNet-large on RTE,
+"single-task" against "dev set") stays EXPLAINED: one paper states the split and the other does not, which is a condition that is recorded for one paper only.
+The fresh-4 contradiction is the same kind of pair (XLNet-large RTE on dev, 83.8 against 85.9, quoted from two papers) and is found because both profiles state
+the split. (3) **The rest of the wrong verdicts are not a matter of rules.** Of the 28 wrong verdicts of the first five sets, 21 are pairs that the key calls NOT
+COMPARABLE (19 read as EXPLAINED, 2 as GENUINE), 18 of them flagged by the labeller as extraction errors: garbled numbers (1.4 for 91.4, 8.4 for 86.5, 13.0 as a
+gain), models that are other systems than their label, F1 stored next to accuracy; the fresh-4 set has the same six (F1 of the test server against an accuracy of
+dev, a part of a bracketed cell, a number read from prose), of which the system finds one. Five candidate rules were tried on the first five sets and dropped: a
+value ratio above 4 to 1 as a sign of an extraction error (right on 4 pairs, wrong on 3 that the key calls EXPLAINED), the metric word of the table column (it is
+not in the headers of these pairs), and three conventions for naming one-sided conditions (the exact match falls from 69.7 to 67, 65 and 58 %).
+
+*The rule.* `conditions.setting_differs` compares the tags of two settings kind by kind (which split, one system or an ensemble, how the model was used,
+in or out of domain) and only in a kind that both state; `unrecorded_conditions` calls a setting one-sided when one paper states an informative tag (split,
+ensemble, zero-shot, translate-*, feature-based) that the other does not, where "single" and "fine-tuned" are the unmarked default and add nothing; a language
+counts as a recorded condition for the multilingual data sets (XQuAD, MLQA, TyDi QA, XNLI, PAWS-X, WikiANN, UDPOS, Tatoeba, IndicXNLI ...), since a result
+without a language is one of their languages. Switch: `[contradiction] setting_dimensions` (on); off restores the 10 Oct comparison.
+
+*Naming, split into what is found and what is added (11 Oct; scoring change, no change of the system).* The exact-match figure above counts a pair as right only
+when the system names exactly the key's set of conditions. Split by pair (the 238 pairs in which key and system both say EXPLAINED; the Gemma judge has 193 such pairs, so its row is
+not on the same pairs): the system names **all** conditions of the key for **84.5 %** (201 of 238; before the settings rule 75.6 %, Gemma 12B 39.4 %), names exactly the key's set
+for 70.2 % (59.7 % before, Gemma 36.8 %), names a condition beyond the key for 19.3 % (policy B names a one-sided condition as a probable explanation, the key lists
+only the one the labeller took to explain), and has a mean recall of 89.8 % and a mean precision of 87.8 % over the key's and the system's conditions. So the "70 %" of the
+exact match is mostly extra names, not missed ones; the 15.5 % of pairs in which a condition of the key is not named are, as in the five-set breakdown of the limits below, mostly conditions that no
+stored profile records (a model size). Still development numbers (the rule was found on five of the six sets), one labeller, and an "all named" rate that is below the 85 % that was
+asked for.
+
+*Limits.* One labeller (the one that wrote the rule), the pairs of fresh-4 come from the same GLUE / SQuAD table families as the earlier sets (the clean test
+shows new pairs of this corpus, not new table layouts), four real contradictions in 300 pairs (finding 3 of 4 is not evidence of a rate; the false-alarm count
+of 5 in 296 is), a gap of 2 pairs to "always EXPLAINED" on fresh-4 that is not significant by itself (the signs are 2 against 0, p = 0.5): on this set the evidence is the macro-F1 and the real contradiction found. The "unmarked default" is a
+convention about how papers write settings. The naming metric is the key's exact set of conditions (dev and test counted as one name); on the first five sets 30
+of the 59 remaining mismatches are names the system adds beyond the key (a one-sided setting next to a one-sided size), 21 are conditions it misses, mostly a model
+size that no profile records, 8 name a different condition.
+
 ### 4.6 Claim 4: do the profile parts hurt answer quality? (key B, 9 answerable questions with numbers)
 
 **Verdict: no difference (parity), and both pipelines are far above the language model alone; the sample is too small for more.**
@@ -657,6 +1093,167 @@ a false scope warning is most likely; `[features] joint_setting = false` restore
 
 Paired sign tests over the 30 questions, the shipped Stage 6 against the LLM judge 4 won / 1 lost (p = 0.375); the 30 September version 15 won / 1 lost (p < 0.001); plain RAG 19 won / 1 lost (p < 0.001). The LLM judge and Stage 6 are still within the noise of 30 questions, the earlier version without the joint check is clearly worse, and what the shipped Stage 6 adds over the judge is the named missing condition (19 of 19; the judge only says yes or no).
 
+### 4.7d Three retrieval levers tried after the repair, none adopted on 11 Oct (the profile signal adopted on the evening of 12 Oct, see the update at the end)
+
+**Verdict: the repaired cards had lowered the reranker's top-5 hit on the 28 gold evidence pages from 85.7 to 78.6 % (section 4.7c). Three levers were tried against
+that, all switchable, all judged on the same 28 gold questions and, for the ranking ones, also on 190 store-made questions: seven passages for the answer writer
+instead of five, a fourth ranking in Stage 4 that lists the chunks whose profiles record the named model, data set and language together, and a fusion of the
+cross-encoder score with the Stage 4 rank. The best of them gains one or two questions of 28 (sign tests p >= 0.5), each costs something, so the shipped
+defaults stay (5 passages, no profile signal, cross-encoder order alone). The end-to-end figure that matters, the gold page among the answer's sources, stays at
+85.7 % (24 of 28); the retrieval stage's own top 5 stays at 78.6 % on the gold pages (96.8 % on the 190 store-made questions, which are circular).**
+
+*Passages for the writer and the profile signal, the whole system* (API for the sources and the out-of-corpus questions, in-process pipeline for the Stage 6 and the
+answer runs; 28 gold questions for the sources, 30 for Stage 6, 9 answerable ones for the answers; the answer model samples at temperature 0.2):
+
+| Measure | default: 5 passages, no profile signal | 7 passages | 7 passages + profile signal | 5 passages + profile signal |
+|---|---|---|---|---|
+| Gold page among the answer's sources, % (partly covered, n = 10) | 85.7 (80.0) | 89.3 (90.0) | 89.3 (90.0) | 85.7 (80.0) |
+| Right paper among the sources, % | 92.9 | 92.9 | 92.9 | 92.9 |
+| Mean number of sources | 5.21 | 6.68 | 6.79 | 5.29 |
+| Median seconds per question (sources run) | 10.4 | 11.8 | 12.6 | 11.1 |
+| Out-of-corpus questions that end with a warning, % of 20 | 100.0 | 100.0 | 100.0 | 100.0 |
+| Stage 6 scope warning: TP / FP / FN | 19 / 1 / 0, F1 97.4, named 19 of 19 | 19 / 1 / 0, F1 97.4, named 19 of 19 | 19 / 1 / 0, F1 97.4, named 19 of 19 | 19 / 1 / 0, F1 97.4, named 19 of 19 |
+| Answers right of 9, original key: full / without stages C, 6, 7 / LLM alone | 6 / 5 / 0 | 6 / 5 / 0 | 6 / 5 / 0 | 5 / 4 / 0 |
+| Answers right of 9, corrected key (not held-out) | 8 / 7 / 0 | 8 / 8 / 0 | 8 / 8 / 0 | 7 / 6 / 0 |
+| Claims the critic supports: full / without stages C, 6, 7 | 0.978 / 0.944 | 0.936 / 0.880 | 0.824 / 0.741 | 1.000 / 0.887 |
+| Numbers named per answer (full) | 7.44 | 7.33 | 5.67 | 7.33 |
+| Seconds per answer (full, in-process) | 8.27 | 10.7 | 10.22 | 9.18 |
+
+*What it shows.* (1) **Seven passages** put the gold page of one more question among the sources (24 to 25 of 28: a partly covered comparison), at 1.4 s more per
+question (10.4 to 11.8 s) and with a lower share of supported claims (0.978 to 0.936 with the profile stages, 0.944 to
+0.880 without them). The answers do not change (8 of 9 on the corrected key either way). One question of 28 is a sign test of 1 to 0, p = 1.0.
+(2) **The profile signal** does not move the end-to-end figures at 5 passages (85.7 %, as before; the answers 7 / 6 / 0 of 9 on the corrected key, one question lower, which is
+sampling noise of the answer model) and not at 7 (89.3 %, the same as without it, with the lowest share of supported claims of the four runs, 0.824). Retrieval
+alone, the reranker's top 5 on the 28 gold pages with the raw question as the only query: signal off 78.6 %, with the signal
+and 4 / 8 / 12 / 20 chunks 78.6 / 82.1 / 78.6 / 82.1 % (the page among the 20 candidates 92.9 % off,
+92.9 / 96.4 / 96.4 / 96.4 % on): at most one question, and not in a way that grows with the number of chunks. (3) Everything else is unchanged: the scope
+warning (19 / 1 / 0, F1 97.4, the condition named 19 of 19), the out-of-corpus warnings (20 of 20; the weak flag alone 45 %) and the right paper (92.9 %). Claims
+supported ranges from 0.82 to 1.00 across the four runs; it is the mean of nine answers' shares and moves with the answer model's sampling, and no pattern is visible that outlasts that.
+
+*Fusing the cross-encoder with the Stage 4 rank* (`scripts/eval_rerank_fusion.py`; the same 20 candidates per question and the raw question as the only query; z = both
+scores z-scored inside the question's candidates and added with the weight w for the Stage 4 score, rank = Reciprocal Rank Fusion of the two orders; the grid and
+the rule "choose the weight on the 190 store-made questions, use the 28 gold questions as the check" were written into the script before it ran):
+
+| Order | 190 store-made: top 5 % (MRR) | gained / lost against the cross-encoder | 28 gold: top 5 % (MRR) | gained / lost |
+|---|---|---|---|---|
+| cross-encoder alone (shipped) | 96.8 (0.842) | - | 78.6 (0.585) | - |
+| Stage 4 rank alone | 85.8 (0.671) | 1 / 22 | 71.4 (0.423) | 1 / 3 |
+| z, w = 0.25 | 96.8 (0.859) | 1 / 1 | 82.1 (0.571) | 1 / 0 |
+| z, w = 0.5 | 96.3 (0.85) | 1 / 2 | 85.7 (0.601) | 2 / 0 |
+| z, w = 1 | 94.7 (0.802) | 1 / 5 | 78.6 (0.607) | 1 / 1 |
+| z, w = 2 | 93.7 (0.769) | 1 / 7 | 75.0 (0.534) | 1 / 2 |
+| rank fusion, Stage 4 weight 0.5 | 96.3 (0.853) | 1 / 2 | 85.7 (0.629) | 2 / 0 |
+| rank fusion, Stage 4 weight 1 | 95.3 (0.809) | 1 / 4 | 85.7 (0.593) | 2 / 0 |
+
+On the 190 store-made questions the cross-encoder alone already holds the relevant chunk in its top 5 for 96.8 % and no fusion raises that (the best, w = 0.25, ties it
+with a slightly higher MRR; every larger weight is lower). On the 28 gold questions three orders reach 85.7 % (z with w = 0.5, both rank fusions: 2 gained, 0 lost, p = 0.5),
+but the weight that the rule fixed beforehand picks (w = 0.25, best on the larger set) reaches 82.1 % (1 gained, p = 1.0), and choosing the best of eight orders on
+the 28 questions would be selecting on the test set. Pooled over both sets the 0.5 weight gains 3 questions and loses 2. The Stage 4 rank alone is clearly worse than the
+cross-encoder (85.8 against 96.8 %, 22 questions lost for 1 gained), so the cross-encoder carries the order.
+
+*Limits.* The three levers were chosen because the top-5 figure fell on these 28 questions, so every number here is a development number; 28 and 30 questions and 9 answers
+cannot show a difference of one question; the 190 store-made questions are built from the same repaired store that defines "relevant" (they were 93.1 % on 10 Oct on the
+raw store, a different set of questions and not comparable); the gold pages were written by the AI that wrote the questions. What would settle the question is a larger
+set of gold questions with page evidence, not another rule. Results `eval/labels/sources_gold.{top7,top7sig,top5sig}.json`, `absent_flagged.*`, `questions_gold.*_main.*`,
+`answer_quality_gold_b.*`, `retrieval_gold.signal_*.json`, `rerank_fusion.json`; switches `[retrieval] generate_top`, `profile_signal`, `profile_k`.
+
+**Update 12 Oct, evening: the profile signal is ON by default now.** After GPT-3's per-size appendix table was read (4.1i), a live probe showed that a question which names a size ("LAMBADA perplexity of GPT-3 13B, zero-shot") retrieved only main-text chunks and was answered with the 175B figure. `scripts/eval_size_lookup.py` makes such table lookups in bulk from the stored results of that table (24 questions, one per data set and measure, sizes other than 175B drawn six times as often; the key is the printed cell; the answer counts when it contains the number): with the signal off 7 of 24 answers carry the number and the table is among the sources for 6; with it on 11 of 24 and 10 (five questions gained, one lost, sign test p = 0.22: the direction is clear, the evidence is small). On the 30 gold questions nothing changes (gold page among the sources 85.7 %, right paper 96.4 %, scope warning 19 / 0 / 0, silver 32 of 32, out-of-corpus 20 of 20, answers 7 of 9 and 9 of 9 on the corrected key, 5 and 8 without Stages C / 6 / 7) and the median time per question rises by 1.2 s (9.4 -> 10.6 s end to end). The three levers of this section were measured on the store of 11 Oct, where no table needed a size; this is the first test with one that does. A departure from the architecture (a fourth ranking from the profile store); `[retrieval] profile_signal = false` in `config.local.toml` ablates it. Result files: `eval/labels/size_lookup.sizes_off.json`, `size_lookup.sizes_signal_on.json`, `*.sizes_signal_on.*`.
+
+### 4.7e One more repair rule (`language_order`) and the whole pass repeated on it (11 Oct)
+
+**Verdict: the one scope warning that was still false on the 30 gold questions (B-AI-07, "mBERT's accuracy on IndicCOPA for Hindi and Tamil") was not a matching
+error but a stored-profile error: in the second half of the stacked IndicCOPA table (Table 17 of 2212.05409) six of mBERT's nine results carried the wrong
+language, because each of those numbers also stands in another cell that the value-based rule cannot rule out (51.8 three times in the same row) and the rule must not guess. A new rule
+reads those languages from the order in which the extractor wrote the results. It changes 25 stored languages (4 tables of 2 papers), each checked by hand
+against its table, and none in the benchmark store, so the clean sample E2 is untouched. With it Stage 6 on the 30 gold questions is 19 / 0 / 0, F1 100.0, condition named 19 of 19 (before:
+19 / 1 / 0, F1 97.4, condition named 19 of 19), the false warning rate 0.0 % (before 9.1 %), the silver regression stays 32 of 32, and nothing else moves beyond noise. A development number: the
+rule was found by reading this one question.**
+
+| Measure (the whole pass of 4.7c, repeated; AI-annotated key) | before the rule (`oct11f`) | after (`oct11g`) |
+|---|---|---|
+| Stage 6 scope warning TP / FP / FN | 19 / 1 / 0, F1 97.4, condition named 19 of 19 | **19 / 0 / 0, F1 100.0, condition named 19 of 19** |
+| False warnings among the 11 answerable questions | 9.1 % | **0.0 %** |
+| LLM judge on the same questions (Gemma 12B, unchanged) | 16 / 1 / 3, F1 88.9 | 16 / 1 / 3, F1 88.9 |
+| Silver regression (32 store-made scope questions) | 32 of 32 | 32 of 32 |
+| Stage 1 conditions, micro-F1 | 95.0 | 95.0 |
+| Retrieval: page in the top 20 / top 5 / right paper in the top 5 (%) | 92.9 / 78.6 / 89.3 | 92.9 / 78.6 / 89.3 |
+| Sources: gold page / right paper among the answer's sources (%) | 85.7 / 92.9 | 85.7 / 92.9 |
+| Out-of-corpus questions that end with a warning | 20 of 20 | 20 of 20 |
+| Answers right of 9 (original key): full / without stages C, 6, 7 / LLM alone | 6 / 5 / 0 | 6 / 4 / 0 |
+| Answers right of 9 (corrected key; not held-out) | 8 / 7 / 0 | 8 / 6 / 0 |
+| Stage 7, 300 labelled pairs, replayed on the new store | 267 of 300 | 267 of 300 |
+
+*The rule* (`repair._order_languages`, switch `language_order`): the extractor wrote the results of a row in the order of the cells (the numbers after `#` in the
+profile ids count along the rows). So when one system's results in that order have exactly the numbers of the cells of the rows that carry its name, the k-th
+result is the k-th cell, and the cell's column names the language ("Dogri" = the gom column of the first half, which stands at the same position as the pa column of
+the second half). It is used only for a table of languages, only for a system whose row labels name it, and only when the whole sequence agrees number by number; an
+"avg" column gives no language; a result that has no language gets none added. 25 languages change: 21 in IndicCOPA (v1-data 7, mBERT 6, XLMR 6, MuRIL 2),
+2 in FLORES (Table 23), 1 in the mT5 paper's XNLI ablation table ("Belarusian" for the bg column), and one name cleaned ("Bengali (bn)"); the list with the stored
+and the new language is `eval/labels/repair_language_order.json`. The first version of the rule matched stored languages by their position in the first half's
+header; it left the three equal numbers of mBERT alone because the extractor had written "Dogri" for gom, which is no column of the table. The order version has no
+need of the stored name.
+
+*What the rest of the pass shows.* Every other row is the same up to noise: the answers of the system without stages C, 6, 7 are 6 of 9 against 7 of 9 on the
+corrected key (the same system gave 6 to 8 in five runs, 4.7c), the full pipeline 8 of 9 as before; the shipped Stage 6 against the LLM judge is now 4 won, 0 lost
+(p = 0.125; 4 won, 1 lost before, p = 0.375), against the 30 September version 15 won, 0 lost (p < 0.001): still not a significant difference from the judge on 30
+questions.
+
+*A second finding in the same question.* With the stored languages right, the live answer to B-AI-07 still said, in one of the first runs, that "the source does not
+provide a specific accuracy value for mBERT on the IndicCOPA task for Tamil" although the profile exists and Stage 6 (rightly) gave no warning. The cause is in
+Stage 8: the writer is shown at most six recorded results per source (`MAX_PROFILE_LINES`), ranked by how many of the question's conditions they satisfy, and a
+question that names two languages ("Hindi and Tamil") or two systems ("MuRIL and mBERT") had only the first of each in the ranking; the other language's result
+tied with every result that matched the model and the data set and fell behind them in a 19-column table. The ranking now counts a condition as satisfied by any of the values
+the question names (`run.requested_for_prompt`, `generate._relevance`; the Stage 6 check already looked at every named value). Three further runs of the question through
+the API all gave Hindi 49.2 and Tamil 51.8 with no warning. The nine-question answer test cannot show the effect (it has one such question): original key
+6 / 4 / 0 of 9 and corrected key 8 / 6 / 0 (the same as before the change), claims supported
+0.956 against 1.000, numbers named per answer 6.89 against 7.78 (answer sampling). Tests: `tests/test_answer_side_fixes.py` (2 new). A wrong "no result is recorded"
+sentence is still not caught by the claim critic (it skips sentences that say a result is not reported, `docs/oct1_fixes_and_metrics.md`); the repair above and this ranking remove the two causes
+found for it here, not the class.
+
+*Limits.* The rule was found by reading one question of the 30, so the new Stage 6 figure (19 / 0 / 0) is a development number, and it removes a false warning by
+correcting the stored profiles of one table; a different question could expose another. The benchmark store has no table of this shape (0 changes), so the
+rule is not tested on new papers; only 4 tables of 2 papers in the 28-paper store use it. Systems whose rows are labelled "+Samanantar" or "IndicBERT-SS" next to
+"IndicBERT" are not aligned (the label does not name them alone) and keep the languages the value rule leaves. The tests are `tests/test_repair.py` (3 new).
+
+### 4.7f The whole pass repeated nine more times (11-12 Oct): what moved, what did not, and the defects the repetitions found
+
+**Verdict: through the store changes of 11 and 12 October (the data set and citation steps, the merged-column rescue, 2,190 more profiles (12,465 in the end), the header and ablation fixes, the output cap, the
+benchmark measures) the scope warning stayed at 19 / 0 / 0 (F1 100.0, the missing condition named 19 of 19), the silver regression at 32 of 32, the out-of-corpus warnings at
+20 of 20, Stage 1 at F1 95.0-95.5, the replay of the 300 labelled Stage 7 pairs at 267 (89.0 %; "always EXPLAINED" 244). What moved: retrieval alone, gold page in the top 5, from
+78.6 % to 85.7 % (22 to 24 of 28 questions; a store effect, not significant), the gold page among the answer's sources between 82.1 and 89.3 % (one to two questions; 85.7 % in `oct12f`), and the answers
+(5 to 7 of 9 on the original key and 7 to 9 on the corrected key, 4 to 5 and 6 to 8 without Stages C / 6 / 7: noise at n = 9). The LLM judge baseline varies between runs of the same code (F1 85.7 to 94.4), so a
+"won / lost" count against it moves with the run: Stage 6 never lost (p between 0.06 and 0.5).**
+
+| Measure (AI-annotated key) | `oct11g` | `oct11i` | `oct11j` | `oct11k` | `oct12a` | `oct12c` | `oct12d` | `oct12e` | `oct12f` |
+|---|---|---|---|---|---|---|---|---|---|
+| Stage 6 scope warning TP / FP / FN | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 | 19 / 0 / 0, F1 100.0, named 19 of 19 |
+| LLM judge on the same questions (TP / FP / FN) | 16 / 1 / 3, F1 88.9; Stage 6 won 4, lost 0, p = 0.125 | 15 / 1 / 4, F1 85.7; Stage 6 won 5, lost 0, p = 0.062 | 15 / 1 / 4, F1 85.7; Stage 6 won 5, lost 0, p = 0.062 | 15 / 1 / 4, F1 85.7; Stage 6 won 5, lost 0, p = 0.062 | 16 / 1 / 3, F1 88.9; Stage 6 won 4, lost 0, p = 0.125 | 17 / 0 / 2, F1 94.4; Stage 6 won 2, lost 0, p = 0.500 | 17 / 0 / 2, F1 94.4; Stage 6 won 2, lost 0, p = 0.500 | 17 / 0 / 2, F1 94.4; Stage 6 won 2, lost 0, p = 0.500 | 17 / 0 / 2, F1 94.4; Stage 6 won 2, lost 0, p = 0.500 |
+| Silver regression (32 store-made scope questions) | 32 of 32 | 32 of 32 | 32 of 32 | 32 of 32 | 32 of 32 | 32 of 32 | 32 of 32 | 32 of 32 | 32 of 32 |
+| Stage 1 conditions micro-F1 | 95.0 (P 96.9, R 93.1) | 95.5 (P 96.9, R 94.1) | 95.5 (P 96.9, R 94.1) | 95.5 (P 96.9, R 94.1) | 95.0 (P 96.9, R 93.1) | 95.0 (P 96.9, R 93.1) | 95.0 (P 96.9, R 93.1) | 95.0 (P 96.9, R 93.1) | 95.0 (P 96.9, R 93.1) |
+| Stage 1 intent / complexity accuracy (%) | 93.3 / 100 | 93.3 / 100 | 93.3 / 100 | 93.3 / 100 | 93.3 / 100 | 93.3 / 100 | 93.3 / 100 | 93.3 / 100 | 93.3 / 100 |
+| Retrieval alone: gold page in top 20 / top 5 / right paper in top 5 (%) | 92.9 / 78.6 / 89.3 | 92.9 / 82.1 / 89.3 | 92.9 / 82.1 / 89.3 | 92.9 / 82.1 / 89.3 | 92.9 / 82.1 / 89.3 | 92.9 / 85.7 / 92.9 | 92.9 / 85.7 / 92.9 | 92.9 / 85.7 / 92.9 | 92.9 / 85.7 / 92.9 |
+| Sources: gold page / right paper among the answer's sources (%) | 85.7 / 92.9 | 82.1 / 92.9 | 85.7 / 92.9 | 89.3 / 92.9 | 85.7 / 92.9 | 89.3 / 96.4 | 89.3 / 96.4 | 89.3 / 96.4 | 85.7 / 96.4 |
+| Out-of-corpus questions that end with a warning | 20 of 20 | 20 of 20 | 20 of 20 | 20 of 20 | 20 of 20 | 20 of 20 | 20 of 20 | 20 of 20 | 20 of 20 |
+| Answers right of 9 (original key): full / without C, 6, 7 / LLM alone | 6 / 4 / 0 | 6 / 5 / 0 | 6 / 5 / 0 | 6 / 5 / 0 | 5 / 5 / 0 | 7 / 4 / 0 | 7 / 4 / 0 | 7 / 4 / 0 | 7 / 5 / 0 |
+| Answers right of 9 (corrected key; not held-out) | 8 / 6 / 0 | 8 / 7 / 0 | 8 / 7 / 0 | 8 / 7 / 0 | 7 / 7 / 0 | 9 / 7 / 0 | 9 / 7 / 0 | 9 / 7 / 0 | 9 / 8 / 0 |
+| Median seconds per question, Stages 1-6 | 3.7 | 4.0 | 3.8 | 3.8 | 3.9 | 3.8 | 3.9 | 3.8 | 3.8 |
+
+Tags: `oct11g` = after the `language_order` rule (4.7e), `oct11i` = after the data set and citation steps (4.1d), `oct11j` and `oct11k` = after the fixes of items 31-32, `oct12a` =
+after the merged-column rescue, the re-read of empty chunks and the measure rules (4.1e), `oct12c` = after the completion sweep and the header fix (4.1f), `oct12d` = after the block
+heading, ablation and lost-decimal changes (4.1g; E4 was drawn from this store), `oct12e` = after the fixes read from E4, `oct12f` = after the table layouts, the output cap and the repair rules of the evening of 12 Oct (4.1i). `oct12b` was stopped at 15:19 because the store was going
+to change and is not used. Files: `eval/labels/*.<tag>.*`; the table is `python scripts/pass_table.py <tags>`.
+
+*The server changed twice.* Ollama 0.34.4 (up to `oct11g`) to 0.35.0 (`oct11i` to `oct11k`; restart of 11 Oct 17:07) to 0.40.3 (from `oct12a`; restart of 12 Oct 13:03). After the
+first restart three of the 30 questions got another Stage 1 reading, identically in two later runs (item 33); the passes on 0.40.3 agree with the last pass on 0.35.0 on every
+measured figure but one question of the sources. Quote a result together with the server version (docs/reproducibility.md).
+
+*What the repetition found* (each fixed with a unit test, items 32-36 of section 3): Stage 6 checked a further system only with the FIRST named language (B-AI-28); Stage 1 chose
+among data set names of one length by the order of a Python set ("SQUAD" / "SQuAD"); table grounding called a card suspect after the citation step had renamed its row (P20); "GLUE
+average" was read as the data set "Average". All four were found by running the whole pass again on a changed store, not by any single test.
+
+*What the repetitions do not show.* They are 30 questions, one labeller and one machine; the counts are within noise of each other. A pass that gives the same number is evidence
+that a change did not damage THESE figures, not that it is harmless.
+
 ### 4.8 Faithfulness (RAGAS-style) and the optional rewrite loop (9-10 Oct)
 
 **Verdict: the numbers in the shipped answers are grounded. In 121 decimal numbers only one is not found in the text the answer was written from (a formatting variant, "92.70" for a recorded 92.7; a check with no language model), the Gemma 12B judge finds 90 % of the statements supported and the NLI critic of Stage 9 accepts 85 % of the claims. The independent judge (Llama 3.1 8B) gave 0.60, but a hand check showed that it misreads results tables, so that figure is not evidence about the answers. The optional rewrite loop has no demonstrated benefit: it raises the score of the judge it uses, no judge-free measure moves, and it doubles the time per question. It stays an optional switch, off by default.**
@@ -694,6 +1291,79 @@ Decision: the loop stays an optional, off-by-default switch; the shipped design 
 Limits: one run per set (the model output is not exactly repeatable, section 5); 30 questions; **no valid independent judge was found**: the only independent one was a small 8B model that failed the hand check, and a larger judge of another family (a 14B model or more) was not tried; the hand check covers three answers in detail and three more at a glance, not a sample; the number check cannot see a right number attached to the wrong model; the metrics are our re-implementation, not the `ragas` package, and are not comparable with other papers'. The first two questions were also run once as a smoke test of the scripts; that test is not part of the numbers.
 Scripts: `scripts/eval_ragas.py` (collect / judge / report), `scripts/analyze_ragas.py` (paired tests, cost, number checks); results `eval/labels/ragas_report.json`, `eval/labels/ragas_analysis.json` (aggregates only; the answers and per-question scores are private files in `data/labelling/private/ragas/`).
 
+### 4.9 An independent answer key on the 28-paper corpus: the Papers with Code leaderboards (11-12 Oct)
+
+**Verdict: this is the only answer key of the project that was not written by the author of the system. Read strictly, the store is above 85 % on four of its five figures and below it
+on the two that need all three names right. Of the 501 results of 22 of the 28 papers that a community leaderboard lists, whose exact printed form is in the paper and whose data set
+the paper names, the store holds the number for 95.8 % (480 of 501; the 10 development papers 98.1 %, the 12 set-aside papers 94.2 %). For the results found, the data set name agrees
+with the leaderboard's for 94.0 %, the model for 94.2 %, the metric for 85.4 % and all three for 79.2 %; counted over all listed results, found and right is 75.8 % (development 78.6 %,
+set-aside 73.9 %). The metric figure rests on two definitional mappings of the scorer (revision 6 below; 82.9 % without them), and a good part of the gap on the rest is the key's own
+filing conventions, not the system. The key pointed at two real defects, both closed (4.1e, 4.1f): T5's main results table had been skipped (6 of its 97 listed results were in the
+store, 91 are now) and GPT-3's SuperGLUE table had its second header block read with the first block's column names (18 of 27 profiles wrong, now 36 right). Without the two
+rescued tables, coverage would be 78.8 % and found and right 59.9 %.** All numbers: "against a leaderboard that the community filled, 22 papers, one matcher written by the author of
+the repair".
+
+*What the key is.* The archive of paperswithcode.com of 28 July 2025 (`pwc-archive/files` on Hugging Face, CC-BY-SA-4.0; `jul-28-evaluation-tables.json.gz`, 21.8 MB, kept in
+`data/bench/pwc/`, git-ignored): 155,456 leaderboard rows, each (task, data set, metric, model, number, paper). Rows are matched to our papers by title (22 of 28 papers have rows; 802
+(row, metric) items). It is used only to evaluate and to find errors, never to fill or overwrite a stored field: a new paper has no leaderboard row, and doing so would make the key
+the answer. `scripts/eval_pwc_gold.py` scores it; the matchers are those of the MetaLead scorer (`eval_metalead.py`) after Papers with Code's conventions are mapped onto the paper's
+("SQuAD1.1 dev" is SQuAD 1.1, "MultiNLI" is MNLI, "MML" is MMLU, "Matched" is a split and not a metric, "(BPC)" is the metric's abbreviation, "Ens." is "Ensemble"). The papers are
+split into development and set-aside halves by a hash of the arXiv id, decided before the first run (`--split`). "Set aside" is weaker than it sounds: T5 and ELECTRA fall in that half
+but were read while the rescue was designed, and GPT-3 and Llama 2 were read while the completion sweep and the header fix were designed, so for those four papers the half is not clean.
+
+*What counts as a listed result.* A row belongs to the paper that introduced the MODEL, so a leaderboard lists BERT on a stock-market data set, PhotoChat or MultiTQ under the BERT
+paper: a third party's result that nobody can find in the paper. A row is therefore counted only when the paper names the data set, the measure is about quality (not "Number of
+params"), and the number is printed in the paper in the leaderboard's own digits (a value with three or more decimals, a test-server figure such as 87.433, may be printed rounded to one
+or two decimals; a fraction such as 0.925 may be printed as 92.5). That leaves 501 of the 802 items.
+
+*The scorer was revised six times; every revision is a change of the measurement, none a change of the system, and every one of them raised the numbers.* This is the list, so that a
+reader can see how much of the movement is the yardstick:
+
+| Revision | When | What changed (found by reading the output) | Listed results | Found and right |
+|---|---|---|---|---|
+| 1 | 11 Oct night | first version: every row counts, "MultiNLI" is not "MNLI", "Matched" is a metric | 802 | not used (coverage 56.9 %, agreement 41 %; no file kept) |
+| 2 | 11 Oct | third-party rows removed (data set not named in the paper, metric not about quality), conventions mapped | 534 | 63.1 % (store of 10,565 profiles, coverage 87.3 %) |
+| 3 | 12 Oct | "printed" means the exact form (the integer rounding no longer counts: 13 of XLNet's server numbers had been "recoverable" although the paper never prints them) | 501 | 67.3 % (store of pass oct12a, 10,762 profiles, coverage 92.6 %) |
+| 4 | 12 Oct | "Ens.+TriviaQA" is "Ensemble+TriviaQA" (an abbreviation with a "." or "+" attached was not expanded: 6 BERT ensemble results counted as another model); Papers with Code's "MML" is MMLU (12 results) | 501 | 69.7 -> 72.9 % (same store, 11,271 profiles) |
+| 5 | 12 Oct | a stored 87.4 matches the leaderboard's 87.433 when the paper prints 87.4 (revision 3 had let such a row count as printed but still compared 87.4 with 87.433, so it was counted missing) | 501 | 72.9 -> 74.3 % (same store) |
+| (store) | 12 Oct | GPT-3 Table 3.8 and six more chunks re-read after the header fix (4.1f) | 501 | 74.3 -> 74.5 % |
+| (rule) | 12 Oct | the repair writes the benchmark's own measure (Matthews correlation, correlation) into CoLA / STS-B profiles whose paper never names it (4.1f): 81 more profiles | 501 | 74.5 -> 73.5 % (the leaderboard files CoLA under "Accuracy") |
+| 6 | 12 Oct | the leaderboard's "Accuracy" for CoLA is read as Matthews correlation (GLUE defines CoLA by it and the numbers are MCC values); a stored "correlation" agrees with a leaderboard's Pearson / Spearman correlation (less specific, not different) | 501 | 73.5 -> 75.8 % (metric 82.9 -> 85.4 %) |
+
+So revisions 4, 5 and 6 together moved found-and-right by 7 points on a store that changed by +9 profiles and one rule. They are corrections of mapping bugs and of the key's labels
+(each fixed rows that were wrongly counted against the system, and revision 6 is needed because the system became right where the key is wrong), but they were found by looking at
+disagreements, and that kind of reading only ever finds errors in one direction. The honest summary is: the system was 67-70 % on the strict key before these revisions and 75-76 %
+after them; do not quote the larger figure without the table.
+
+| Papers | listed results | coverage | data set | metric | model | all three | found and right, of all listed |
+|---|---|---|---|---|---|---|---|
+| all 22 | 501 | **95.8 %** | 94.0 | 85.4 | 94.2 | 79.2 | **75.8** |
+| development (10 papers) | 206 | 98.1 % | 96.5 | 87.1 | 93.6 | 80.2 | 78.6 |
+| set aside (12 papers; T5, ELECTRA, GPT-3, Llama 2 not clean) | 295 | 94.2 % | 92.1 | 84.2 | 94.6 | 78.4 | 73.9 |
+| all, without the two rescued tables (T5 Table 14, ELECTRA Table 8) | 501 | 78.8 % | 92.9 | 82.3 | 93.2 | 75.9 | 59.9 |
+| set aside, without the two rescued tables | 295 | 65.4 % | 89.1 | 77.2 | 92.7 | 71.5 | 46.8 |
+
+(The last two rows leave out only the chunks of the two rescued tables; the re-read of empty chunks and the completion sweep stay in, so they are not the store of 11 Oct. The
+file of the pass, `eval/labels/pwc_gold.oct12d.json`, also gives the same figures for the raw extraction before the repair overlay.)
+
+*What is left.* Results that are listed and printed but not in the store (21 of 501): GPT-3 (10: the per-size appendix table H.1 with 3 to 5 numbers in one cell, which is skipped as
+garbled and cannot be split without doubt), T5 (6: the CNN/DM ROUGE rows and two single cells), DistilBERT (3: a flattened table), BERT (1) and RoBERTa (1). The 100 disagreements among
+the 480 found: 53 on the metric only (the key's conventions: pass@1 filed as "Accuracy" 8, "% true" / "% info" for TruthfulQA 7, the bias categories of CrowS-Pairs as metrics 9,
+"accuracy" in GPT-3 and Llama 2 where the leaderboard writes "EM" 7 (the papers' own word is accuracy), RACE-m / RACE-h as metric names, "F1" against the paper's "F1a"), 19 on the data
+set only, 18 on the model only (the leaderboard lists T5-3B's MRPC and CB numbers under another size: the paper prints 90.0 for T5-3B and 90.4 for T5-11B; "Our Longformer" against
+"Longformer (12 layers)"), and 10 on both. Real errors in what is found: XLM's translation table has the pretraining variants (-, CLM, MLM) as columns and the translation directions as
+rows, and the system is stored as the nearest citation row ("Sennrich et al.", "Lample et al.") for 6 results (a transposed layout that the reader does not know); GPT-3's per-size
+appendix tables are skipped, so a number that also occurs elsewhere in the paper is matched to the wrong row (LAMBADA 4.00 against a WMT BLEU, BoolQ 60.5 against TriviaQA); the
+extractor wrote "LAMBDA" for "LAMBADA" (a spelling the paper never uses: 68 of the 11,280 profiles carry a data set name that the paper does not spell, mostly cut header words).
+Conventions, not errors: Papers with Code files MRPC and QQP under "Semantic Textual Similarity" and "Question Answering", expands "Ens." to "Ensemble", and lists "T5-XXL 11B
+(fine-tuned)" for what the paper prints as "T5-11B". The key is also wrong in places: it lists 91.9 as T5-11B's MRPC F1 where the paper prints 92.8 (the stored profile is the paper's).
+
+*Limits.* The community key is incomplete (only results somebody put on a leaderboard) and not free of errors. My matcher is looser than a human and was written by the author of the
+repair; revisions 4 to 6 show that it was still wrong in places after three readings, so a seventh reading might move the numbers again, in either direction. The data set mention
+filter drops a result whose data set the paper names differently than Papers with Code does. 22 papers and 501 results are a small sample, clustered (T5 and LLaMA hold 42 % of it, T5
+alone 97). The "all three" figure is convention-heavy and should be read with the examples above, not as an error rate. Not reached: 85 % on the three names together and on found and
+right; the remaining gap is partly the leaderboard's filing conventions (which no rule on our side can honestly remove) and partly the real defects listed above.
+
 ## 5. Repeatability
 
 The language-model parts are nearly, but not perfectly, repeatable, so a result should be shown with how often it was repeated.
@@ -729,6 +1399,10 @@ Two ideas were tried on the first set and dropped: filling the blank model sizes
 
 **11 Oct (development numbers, sections 4.1b, 4.1c, 4.5f, 4.7c).** (0) Three fixes of Stage 1 / Stage 6 / the cards after the first system run on the repaired store (item 25): N-shot settings are conditions, a named setting must be recorded together with model and data set (`joint_setting`), cards name the data set version. (1) The profile repair and its overlay table (`[features] profile_repair`, on); (2) the table reader switches the column names at a header row that is repeated in the middle of a table and joins group labels printed vertically; (3) Stage 7 policy B (`one_sided_conditions_explain`) is ON together with table grounding; (4) `CGRAG_OVERLAY` merges one more configuration file (used for the benchmark's paths). 258 unit tests pass.
 
+**12 Oct (development numbers; sections 4.1e-4.1h, 4.9, 4.7f).** (1) Reader: the merged-column rescue (T5, ELECTRA), merged result rows (DeBERTa), a second header block, cut header words put back together, a block heading under the column names is a heading, a bracketed measure joins its group label, a group label does not span a smaller model. (2) Store: chunks that had no profile read (+171), 53 partly read chunks completed (+509, new ids only), header-corrected chunks replaced (GPT-3's SuperGLUE table, LLaMA's MMLU table). (3) Repair: the measure of CoLA / STS-B (the paper's word, else the benchmark's), difference and cut metrics, the row of an ablation or factor table is a setting (`setting_ablation`), lost decimals, MNLI m / mm pairs, CoNLL by language, an ensemble block against a "single model" setting, no task for "average", no language for averages over languages, "m" / "mm" are splits, "train dev" is dev, the MMLU subject is not the data set, a difference stated in the rest of its sentence; Stage 7 reads the tag "ablation". (4) Measurement: the scorer of the leaderboard key was revised six times (4.9). Each is general and tested; each was found by reading failures of the 28-paper store, so the numbers they produce on that store are development numbers; E4 (4.1g) and MetaLead (4.1h) are the checks.
+
+**12 Oct, evening (development numbers; section 4.1i).** (5) Reader: rows of whole columns (DistilBERT), size-scaling tables with merged cells, glued tenths and carried header rows (GPT-3's appendix table), a label cut in two over a family of columns (LLaMA), data set names cut across header cells and completed from the benchmark list, bare numbers as row labels (T5's Table 7). (6) Extractor: output cap 4,500 tokens (the last result of every full view was cut at 3,000), workers matched to the server's slots, a failed view is not fatal, the model family written into size columns. (7) Repair: the WMT measure is BLEU, "Avg" on a data set's column is not the average, a spelling that differs by a letter or two from the table's own label of a known benchmark, "effects of" captions, glued header runs. Each is general and tested; each was found by reading the leaderboard key or E5, so their effect on those is a development number; E6 (4.1i) is the check.
+
 ## 7. What these numbers can and cannot show
 
 - **Independence.** One AI labeller who also helped build the system. The labels are checked against the PDFs, but a second reader could disagree on borderline cases (Stage 7's "not comparable" class and the lenient / strict question in job A are the soft spots). The second job-A sheet and the filled teammate sheets (except the second-labeller pair sheets, which are the second AI's) were made by the same labeller with the same rules; both job-C third looks are not blind and sided with the first pass on most pairs (8 of 10 and 6 of 7).
@@ -741,12 +1415,21 @@ Two ideas were tried on the first set and dropped: filling the blank model sizes
 - **Not done:** an extraction baseline on the 320 profiles of key A (the baseline exists only on the public benchmark, 4.1c); the `ragas` package itself (the RAGAS-style metrics were re-implemented, section 4.8); a larger independent judge (a 14B model or more of another family; the hand check of the 8B judge failed, section 4.8); a human second labeller; a user study of the interface (it was checked with headless Chrome scripts and looked at by the project lead only).
 - **Stage 7's accuracy is judged against a base rate of 80 %.** 201 of the 250 labelled pairs are EXPLAINED, so a rule that always says EXPLAINED scores 80.4 %. The shipped Stage 7 (table grounding + policy B on the repaired store) reaches 88.0 % over the five sets (82.5 % over the first four before the repair and policy B; the clean 10 Oct set gave 88 %, the clean 11 Oct set 92 % against 90 % for the trivial rule); its evidence of skill is macro-F1, the not-comparable pairs found (25 of 46) and the false alarms avoided, not accuracy. What is left (4.5e, 4.5f): metric mixes (F1 against accuracy), numbers read from prose, a figure that exists in two versions, and the stored profiles themselves (repaired by an overlay, not re-extracted).
 - **The fresh pair sets have one labeller.** No second labeller and no kappa; the same AI helped build the system; 9 labels of medium confidence in each. Their pairs come from a handful of GLUE / SQuAD-style tables repeated across papers, and the last set reuses profiles of the earlier ones in new pairs (4.5e): grounding is shown to generalise to new pairs of this corpus, not to new table layouts.
+- **Stage 7 by kind of setting (4.5g).** The gains on the first five sets are development numbers; the clean sixth set has one real contradiction and a base rate of 86 %, so its accuracy gain is small and its macro-F1 and false-alarm figures carry the result.
+- **The `language_order` rule (4.7e) was found by reading one gold question** and touches 25 profiles of 4 tables; Stage 6's 19 / 0 / 0 on the 30 questions is therefore a development number and the benchmark store gives no second test of it.
 - **The system-level numbers of 11 Oct are development numbers.** The three fixes of section 4.7c were found on the same 30 gold questions; the setting-bearing questions are five, so the joint-setting check has been exercised on five cases only.
 - **The repair is judged by the AI that wrote it.** Field by field, with the stored and the repaired version in random order, but the rules are known to the labeller; the human gold of MetaLead (section 4.1c) is the independent check of names, and there the repaired numbers are development numbers. The share of completely right profiles (60.6 % lenient, 39.4 % strict on the clean sample) is below the 85 % that was asked for; the remaining errors are named in 4.1b.
 - **A group, subject or subset of a data set is not recorded** (MMLU subjects, BOLD groups, RACE middle / high, GLUE diagnostic categories); two results of one table that differ only in it look the same to Stage 6 and Stage 7 (a `subset` field is not built).
 - **The plain-LLM baseline is one configuration** (windows of 6,000 characters, one prompt, one local model); a model with a long context window or an agentic reader could do better, and the benchmark authors' reference models were not re-run.
 - **Earlier silver tables** (3 October: Stage 6 100 %, answers 40 / 40) were built from the same store the system reads and are partly circular. Never quote them next to these numbers.
 - **Known extraction failure:** a result table that is made of two stacked blocks can be stored with the first block's header (IndicCOPA, Table 17 of 2212.05409: wrong languages, Tamil missing). It causes the one false scope warning that is left after the fixes.
+
+- **The leaderboard key (4.9) rests on a matcher that was revised six times after reading its output**; found-and-right moved by 7 points through revisions 4-6 on one store, and every revision raised it. A seventh reading may move it again. The key is incomplete and has errors of its own (MRPC F1, CoLA filed under "Accuracy").
+- **E3 and E4 (4.1g) are 100 and 97 results**, intervals about +-9 points, one AI labeller who wrote the rules; E4 is clean only for the changes written before it was drawn, and its "after the fixes" figure (88.7 / 54.6 %) is development material. The policy for a split that the paper states in general but the table does not (imprecise, not wrong) is more lenient than E2's, so E2 and E4 are not strictly comparable.
+- **The completion and replacement steps of 12 Oct (4.1f, 4.1g) change profiles that no hand check has seen**: 981 profiles more than the 10,275 of the frozen store; the 300 labelled pairs refer to profiles that were never replaced (600 of 600 references checked after each step).
+- **MetaLead after the sweep (4.1h)**: coverage +1.4 points, names -0.7 (the added profiles are named a little worse); the benchmark store's table-cell recall is 81.5 %, so most of the 10 % of gold results that are not found are in tables the reader does not read.
+
+* **E6 is clean only for what was fixed from E5 and the key (12 Oct, evening).** It was drawn from the final store after the last change and nothing changed afterwards, but the labeller is the author of the rules, there is one labeller and no kappa, n = 99 (about +-5 points), and the sample says nothing about papers outside the corpus. A lenient 92.9 % and a strict 58.6 % must be quoted together: the strict reading counts a group or subset of a data set that is not recorded as a field (BOLD, ToxiGen, MMLU subjects, CrowS-Pairs: 14 of the 33 vague items) as wrong, and that is not built.
 
 ## 8. How to reproduce, and how to swap in human labels
 
@@ -806,6 +1489,18 @@ python scripts/reindex_cards.py --cards raw|repaired|union             # which p
 python scripts/eval_retrieval_gold.py --chroma <index>/chroma --bm25 <index>/bm25.pkl --out eval/labels/retrieval_gold.<tag>.json --tag <tag>     # retrieval of the 28 gold pages on any index copy
 python scripts/rescore_answers_gold_b.py <answers.json> <out.json>     # the corrected key (section 3, item 16) for any run of eval_answers.py
 CGRAG_OVERLAY=config/raw_cards_oct11.toml python scripts/eval_questions.py ...     # retrieve with the pre-repair cards, read the repaired profiles (ablation overlay)
+# 11 Oct, later: the fourth fresh pair set (4.5g), the retrieval levers (4.7d) and the last repair rule (4.7e)
+python scripts/make_heldout_pairs.py --pairs 50 --seed 1020 --prefix K --name fresh4 --allow-profile-reuse --reuse-subjects --also-exclude <the four earlier keys> --people first   # fresh-4, the clean test of settings by kind
+python scripts/fill_job_c_from_ai.py --answers data/labelling/private/fresh4_first_pass.jsonl --sheet data/labelling/C_fresh4_pairs_first.xlsx --model "..." --date ... --tag fresh4-first --role "FRESH-4 FIRST PASS"
+python scripts/run_pair_baselines.py --key data/labelling/private/job_C_fresh4_key.json --out data/labelling/private/job_C_fresh4_baselines.json
+PROFILE_REPAIR=on python scripts/score_stage7_variants.py               # six sets, 300 pairs, the settings-by-kind variant and the naming split -> eval/labels/stage7_variants_repaired.json
+# retrieval levers (API stopped for the in-process runs; overlays are two-line toml files: [retrieval] generate_top = 7 / profile_signal = true / profile_k = 8)
+CGRAG_OVERLAY=<overlay.toml> python scripts/eval_answers.py --gold-b eval/labels/questions_gold.jsonl --out eval/labels/answer_quality_gold_b.<tag>.json
+CGRAG_OVERLAY=<overlay.toml> python scripts/eval_questions.py eval/labels/questions_gold.jsonl --tag <tag>_main
+python scripts/eval_retrieval_gold.py --profile-signal on|off --out eval/labels/retrieval_gold.signal_<k>.json --tag signal_<k>     # profile_k from the overlay
+python scripts/eval_rerank_fusion.py --out eval/labels/rerank_fusion.json     # cross-encoder x Stage 4 rank on 190 store-made + 28 gold questions (API stopped)
+python scripts/rescore_answers_gold_b.py eval/labels/answer_quality_gold_b.<tag>.json eval/labels/answer_quality_gold_b.<tag>.corrected_key.json
+python scripts/repair_store.py --apply ; python scripts/reindex_cards.py     # after a change of repair.py (the `language_order` rule); then the whole pass of 4.7c again under a new tag (`oct11g`)
 ```
 
 If teammates (or anyone else) ever deliver real label files, put the workbooks into `data/labelling/done/` and run the same scorers
