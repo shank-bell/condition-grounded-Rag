@@ -28,7 +28,9 @@ from cgrag.stores.profile_store import ProfileStore
 DONE = Path("data/labelling/done")
 PRIVATE = Path("data/labelling/private")
 REPAIRED = os.environ.get("PROFILE_REPAIR", "off") == "on"
-OUT = Path("eval/labels/stage7_variants_repaired.json" if REPAIRED else "eval/labels/stage7_variants.json")
+SUFFIX = os.environ.get("PAIR_BASELINE_SUFFIX", "")
+OUT_TAG = os.environ.get("STAGE7_OUT_TAG", "")
+OUT = Path(("eval/labels/stage7_variants_repaired" if REPAIRED else "eval/labels/stage7_variants") + OUT_TAG + ".json")
 FROZEN = dict(human_rows_not_comparable=False, two_metric_tasks_no_genuine=False, mnli_split_tags=False, one_sided_conditions_explain=False, table_grounding=False,
               setting_dimensions=False)
 NOALIGN = dict(setting_dimensions=False)
@@ -74,11 +76,11 @@ def main() -> None:
         "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": (fresh4_gold, json.loads((PRIVATE / "job_C_fresh4_key.json").read_text(encoding="utf-8")),
                                                                                  "system_verdict_frozen"),
     }
-    baseline_files = {"first 50 pairs": PRIVATE / "job_C_baselines.json", "held-out 50 pairs": PRIVATE / "job_C_heldout_baselines.json",
-                      "fresh 50 pairs (clean test)": PRIVATE / "job_C_fresh_baselines.json",
-                      "fresh-2 50 pairs (final clean test)": PRIVATE / "job_C_fresh2_baselines.json",
-                      "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": PRIVATE / "job_C_fresh3_baselines.json",
-                      "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": PRIVATE / "job_C_fresh4_baselines.json"}
+    baseline_files = {"first 50 pairs": PRIVATE / f"job_C_baselines{SUFFIX}.json", "held-out 50 pairs": PRIVATE / f"job_C_heldout_baselines{SUFFIX}.json",
+                      "fresh 50 pairs (clean test)": PRIVATE / f"job_C_fresh_baselines{SUFFIX}.json",
+                      "fresh-2 50 pairs (final clean test)": PRIVATE / f"job_C_fresh2_baselines{SUFFIX}.json",
+                      "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": PRIVATE / f"job_C_fresh3_baselines{SUFFIX}.json",
+                      "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": PRIVATE / f"job_C_fresh4_baselines{SUFFIX}.json"}
     chunk_text = load_chunk_index(get_settings().paths.index_dir / "chunks.jsonl").texts
     con = sqlite3.connect(get_settings().paths.profile_db)
     con.row_factory = sqlite3.Row
