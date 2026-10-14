@@ -2,7 +2,7 @@
 import numpy as np
 
 from cgrag.evaluation.baselines import (
-    ConflictJudgement, Sufficiency, differing_names, llm_conflict_verdict, plain_nli_verdict, score_warnings, sufficient_context,
+    ConflictJudgement, Sufficiency, differing_names, llm_conflict_verdict, plain_nli_verdict, score_warnings, sufficient_context, sufficient_context_records,
     taxonomy_verdict,
 )
 from cgrag.labelling.score import score_system_c
@@ -70,6 +70,18 @@ def test_the_autorater_reads_the_passages_and_an_unusable_reply_stays_silent():
     prompt = llm.prompts[0][0]
     assert "[1] passage one" in prompt and "[2] " in prompt and len(prompt) < 4000
     assert sufficient_context(StubLLM(ValueError("x")), "q", [])[0] is True
+
+
+def test_the_autorater_with_records_sees_the_stores_lines_and_stays_silent_on_a_bad_reply():
+    llm = StubLLM(Sufficiency(sufficient=True, reason="the records cover it"))
+    sufficient, why = sufficient_context_records(llm, "XLM-R on XNLI for Kannada?", ["passage one"], ["XLM-R obtains 71.5 accuracy on IndicXNLI (kn).", "mBERT obtains 58.6 accuracy."])
+    prompt = llm.prompts[0][0]
+    assert sufficient is True and why == "the records cover it"
+    assert "[1] passage one" in prompt and "RECORDED RESULTS" in prompt and "- XLM-R obtains 71.5 accuracy on IndicXNLI (kn)." in prompt
+    no_records = StubLLM(Sufficiency(sufficient=False))
+    sufficient_context_records(no_records, "q", ["p"], [])
+    assert "RECORDED RESULTS" not in no_records.prompts[0][0]
+    assert sufficient_context_records(StubLLM(ValueError("x")), "q", [], [])[0] is True
 
 
 def row(expect, warned, expected=None, named=None):
