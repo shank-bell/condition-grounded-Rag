@@ -352,6 +352,16 @@ function ActionRow({ r, onRetry, canRetry }: { r: QueryResponse; onRetry: () => 
           </>
         )}
         {total !== undefined && <> · {(total / 1000).toFixed(1)} s</>}
+        {r.faithfulness != null && (
+          <span title={`RAGAS-style faithfulness: the share of the answer's statements that the sources support (judge: ${r.faithfulness_judge ?? "unknown"})`}>
+            {" "}· faithfulness {r.faithfulness.toFixed(2)}
+          </span>
+        )}
+        {r.answer_relevancy != null && (
+          <span title="RAGAS-style answer relevancy: how well the answer fits the question (0 for an answer that says it cannot answer)">
+            {" "}· relevancy {r.answer_relevancy.toFixed(2)}
+          </span>
+        )}
       </span>
       <span className="sr-only" aria-live="polite">
         {copied ? "Answer copied" : ""}
