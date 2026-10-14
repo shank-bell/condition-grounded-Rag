@@ -120,6 +120,7 @@ class FeaturesConfig(BaseModel):
     joint_coverage: bool = False
     joint_setting: bool = True
     ragas_loop: bool = False
+    ragas_score: bool = False
     profile_repair: bool = True
     dataset_context: bool = True
 
