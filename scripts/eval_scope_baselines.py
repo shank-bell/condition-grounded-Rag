@@ -29,14 +29,15 @@ from pathlib import Path
 from ablate_stage6 import CONFIGS, build_cases, settings_for
 
 from cgrag.config import get_settings
-from cgrag.evaluation.baselines import score_warnings, sufficient_context
+from cgrag.evaluation.baselines import score_warnings, sufficient_context, sufficient_context_records
 from cgrag.evaluation.freeze import provenance
 from cgrag.labelling.sampling import load_chunk_index
+from cgrag.pipeline.conditions import claim_text
 from cgrag.pipeline.run import Pipeline
 from cgrag.stores.profile_store import ProfileStore
 
 STAGE6 = {"stage6_30sep": "baseline", "stage6_joint": "+joint", "stage6_full": "+escalation"}
-SYSTEMS = ["plain_rag", "abstain_on_weak_retrieval", "sufficient_context", *STAGE6]
+SYSTEMS = ["plain_rag", "abstain_on_weak_retrieval", "sufficient_context", "sufficient_context_records", *STAGE6]
 
 
 def load_questions(args) -> list[dict]:
@@ -82,9 +83,14 @@ def main() -> None:
         plain_s = time.perf_counter() - t0
         t1 = time.perf_counter()
         sufficient, why = sufficient_context(plain.llm, q["question"], [index.texts[s.chunk_id] for s in r.sources])
+        t1b = time.perf_counter()
+        recorded = [claim_text(p) for ps in plain.profiles.for_chunks([s.chunk_id for s in r.sources]).values() for p in ps]
+        sufficient_rec, why_rec = sufficient_context_records(plain.llm, q["question"], [index.texts[s.chunk_id] for s in r.sources], recorded)
         systems = {"plain_rag": {"warned": False, "named_missing": None, "seconds": round(plain_s, 2)},
                    "abstain_on_weak_retrieval": {"warned": bool(r.retrieval_weak), "named_missing": None, "seconds": round(plain_s, 2)},
-                   "sufficient_context": {"warned": not sufficient, "named_missing": None, "reason": why, "seconds": round(plain_s + time.perf_counter() - t1, 2)}}
+                   "sufficient_context": {"warned": not sufficient, "named_missing": None, "reason": why, "seconds": round(plain_s + t1b - t1, 2)},
+                   "sufficient_context_records": {"warned": not sufficient_rec, "named_missing": None, "reason": why_rec, "recorded_results_shown": len(recorded),
+                                                  "seconds": round(plain_s + time.perf_counter() - t1b, 2)}}
         for name, pipe in stage6.items():
             t2 = time.perf_counter()
             app = pipe.run(q["question"], stop_after="applicability").applicability
