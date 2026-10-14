@@ -1,0 +1,169 @@
+{
+ "A": {
+  "n": 68,
+  "intent_acc": 1.0,
+  "intent_f1": 1.0,
+  "cx_acc": 1.0,
+  "cx_f1": 1.0,
+  "joint_acc": 1.0,
+  "per_class": {
+   "intent": {
+    "classes": {
+     "factual": {
+      "support": 17,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "comparison": {
+      "support": 12,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "method": {
+      "support": 12,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "result": {
+      "support": 20,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "survey": {
+      "support": 7,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "confusions": {}
+   },
+   "complexity": {
+    "classes": {
+     "simple": {
+      "support": 32,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "complex": {
+      "support": 36,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "confusions": {}
+   }
+  }
+ },
+ "B": {
+  "n": 39,
+  "intent_acc": 0.9744,
+  "intent_f1": 0.9759,
+  "cx_acc": 1.0,
+  "cx_f1": 1.0,
+  "joint_acc": 0.9744,
+  "per_class": {
+   "intent": {
+    "classes": {
+     "factual": {
+      "support": 10,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "comparison": {
+      "support": 7,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "method": {
+      "support": 7,
+      "precision": 1.0,
+      "recall": 0.857
+     },
+     "result": {
+      "support": 11,
+      "precision": 0.917,
+      "recall": 1.0
+     },
+     "survey": {
+      "support": 4,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "confusions": {
+     "method->result": 1
+    }
+   },
+   "complexity": {
+    "classes": {
+     "simple": {
+      "support": 18,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "complex": {
+      "support": 21,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "confusions": {}
+   }
+  }
+ },
+ "C": {
+  "n": 48,
+  "intent_acc": 1.0,
+  "intent_f1": 1.0,
+  "cx_acc": 1.0,
+  "cx_f1": 1.0,
+  "joint_acc": 1.0,
+  "per_class": {
+   "intent": {
+    "classes": {
+     "factual": {
+      "support": 10,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "comparison": {
+      "support": 10,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "method": {
+      "support": 10,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "result": {
+      "support": 12,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "survey": {
+      "support": 6,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "confusions": {}
+   },
+   "complexity": {
+    "classes": {
+     "simple": {
+      "support": 18,
+      "precision": 1.0,
+      "recall": 1.0
+     },
+     "complex": {
+      "support": 30,
+      "precision": 1.0,
+      "recall": 1.0
+     }
+    },
+    "confusions": {}
+   }
+  }
+ }
+}
