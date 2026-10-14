@@ -11,6 +11,7 @@ export const STEP_INFO: Record<string, [number, string, string]> = {
   "7_contradiction": [7, "Contradiction resolver", "Separates real conflicts between papers from differences caused by different conditions"],
   "8_generate": [8, "Answer generation", "The language model writes the answer from the passages and the recorded conditions"],
   "9_critic": [9, "Claim critic", "An NLI model checks every sentence against its source and regenerates once if needed"],
+  "9b_ragas": [9, "Faithfulness and relevancy", "RAGAS-style: a judge checks each statement of the answer against the passages and scores how well the answer fits the question"],
 };
 export const STEP_ORDER = Object.keys(STEP_INFO);
 
