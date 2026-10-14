@@ -49,6 +49,24 @@ def sufficient_context(llm, question: str, passages: list[str]) -> tuple[bool, s
     return out.sufficient, out.reason
 
 
+RECORDS_CHARS = 6000
+
+
+def sufficient_context_records(llm, question: str, passages: list[str], records: list[str]) -> tuple[bool, str]:
+    """The same autorater, shown the recorded results (the Condition Profile store's lines for the retrieved passages) as well as the passages: it has the store, but not Stage 6's
+    joint rule. Used to separate "having the store" from "having the rule" (13 Oct 2026). An unusable reply counts as sufficient."""
+    context = "\n\n".join(f"[{i}] {p[:PASSAGE_CHARS]}" for i, p in enumerate(passages, start=1)) or "(no passage was retrieved)"
+    shown = "\n".join(f"- {r}" for r in records)[:RECORDS_CHARS]
+    if shown:
+        context += ("\n\nRECORDED RESULTS of these passages (read from their tables; each line names the model, data set, version, language and setting it was measured under):\n"
+                    + shown)
+    try:
+        out, _ = llm.structured(f"QUESTION: {question}\n\nCONTEXT:\n{context}", Sufficiency, system=SUFFICIENT_SYSTEM, max_tokens=150, temperature=0.0)
+    except ValueError as err:
+        return True, f"unusable reply: {err}"[:200]
+    return out.sufficient, out.reason
+
+
 def score_warnings(rows: list[dict]) -> dict:
     """Score a system's warn / do-not-warn decisions. A row: expect_warning (bool, the truth), warned (bool), expected_missing (the condition
     names the truth says are missing) and named_missing (the condition names the system reports, None for a system that only abstains).
