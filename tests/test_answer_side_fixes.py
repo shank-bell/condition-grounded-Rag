@@ -53,6 +53,16 @@ def test_a_data_set_stored_in_two_spellings_is_named_as_the_question_writes_it()
         assert vocabulary_conditions("What F1 does BERT get on squad 2.0?", vocab)["dataset"] == "SQUAD"
 
 
+def test_an_ordinary_word_that_a_table_row_is_labelled_with_is_not_a_data_set():
+    """The store holds data sets called "Average", "Better" or "Math" (a table's average column, a comparison phrase). "What is XLM-R's average accuracy on XNLI?"
+    came back with the data set "Average" (the longest literal name won, XNLI was lost) and a false scope warning: found by the live demo on 13 Oct."""
+    vocab = {"dataset": ["Average", "Better", "XNLI", "Math", "various", "Copa"], "model": [], "language": [], "task": []}
+    assert vocabulary_conditions("What is XLM-R's average accuracy on XNLI?", vocab)["dataset"] == "XNLI"
+    assert vocabulary_conditions("Is BERT better than ELMo on XNLI?", vocab)["dataset"] == "XNLI"
+    assert "dataset" not in vocabulary_conditions("What is the average accuracy of various models on math problems?", vocab)
+    assert vocabulary_conditions("What accuracy does GPT-3 get on Copa?", vocab)["dataset"] == "Copa"
+
+
 def test_names_the_question_does_not_contain_are_not_invented():
     assert vocabulary_conditions("How does pre-training work?", VOCAB) == {}
     assert "model" not in vocabulary_conditions("Is DistilBERT smaller?", VOCAB)
