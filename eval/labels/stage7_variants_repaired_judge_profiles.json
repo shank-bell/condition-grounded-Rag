@@ -1,0 +1,1860 @@
+{
+ "note": "development numbers (policy B was found by reading the mistakes of both sets); aggregates only",
+ "sets": {
+  "first 50 pairs": {
+   "frozen (every switch off)": {
+    "accuracy": 0.68,
+    "right": 34,
+    "pairs": 50,
+    "macro_f1": 0.6054,
+    "genuine_calls": 6,
+    "not_comparable_found": "4/9",
+    "verdicts": {
+     "GENUINE": 6,
+     "EXPLAINED": 33,
+     "NOT_COMPARABLE": 11
+    },
+    "condition_attribution_merged_exact": 0.5667,
+    "condition_attribution_merged_pairs": 30,
+    "condition_attribution_merged_jaccard": 0.7611,
+    "condition_attribution_merged_recall": 0.8833,
+    "condition_attribution_merged_precision": 0.8333,
+    "all_key_conditions_named": 0.8,
+    "names_conditions_beyond_key": 0.3,
+    "per_class_f1": {
+     "EXPLAINED": 0.8108,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.4
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.76,
+    "right": 38,
+    "pairs": 50,
+    "macro_f1": 0.7367,
+    "genuine_calls": 3,
+    "not_comparable_found": "8/9",
+    "verdicts": {
+     "GENUINE": 3,
+     "EXPLAINED": 31,
+     "NOT_COMPARABLE": 16
+    },
+    "condition_attribution_merged_exact": 0.5667,
+    "condition_attribution_merged_pairs": 30,
+    "condition_attribution_merged_jaccard": 0.7611,
+    "condition_attribution_merged_recall": 0.8833,
+    "condition_attribution_merged_precision": 0.8333,
+    "all_key_conditions_named": 0.8,
+    "names_conditions_beyond_key": 0.3,
+    "per_class_f1": {
+     "EXPLAINED": 0.8333,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.64
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.74,
+    "right": 37,
+    "pairs": 50,
+    "macro_f1": 0.4353,
+    "genuine_calls": 6,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "GENUINE": 6,
+     "EXPLAINED": 44
+    },
+    "condition_attribution_merged_exact": 0.5405,
+    "condition_attribution_merged_pairs": 37,
+    "condition_attribution_merged_jaccard": 0.7117,
+    "condition_attribution_merged_recall": 0.8243,
+    "condition_attribution_merged_precision": 0.7703,
+    "all_key_conditions_named": 0.7568,
+    "names_conditions_beyond_key": 0.3514,
+    "per_class_f1": {
+     "EXPLAINED": 0.8706,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.9128,
+    "genuine_calls": 3,
+    "not_comparable_found": "8/9",
+    "verdicts": {
+     "GENUINE": 3,
+     "EXPLAINED": 38,
+     "NOT_COMPARABLE": 9
+    },
+    "condition_attribution_merged_exact": 0.5405,
+    "condition_attribution_merged_pairs": 37,
+    "condition_attribution_merged_jaccard": 0.7117,
+    "condition_attribution_merged_recall": 0.8243,
+    "condition_attribution_merged_precision": 0.7703,
+    "all_key_conditions_named": 0.7568,
+    "names_conditions_beyond_key": 0.3514,
+    "per_class_f1": {
+     "EXPLAINED": 0.9367,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.8889
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.7733,
+    "genuine_calls": 1,
+    "not_comparable_found": "8/9",
+    "verdicts": {
+     "EXPLAINED": 34,
+     "NOT_COMPARABLE": 15,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.5455,
+    "condition_attribution_merged_pairs": 33,
+    "condition_attribution_merged_jaccard": 0.7374,
+    "condition_attribution_merged_recall": 0.8788,
+    "condition_attribution_merged_precision": 0.8182,
+    "all_key_conditions_named": 0.7879,
+    "names_conditions_beyond_key": 0.303,
+    "per_class_f1": {
+     "EXPLAINED": 0.88,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.6667
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.92,
+    "right": 46,
+    "pairs": 50,
+    "macro_f1": 0.8961,
+    "genuine_calls": 1,
+    "not_comparable_found": "8/9",
+    "verdicts": {
+     "EXPLAINED": 39,
+     "NOT_COMPARABLE": 10,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.5263,
+    "condition_attribution_merged_pairs": 38,
+    "condition_attribution_merged_jaccard": 0.693,
+    "condition_attribution_merged_recall": 0.8158,
+    "condition_attribution_merged_precision": 0.7632,
+    "all_key_conditions_named": 0.7368,
+    "names_conditions_beyond_key": 0.3421,
+    "per_class_f1": {
+     "EXPLAINED": 0.95,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.8421
+    }
+   },
+   "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+    "accuracy": 0.92,
+    "right": 46,
+    "pairs": 50,
+    "macro_f1": 0.9244,
+    "genuine_calls": 2,
+    "not_comparable_found": "9/9",
+    "verdicts": {
+     "GENUINE": 2,
+     "EXPLAINED": 37,
+     "NOT_COMPARABLE": 11
+    },
+    "condition_attribution_merged_exact": 0.6216,
+    "condition_attribution_merged_pairs": 37,
+    "condition_attribution_merged_jaccard": 0.7793,
+    "condition_attribution_merged_recall": 0.8649,
+    "condition_attribution_merged_precision": 0.8514,
+    "all_key_conditions_named": 0.7838,
+    "names_conditions_beyond_key": 0.2432,
+    "per_class_f1": {
+     "EXPLAINED": 0.9487,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.9
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.0,
+    "right": 0,
+    "pairs": 50,
+    "macro_f1": 0.0,
+    "genuine_calls": 48,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "GENUINE": 48,
+     "NOT_COMPARABLE": 2
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "condition_attribution_merged_jaccard": null,
+    "condition_attribution_merged_recall": null,
+    "condition_attribution_merged_precision": null,
+    "all_key_conditions_named": null,
+    "names_conditions_beyond_key": null,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.74,
+    "right": 37,
+    "pairs": 50,
+    "macro_f1": 0.4458,
+    "genuine_calls": 7,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "GENUINE": 7,
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 1
+    },
+    "condition_attribution_merged_exact": 0.7838,
+    "condition_attribution_merged_pairs": 37,
+    "condition_attribution_merged_jaccard": 0.8468,
+    "condition_attribution_merged_recall": 0.8919,
+    "condition_attribution_merged_precision": 0.8649,
+    "all_key_conditions_named": 0.8649,
+    "names_conditions_beyond_key": 0.1892,
+    "per_class_f1": {
+     "EXPLAINED": 0.8916,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.4506,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/9",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0488,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.0488,
+    "condition_attribution_merged_recall": 0.0488,
+    "condition_attribution_merged_precision": 1.0,
+    "all_key_conditions_named": 0.0488,
+    "names_conditions_beyond_key": 0.0,
+    "per_class_f1": {
+     "EXPLAINED": 0.9011,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "held-out 50 pairs": {
+   "frozen (every switch off)": {
+    "accuracy": 0.72,
+    "right": 36,
+    "pairs": 50,
+    "macro_f1": 0.3288,
+    "genuine_calls": 1,
+    "not_comparable_found": "1/7",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 7,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.6571,
+    "condition_attribution_merged_pairs": 35,
+    "condition_attribution_merged_jaccard": 0.7857,
+    "condition_attribution_merged_recall": 0.9,
+    "condition_attribution_merged_precision": 0.8286,
+    "all_key_conditions_named": 0.8571,
+    "names_conditions_beyond_key": 0.2571,
+    "per_class_f1": {
+     "EXPLAINED": 0.8434,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.1429
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.72,
+    "right": 36,
+    "pairs": 50,
+    "macro_f1": 0.3288,
+    "genuine_calls": 1,
+    "not_comparable_found": "1/7",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 7,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.6571,
+    "condition_attribution_merged_pairs": 35,
+    "condition_attribution_merged_jaccard": 0.7857,
+    "condition_attribution_merged_recall": 0.9,
+    "condition_attribution_merged_precision": 0.8286,
+    "all_key_conditions_named": 0.8571,
+    "names_conditions_beyond_key": 0.2571,
+    "per_class_f1": {
+     "EXPLAINED": 0.8434,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.1429
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3037,
+    "genuine_calls": 1,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 49,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.6098,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.7561,
+    "condition_attribution_merged_recall": 0.8902,
+    "condition_attribution_merged_precision": 0.7927,
+    "all_key_conditions_named": 0.8537,
+    "names_conditions_beyond_key": 0.3171,
+    "per_class_f1": {
+     "EXPLAINED": 0.9111,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3037,
+    "genuine_calls": 1,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 49,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.6098,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.7561,
+    "condition_attribution_merged_recall": 0.8902,
+    "condition_attribution_merged_precision": 0.7927,
+    "all_key_conditions_named": 0.8537,
+    "names_conditions_beyond_key": 0.3171,
+    "per_class_f1": {
+     "EXPLAINED": 0.9111,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.78,
+    "right": 39,
+    "pairs": 50,
+    "macro_f1": 0.3552,
+    "genuine_calls": 1,
+    "not_comparable_found": "1/7",
+    "verdicts": {
+     "EXPLAINED": 45,
+     "NOT_COMPARABLE": 4,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.6842,
+    "condition_attribution_merged_pairs": 38,
+    "condition_attribution_merged_jaccard": 0.8158,
+    "condition_attribution_merged_recall": 0.9342,
+    "condition_attribution_merged_precision": 0.8553,
+    "all_key_conditions_named": 0.8947,
+    "names_conditions_beyond_key": 0.2368,
+    "per_class_f1": {
+     "EXPLAINED": 0.8837,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.1818
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3037,
+    "genuine_calls": 1,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 49,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.6341,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.7805,
+    "condition_attribution_merged_recall": 0.9146,
+    "condition_attribution_merged_precision": 0.8171,
+    "all_key_conditions_named": 0.878,
+    "names_conditions_beyond_key": 0.2927,
+    "per_class_f1": {
+     "EXPLAINED": 0.9111,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+    "accuracy": 0.86,
+    "right": 43,
+    "pairs": 50,
+    "macro_f1": 0.5773,
+    "genuine_calls": 3,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "GENUINE": 3
+    },
+    "condition_attribution_merged_exact": 0.7073,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.8415,
+    "condition_attribution_merged_recall": 0.9756,
+    "condition_attribution_merged_precision": 0.8659,
+    "all_key_conditions_named": 0.9512,
+    "names_conditions_beyond_key": 0.2439,
+    "per_class_f1": {
+     "EXPLAINED": 0.9318,
+     "GENUINE": 0.8,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.04,
+    "right": 2,
+    "pairs": 50,
+    "macro_f1": 0.0261,
+    "genuine_calls": 49,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "GENUINE": 49,
+     "NOT_COMPARABLE": 1
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "condition_attribution_merged_jaccard": null,
+    "condition_attribution_merged_recall": null,
+    "condition_attribution_merged_precision": null,
+    "all_key_conditions_named": null,
+    "names_conditions_beyond_key": null,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0784,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.84,
+    "right": 42,
+    "pairs": 50,
+    "macro_f1": 0.6364,
+    "genuine_calls": 2,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "GENUINE": 2,
+     "NOT_COMPARABLE": 1
+    },
+    "condition_attribution_merged_exact": 0.8,
+    "condition_attribution_merged_pairs": 40,
+    "condition_attribution_merged_jaccard": 0.875,
+    "condition_attribution_merged_recall": 0.9625,
+    "condition_attribution_merged_precision": 0.8875,
+    "all_key_conditions_named": 0.95,
+    "names_conditions_beyond_key": 0.175,
+    "per_class_f1": {
+     "EXPLAINED": 0.9091,
+     "GENUINE": 1.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.3004,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/7",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0244,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.0244,
+    "condition_attribution_merged_recall": 0.0244,
+    "condition_attribution_merged_precision": 1.0,
+    "all_key_conditions_named": 0.0244,
+    "names_conditions_beyond_key": 0.0,
+    "per_class_f1": {
+     "EXPLAINED": 0.9011,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "fresh 50 pairs (clean test)": {
+   "frozen (every switch off)": {
+    "accuracy": 0.64,
+    "right": 32,
+    "pairs": 50,
+    "macro_f1": 0.5555,
+    "genuine_calls": 4,
+    "not_comparable_found": "4/15",
+    "verdicts": {
+     "EXPLAINED": 37,
+     "NOT_COMPARABLE": 9,
+     "GENUINE": 4
+    },
+    "condition_attribution_merged_exact": 0.7143,
+    "condition_attribution_merged_pairs": 28,
+    "condition_attribution_merged_jaccard": 0.8571,
+    "condition_attribution_merged_recall": 0.9643,
+    "condition_attribution_merged_precision": 0.8929,
+    "all_key_conditions_named": 0.9286,
+    "names_conditions_beyond_key": 0.2143,
+    "per_class_f1": {
+     "EXPLAINED": 0.7778,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.3333
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.64,
+    "right": 32,
+    "pairs": 50,
+    "macro_f1": 0.5555,
+    "genuine_calls": 4,
+    "not_comparable_found": "4/15",
+    "verdicts": {
+     "EXPLAINED": 37,
+     "NOT_COMPARABLE": 9,
+     "GENUINE": 4
+    },
+    "condition_attribution_merged_exact": 0.7143,
+    "condition_attribution_merged_pairs": 28,
+    "condition_attribution_merged_jaccard": 0.8571,
+    "condition_attribution_merged_recall": 0.9643,
+    "condition_attribution_merged_precision": 0.8929,
+    "all_key_conditions_named": 0.9286,
+    "names_conditions_beyond_key": 0.2143,
+    "per_class_f1": {
+     "EXPLAINED": 0.7778,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.3333
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.66,
+    "right": 33,
+    "pairs": 50,
+    "macro_f1": 0.4074,
+    "genuine_calls": 4,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 46,
+     "GENUINE": 4
+    },
+    "condition_attribution_merged_exact": 0.697,
+    "condition_attribution_merged_pairs": 33,
+    "condition_attribution_merged_jaccard": 0.8485,
+    "condition_attribution_merged_recall": 0.9545,
+    "condition_attribution_merged_precision": 0.8939,
+    "all_key_conditions_named": 0.9091,
+    "names_conditions_beyond_key": 0.2121,
+    "per_class_f1": {
+     "EXPLAINED": 0.8148,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.66,
+    "right": 33,
+    "pairs": 50,
+    "macro_f1": 0.4074,
+    "genuine_calls": 4,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 46,
+     "GENUINE": 4
+    },
+    "condition_attribution_merged_exact": 0.697,
+    "condition_attribution_merged_pairs": 33,
+    "condition_attribution_merged_jaccard": 0.8485,
+    "condition_attribution_merged_recall": 0.9545,
+    "condition_attribution_merged_precision": 0.8939,
+    "all_key_conditions_named": 0.9091,
+    "names_conditions_beyond_key": 0.2121,
+    "per_class_f1": {
+     "EXPLAINED": 0.8148,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.82,
+    "right": 41,
+    "pairs": 50,
+    "macro_f1": 0.7793,
+    "genuine_calls": 2,
+    "not_comparable_found": "8/15",
+    "verdicts": {
+     "EXPLAINED": 39,
+     "NOT_COMPARABLE": 9,
+     "GENUINE": 2
+    },
+    "condition_attribution_merged_exact": 0.6364,
+    "condition_attribution_merged_pairs": 33,
+    "condition_attribution_merged_jaccard": 0.7879,
+    "condition_attribution_merged_recall": 0.8485,
+    "condition_attribution_merged_precision": 0.8788,
+    "all_key_conditions_named": 0.7576,
+    "names_conditions_beyond_key": 0.1818,
+    "per_class_f1": {
+     "EXPLAINED": 0.8919,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.6667
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.8,
+    "right": 40,
+    "pairs": 50,
+    "macro_f1": 0.7272,
+    "genuine_calls": 2,
+    "not_comparable_found": "6/15",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 6,
+     "GENUINE": 2
+    },
+    "condition_attribution_merged_exact": 0.6176,
+    "condition_attribution_merged_pairs": 34,
+    "condition_attribution_merged_jaccard": 0.7794,
+    "condition_attribution_merged_recall": 0.8529,
+    "condition_attribution_merged_precision": 0.8676,
+    "all_key_conditions_named": 0.7647,
+    "names_conditions_beyond_key": 0.2059,
+    "per_class_f1": {
+     "EXPLAINED": 0.8831,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5714
+    }
+   },
+   "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+    "accuracy": 0.8,
+    "right": 40,
+    "pairs": 50,
+    "macro_f1": 0.7272,
+    "genuine_calls": 2,
+    "not_comparable_found": "6/15",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 6,
+     "GENUINE": 2
+    },
+    "condition_attribution_merged_exact": 0.7941,
+    "condition_attribution_merged_pairs": 34,
+    "condition_attribution_merged_jaccard": 0.8971,
+    "condition_attribution_merged_recall": 0.9559,
+    "condition_attribution_merged_precision": 0.9412,
+    "all_key_conditions_named": 0.9118,
+    "names_conditions_beyond_key": 0.1176,
+    "per_class_f1": {
+     "EXPLAINED": 0.8831,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5714
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.02,
+    "right": 1,
+    "pairs": 50,
+    "macro_f1": 0.05,
+    "genuine_calls": 45,
+    "not_comparable_found": "1/15",
+    "verdicts": {
+     "GENUINE": 45,
+     "NOT_COMPARABLE": 5
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "condition_attribution_merged_jaccard": null,
+    "condition_attribution_merged_recall": null,
+    "condition_attribution_merged_precision": null,
+    "all_key_conditions_named": null,
+    "names_conditions_beyond_key": null,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.1
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.68,
+    "right": 34,
+    "pairs": 50,
+    "macro_f1": 0.4147,
+    "genuine_calls": 3,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "GENUINE": 3
+    },
+    "condition_attribution_merged_exact": 0.7353,
+    "condition_attribution_merged_pairs": 34,
+    "condition_attribution_merged_jaccard": 0.8529,
+    "condition_attribution_merged_recall": 0.8971,
+    "condition_attribution_merged_precision": 0.9265,
+    "all_key_conditions_named": 0.8235,
+    "names_conditions_beyond_key": 0.1176,
+    "per_class_f1": {
+     "EXPLAINED": 0.8293,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.7,
+    "right": 35,
+    "pairs": 50,
+    "macro_f1": 0.4118,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/15",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0,
+    "condition_attribution_merged_pairs": 35,
+    "condition_attribution_merged_jaccard": 0.0,
+    "condition_attribution_merged_recall": 0.0,
+    "condition_attribution_merged_precision": 1.0,
+    "all_key_conditions_named": 0.0,
+    "names_conditions_beyond_key": 0.0,
+    "per_class_f1": {
+     "EXPLAINED": 0.8235,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "frozen (every switch off)": {
+    "accuracy": 0.72,
+    "right": 36,
+    "pairs": 50,
+    "macro_f1": 0.5625,
+    "genuine_calls": 0,
+    "not_comparable_found": "3/11",
+    "verdicts": {
+     "EXPLAINED": 41,
+     "NOT_COMPARABLE": 9
+    },
+    "condition_attribution_merged_exact": 0.5455,
+    "condition_attribution_merged_pairs": 33,
+    "condition_attribution_merged_jaccard": 0.7424,
+    "condition_attribution_merged_recall": 0.803,
+    "condition_attribution_merged_precision": 0.8788,
+    "all_key_conditions_named": 0.6667,
+    "names_conditions_beyond_key": 0.1818,
+    "per_class_f1": {
+     "EXPLAINED": 0.825,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.3
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.78,
+    "right": 39,
+    "pairs": 50,
+    "macro_f1": 0.6894,
+    "genuine_calls": 0,
+    "not_comparable_found": "6/11",
+    "verdicts": {
+     "EXPLAINED": 38,
+     "NOT_COMPARABLE": 12
+    },
+    "condition_attribution_merged_exact": 0.5455,
+    "condition_attribution_merged_pairs": 33,
+    "condition_attribution_merged_jaccard": 0.7424,
+    "condition_attribution_merged_recall": 0.803,
+    "condition_attribution_merged_precision": 0.8788,
+    "all_key_conditions_named": 0.6667,
+    "names_conditions_beyond_key": 0.1818,
+    "per_class_f1": {
+     "EXPLAINED": 0.8571,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.5217
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.78,
+    "right": 39,
+    "pairs": 50,
+    "macro_f1": 0.4382,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/11",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.5897,
+    "condition_attribution_merged_pairs": 39,
+    "condition_attribution_merged_jaccard": 0.7564,
+    "condition_attribution_merged_recall": 0.8077,
+    "condition_attribution_merged_precision": 0.8718,
+    "all_key_conditions_named": 0.6923,
+    "names_conditions_beyond_key": 0.1795,
+    "per_class_f1": {
+     "EXPLAINED": 0.8764,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.8228,
+    "genuine_calls": 0,
+    "not_comparable_found": "6/11",
+    "verdicts": {
+     "EXPLAINED": 44,
+     "NOT_COMPARABLE": 6
+    },
+    "condition_attribution_merged_exact": 0.5897,
+    "condition_attribution_merged_pairs": 39,
+    "condition_attribution_merged_jaccard": 0.7564,
+    "condition_attribution_merged_recall": 0.8077,
+    "condition_attribution_merged_precision": 0.8718,
+    "all_key_conditions_named": 0.6923,
+    "names_conditions_beyond_key": 0.1795,
+    "per_class_f1": {
+     "EXPLAINED": 0.9398,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.7059
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.8252,
+    "genuine_calls": 0,
+    "not_comparable_found": "8/11",
+    "verdicts": {
+     "EXPLAINED": 39,
+     "NOT_COMPARABLE": 11
+    },
+    "condition_attribution_merged_exact": 0.4444,
+    "condition_attribution_merged_pairs": 36,
+    "condition_attribution_merged_jaccard": 0.6806,
+    "condition_attribution_merged_recall": 0.75,
+    "condition_attribution_merged_precision": 0.8472,
+    "all_key_conditions_named": 0.5833,
+    "names_conditions_beyond_key": 0.2222,
+    "per_class_f1": {
+     "EXPLAINED": 0.9231,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.7273
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.94,
+    "right": 47,
+    "pairs": 50,
+    "macro_f1": 0.9025,
+    "genuine_calls": 0,
+    "not_comparable_found": "8/11",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 8
+    },
+    "condition_attribution_merged_exact": 0.4615,
+    "condition_attribution_merged_pairs": 39,
+    "condition_attribution_merged_jaccard": 0.6795,
+    "condition_attribution_merged_recall": 0.7436,
+    "condition_attribution_merged_precision": 0.8333,
+    "all_key_conditions_named": 0.5897,
+    "names_conditions_beyond_key": 0.2308,
+    "per_class_f1": {
+     "EXPLAINED": 0.963,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.8421
+    }
+   },
+   "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+    "accuracy": 0.94,
+    "right": 47,
+    "pairs": 50,
+    "macro_f1": 0.9025,
+    "genuine_calls": 0,
+    "not_comparable_found": "8/11",
+    "verdicts": {
+     "EXPLAINED": 42,
+     "NOT_COMPARABLE": 8
+    },
+    "condition_attribution_merged_exact": 0.641,
+    "condition_attribution_merged_pairs": 39,
+    "condition_attribution_merged_jaccard": 0.8077,
+    "condition_attribution_merged_recall": 0.8718,
+    "condition_attribution_merged_precision": 0.9103,
+    "all_key_conditions_named": 0.7692,
+    "names_conditions_beyond_key": 0.1538,
+    "per_class_f1": {
+     "EXPLAINED": 0.963,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.8421
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.02,
+    "right": 1,
+    "pairs": 50,
+    "macro_f1": 0.0625,
+    "genuine_calls": 45,
+    "not_comparable_found": "1/11",
+    "verdicts": {
+     "GENUINE": 45,
+     "NOT_COMPARABLE": 5
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "condition_attribution_merged_jaccard": null,
+    "condition_attribution_merged_recall": null,
+    "condition_attribution_merged_precision": null,
+    "all_key_conditions_named": null,
+    "names_conditions_beyond_key": null,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.125
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.76,
+    "right": 38,
+    "pairs": 50,
+    "macro_f1": 0.4419,
+    "genuine_calls": 3,
+    "not_comparable_found": "0/11",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "GENUINE": 3
+    },
+    "condition_attribution_merged_exact": 0.7632,
+    "condition_attribution_merged_pairs": 38,
+    "condition_attribution_merged_jaccard": 0.8684,
+    "condition_attribution_merged_recall": 0.8947,
+    "condition_attribution_merged_precision": 0.9474,
+    "all_key_conditions_named": 0.8158,
+    "names_conditions_beyond_key": 0.0789,
+    "per_class_f1": {
+     "EXPLAINED": 0.8837,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.78,
+    "right": 39,
+    "pairs": 50,
+    "macro_f1": 0.4382,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/11",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0,
+    "condition_attribution_merged_pairs": 39,
+    "condition_attribution_merged_jaccard": 0.0,
+    "condition_attribution_merged_recall": 0.0,
+    "condition_attribution_merged_precision": 1.0,
+    "all_key_conditions_named": 0.0,
+    "names_conditions_beyond_key": 0.0,
+    "per_class_f1": {
+     "EXPLAINED": 0.8764,
+     "GENUINE": null,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "frozen (every switch off)": {
+    "accuracy": 0.84,
+    "right": 42,
+    "pairs": 50,
+    "macro_f1": 0.469,
+    "genuine_calls": 1,
+    "not_comparable_found": "3/4",
+    "verdicts": {
+     "EXPLAINED": 41,
+     "NOT_COMPARABLE": 8,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.5128,
+    "condition_attribution_merged_pairs": 39,
+    "condition_attribution_merged_jaccard": 0.7179,
+    "condition_attribution_merged_recall": 0.7949,
+    "condition_attribution_merged_precision": 0.8462,
+    "all_key_conditions_named": 0.6667,
+    "names_conditions_beyond_key": 0.2308,
+    "per_class_f1": {
+     "EXPLAINED": 0.907,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.84,
+    "right": 42,
+    "pairs": 50,
+    "macro_f1": 0.469,
+    "genuine_calls": 1,
+    "not_comparable_found": "3/4",
+    "verdicts": {
+     "EXPLAINED": 41,
+     "NOT_COMPARABLE": 8,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.5128,
+    "condition_attribution_merged_pairs": 39,
+    "condition_attribution_merged_jaccard": 0.7179,
+    "condition_attribution_merged_recall": 0.7949,
+    "condition_attribution_merged_precision": 0.8462,
+    "all_key_conditions_named": 0.6667,
+    "names_conditions_beyond_key": 0.2308,
+    "per_class_f1": {
+     "EXPLAINED": 0.907,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.3121,
+    "genuine_calls": 1,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 49,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.5227,
+    "condition_attribution_merged_pairs": 44,
+    "condition_attribution_merged_jaccard": 0.7273,
+    "condition_attribution_merged_recall": 0.8182,
+    "condition_attribution_merged_precision": 0.8409,
+    "all_key_conditions_named": 0.7045,
+    "names_conditions_beyond_key": 0.25,
+    "per_class_f1": {
+     "EXPLAINED": 0.9362,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.3121,
+    "genuine_calls": 1,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 49,
+     "GENUINE": 1
+    },
+    "condition_attribution_merged_exact": 0.5227,
+    "condition_attribution_merged_pairs": 44,
+    "condition_attribution_merged_jaccard": 0.7273,
+    "condition_attribution_merged_recall": 0.8182,
+    "condition_attribution_merged_precision": 0.8409,
+    "all_key_conditions_named": 0.7045,
+    "names_conditions_beyond_key": 0.25,
+    "per_class_f1": {
+     "EXPLAINED": 0.9362,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.4924,
+    "genuine_calls": 0,
+    "not_comparable_found": "3/4",
+    "verdicts": {
+     "EXPLAINED": 43,
+     "NOT_COMPARABLE": 7
+    },
+    "condition_attribution_merged_exact": 0.5854,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.7561,
+    "condition_attribution_merged_recall": 0.8415,
+    "condition_attribution_merged_precision": 0.8415,
+    "all_key_conditions_named": 0.7561,
+    "names_conditions_beyond_key": 0.2439,
+    "per_class_f1": {
+     "EXPLAINED": 0.9318,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5455
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.92,
+    "right": 46,
+    "pairs": 50,
+    "macro_f1": 0.5093,
+    "genuine_calls": 0,
+    "not_comparable_found": "2/4",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "NOT_COMPARABLE": 3
+    },
+    "condition_attribution_merged_exact": 0.6136,
+    "condition_attribution_merged_pairs": 44,
+    "condition_attribution_merged_jaccard": 0.7727,
+    "condition_attribution_merged_recall": 0.8523,
+    "condition_attribution_merged_precision": 0.8523,
+    "all_key_conditions_named": 0.7727,
+    "names_conditions_beyond_key": 0.2273,
+    "per_class_f1": {
+     "EXPLAINED": 0.9565,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5714
+    }
+   },
+   "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+    "accuracy": 0.92,
+    "right": 46,
+    "pairs": 50,
+    "macro_f1": 0.5093,
+    "genuine_calls": 0,
+    "not_comparable_found": "2/4",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "NOT_COMPARABLE": 3
+    },
+    "condition_attribution_merged_exact": 0.6818,
+    "condition_attribution_merged_pairs": 44,
+    "condition_attribution_merged_jaccard": 0.8068,
+    "condition_attribution_merged_recall": 0.8523,
+    "condition_attribution_merged_precision": 0.8864,
+    "all_key_conditions_named": 0.7727,
+    "names_conditions_beyond_key": 0.1591,
+    "per_class_f1": {
+     "EXPLAINED": 0.9565,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.5714
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.02,
+    "right": 1,
+    "pairs": 50,
+    "macro_f1": 0.0131,
+    "genuine_calls": 50,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "GENUINE": 50
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "condition_attribution_merged_jaccard": null,
+    "condition_attribution_merged_recall": null,
+    "condition_attribution_merged_precision": null,
+    "all_key_conditions_named": null,
+    "names_conditions_beyond_key": null,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0392,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.5338,
+    "genuine_calls": 2,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "NOT_COMPARABLE": 1,
+     "GENUINE": 2
+    },
+    "condition_attribution_merged_exact": 0.7674,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.8605,
+    "condition_attribution_merged_recall": 0.8837,
+    "condition_attribution_merged_precision": 0.9302,
+    "all_key_conditions_named": 0.814,
+    "names_conditions_beyond_key": 0.093,
+    "per_class_f1": {
+     "EXPLAINED": 0.9348,
+     "GENUINE": 0.6667,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.3158,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/4",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0,
+    "condition_attribution_merged_pairs": 45,
+    "condition_attribution_merged_jaccard": 0.0,
+    "condition_attribution_merged_recall": 0.0,
+    "condition_attribution_merged_precision": 1.0,
+    "all_key_conditions_named": 0.0,
+    "names_conditions_beyond_key": 0.0,
+    "per_class_f1": {
+     "EXPLAINED": 0.9474,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  },
+  "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": {
+   "frozen (every switch off)": {
+    "accuracy": 0.86,
+    "right": 43,
+    "pairs": 50,
+    "macro_f1": 0.3082,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/6",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.6279,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.7636,
+    "condition_attribution_merged_recall": 0.8333,
+    "condition_attribution_merged_precision": 0.8372,
+    "all_key_conditions_named": 0.7674,
+    "names_conditions_beyond_key": 0.2326,
+    "per_class_f1": {
+     "EXPLAINED": 0.9247,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A (before table grounding)": {
+    "accuracy": 0.86,
+    "right": 43,
+    "pairs": 50,
+    "macro_f1": 0.3082,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/6",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.6279,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.7636,
+    "condition_attribution_merged_recall": 0.8333,
+    "condition_attribution_merged_precision": 0.8372,
+    "all_key_conditions_named": 0.7674,
+    "names_conditions_beyond_key": 0.2326,
+    "per_class_f1": {
+     "EXPLAINED": 0.9247,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "policy B alone": {
+    "accuracy": 0.86,
+    "right": 43,
+    "pairs": 50,
+    "macro_f1": 0.3082,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/6",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.6279,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.7636,
+    "condition_attribution_merged_recall": 0.8333,
+    "condition_attribution_merged_precision": 0.8372,
+    "all_key_conditions_named": 0.7674,
+    "names_conditions_beyond_key": 0.2326,
+    "per_class_f1": {
+     "EXPLAINED": 0.9247,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + policy B": {
+    "accuracy": 0.86,
+    "right": 43,
+    "pairs": 50,
+    "macro_f1": 0.3082,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/6",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.6279,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.7636,
+    "condition_attribution_merged_recall": 0.8333,
+    "condition_attribution_merged_precision": 0.8372,
+    "all_key_conditions_named": 0.7674,
+    "names_conditions_beyond_key": 0.2326,
+    "per_class_f1": {
+     "EXPLAINED": 0.9247,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "fix A + table grounding (shipped 10 Oct)": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.4068,
+    "genuine_calls": 0,
+    "not_comparable_found": "1/6",
+    "verdicts": {
+     "EXPLAINED": 49,
+     "NOT_COMPARABLE": 1
+    },
+    "condition_attribution_merged_exact": 0.6512,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.7519,
+    "condition_attribution_merged_recall": 0.7984,
+    "condition_attribution_merged_precision": 0.814,
+    "all_key_conditions_named": 0.7442,
+    "names_conditions_beyond_key": 0.2326,
+    "per_class_f1": {
+     "EXPLAINED": 0.9348,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.2857
+    }
+   },
+   "fix A + grounding + policy B (shipped from 11 Oct)": {
+    "accuracy": 0.88,
+    "right": 44,
+    "pairs": 50,
+    "macro_f1": 0.4068,
+    "genuine_calls": 0,
+    "not_comparable_found": "1/6",
+    "verdicts": {
+     "EXPLAINED": 49,
+     "NOT_COMPARABLE": 1
+    },
+    "condition_attribution_merged_exact": 0.6512,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.7519,
+    "condition_attribution_merged_recall": 0.7984,
+    "condition_attribution_merged_precision": 0.814,
+    "all_key_conditions_named": 0.7442,
+    "names_conditions_beyond_key": 0.2326,
+    "per_class_f1": {
+     "EXPLAINED": 0.9348,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.2857
+    }
+   },
+   "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+    "accuracy": 0.9,
+    "right": 45,
+    "pairs": 50,
+    "macro_f1": 0.7436,
+    "genuine_calls": 1,
+    "not_comparable_found": "1/6",
+    "verdicts": {
+     "EXPLAINED": 48,
+     "GENUINE": 1,
+     "NOT_COMPARABLE": 1
+    },
+    "condition_attribution_merged_exact": 0.7442,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.8217,
+    "condition_attribution_merged_recall": 0.8566,
+    "condition_attribution_merged_precision": 0.8721,
+    "all_key_conditions_named": 0.814,
+    "names_conditions_beyond_key": 0.1628,
+    "per_class_f1": {
+     "EXPLAINED": 0.9451,
+     "GENUINE": 1.0,
+     "NOT COMPARABLE": 0.2857
+    }
+   },
+   "plain NLI": {
+    "accuracy": 0.02,
+    "right": 1,
+    "pairs": 50,
+    "macro_f1": 0.0142,
+    "genuine_calls": 46,
+    "not_comparable_found": "0/6",
+    "verdicts": {
+     "GENUINE": 46,
+     "NOT_COMPARABLE": 4
+    },
+    "condition_attribution_merged_exact": null,
+    "condition_attribution_merged_pairs": 0,
+    "condition_attribution_merged_jaccard": null,
+    "condition_attribution_merged_recall": null,
+    "condition_attribution_merged_precision": null,
+    "all_key_conditions_named": null,
+    "names_conditions_beyond_key": null,
+    "per_class_f1": {
+     "EXPLAINED": 0.0,
+     "GENUINE": 0.0426,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "Gemma 12B (taxonomy prompt)": {
+    "accuracy": 0.84,
+    "right": 42,
+    "pairs": 50,
+    "macro_f1": 0.4704,
+    "genuine_calls": 3,
+    "not_comparable_found": "0/6",
+    "verdicts": {
+     "EXPLAINED": 47,
+     "GENUINE": 3
+    },
+    "condition_attribution_merged_exact": 0.7073,
+    "condition_attribution_merged_pairs": 41,
+    "condition_attribution_merged_jaccard": 0.813,
+    "condition_attribution_merged_recall": 0.8374,
+    "condition_attribution_merged_precision": 0.9024,
+    "all_key_conditions_named": 0.7561,
+    "names_conditions_beyond_key": 0.122,
+    "per_class_f1": {
+     "EXPLAINED": 0.9111,
+     "GENUINE": 0.5,
+     "NOT COMPARABLE": 0.0
+    }
+   },
+   "always EXPLAINED": {
+    "accuracy": 0.86,
+    "right": 43,
+    "pairs": 50,
+    "macro_f1": 0.3082,
+    "genuine_calls": 0,
+    "not_comparable_found": "0/6",
+    "verdicts": {
+     "EXPLAINED": 50
+    },
+    "condition_attribution_merged_exact": 0.0,
+    "condition_attribution_merged_pairs": 43,
+    "condition_attribution_merged_jaccard": 0.0,
+    "condition_attribution_merged_recall": 0.0,
+    "condition_attribution_merged_precision": 1.0,
+    "all_key_conditions_named": 0.0,
+    "names_conditions_beyond_key": 0.0,
+    "per_class_f1": {
+     "EXPLAINED": 0.9247,
+     "GENUINE": 0.0,
+     "NOT COMPARABLE": 0.0
+    }
+   }
+  }
+ },
+ "pooled_100_pairs": {
+  "frozen (every switch off)": {
+   "accuracy": 0.7,
+   "right": 70,
+   "macro_f1": 0.374,
+   "false_genuine_calls": 7,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.6154,
+   "condition_attribution_merged_pairs": 65,
+   "verdicts": {
+    "GENUINE": 7,
+    "EXPLAINED": 75,
+    "NOT_COMPARABLE": 18
+   }
+  },
+  "fix A (before table grounding)": {
+   "accuracy": 0.74,
+   "right": 74,
+   "macro_f1": 0.4334,
+   "false_genuine_calls": 4,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.6154,
+   "condition_attribution_merged_pairs": 65,
+   "verdicts": {
+    "GENUINE": 4,
+    "EXPLAINED": 73,
+    "NOT_COMPARABLE": 23
+   }
+  },
+  "policy B alone": {
+   "accuracy": 0.78,
+   "right": 78,
+   "macro_f1": 0.2971,
+   "false_genuine_calls": 7,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.5769,
+   "condition_attribution_merged_pairs": 78,
+   "verdicts": {
+    "GENUINE": 7,
+    "EXPLAINED": 93
+   }
+  },
+  "fix A + policy B": {
+   "accuracy": 0.86,
+   "right": 86,
+   "macro_f1": 0.521,
+   "false_genuine_calls": 4,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.5769,
+   "condition_attribution_merged_pairs": 78,
+   "verdicts": {
+    "GENUINE": 4,
+    "EXPLAINED": 87,
+    "NOT_COMPARABLE": 9
+   }
+  },
+  "fix A + table grounding (shipped 10 Oct)": {
+   "accuracy": 0.8,
+   "right": 80,
+   "macro_f1": 0.4654,
+   "false_genuine_calls": 2,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.6197,
+   "condition_attribution_merged_pairs": 71,
+   "verdicts": {
+    "EXPLAINED": 79,
+    "NOT_COMPARABLE": 19,
+    "GENUINE": 2
+   }
+  },
+  "fix A + grounding + policy B (shipped from 11 Oct)": {
+   "accuracy": 0.87,
+   "right": 87,
+   "macro_f1": 0.5149,
+   "false_genuine_calls": 2,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "0/2",
+   "condition_attribution_merged_exact": 0.5823,
+   "condition_attribution_merged_pairs": 79,
+   "verdicts": {
+    "EXPLAINED": 88,
+    "NOT_COMPARABLE": 10,
+    "GENUINE": 2
+   }
+  },
+  "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+   "accuracy": 0.89,
+   "right": 89,
+   "macro_f1": 0.726,
+   "false_genuine_calls": 3,
+   "of_not_genuine": 98,
+   "real_contradictions_found": "2/2",
+   "condition_attribution_merged_exact": 0.6667,
+   "condition_attribution_merged_pairs": 78,
+   "verdicts": {
+    "GENUINE": 5,
+    "EXPLAINED": 84,
+    "NOT_COMPARABLE": 11
+   }
+  }
+ },
+ "one_sided_pairs": {
+  "first 50 pairs": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 14,
+   "gold": {
+    "EXPLAINED": 11,
+    "NOT COMPARABLE": 3
+   }
+  },
+  "held-out 50 pairs": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 14,
+   "gold": {
+    "EXPLAINED": 13,
+    "NOT COMPARABLE": 1
+   }
+  },
+  "fresh 50 pairs (clean test)": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 12,
+   "gold": {
+    "NOT COMPARABLE": 5,
+    "EXPLAINED": 7
+   }
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 14,
+   "gold": {
+    "EXPLAINED": 11,
+    "NOT COMPARABLE": 3
+   }
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 10,
+   "gold": {
+    "EXPLAINED": 7,
+    "NOT COMPARABLE": 3
+   }
+  },
+  "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": {
+   "pairs_where_the_frozen_rule_says_recorded_for_only_one_paper": 13,
+   "gold": {
+    "EXPLAINED": 12,
+    "NOT COMPARABLE": 1
+   }
+  }
+ },
+ "paired": {
+  "first 50 pairs": {
+   "grounding_vs_fixA": {
+    "gained": 4,
+    "lost": 1,
+    "sign_test_p": 0.375
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 5,
+    "lost": 0,
+    "sign_test_p": 0.0625
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 8,
+    "lost": 3,
+    "sign_test_p": 0.2266
+   },
+   "grounding_vs_always_explained": {
+    "gained": 8,
+    "lost": 8,
+    "sign_test_p": 1.0
+   }
+  },
+  "held-out 50 pairs": {
+   "grounding_vs_fixA": {
+    "gained": 3,
+    "lost": 0,
+    "sign_test_p": 0.25
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 3,
+    "lost": 1,
+    "sign_test_p": 0.625
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 0,
+    "lost": 0,
+    "sign_test_p": 1.0
+   },
+   "grounding_vs_always_explained": {
+    "gained": 1,
+    "lost": 3,
+    "sign_test_p": 0.625
+   }
+  },
+  "fresh 50 pairs (clean test)": {
+   "grounding_vs_fixA": {
+    "gained": 10,
+    "lost": 1,
+    "sign_test_p": 0.0117
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 1,
+    "lost": 2,
+    "sign_test_p": 1.0
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 6,
+    "lost": 1,
+    "sign_test_p": 0.125
+   },
+   "grounding_vs_always_explained": {
+    "gained": 8,
+    "lost": 2,
+    "sign_test_p": 0.1094
+   }
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "grounding_vs_fixA": {
+    "gained": 6,
+    "lost": 1,
+    "sign_test_p": 0.125
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 3,
+    "lost": 0,
+    "sign_test_p": 0.25
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 8,
+    "lost": 0,
+    "sign_test_p": 0.0078
+   },
+   "grounding_vs_always_explained": {
+    "gained": 8,
+    "lost": 3,
+    "sign_test_p": 0.2266
+   }
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "grounding_vs_fixA": {
+    "gained": 4,
+    "lost": 2,
+    "sign_test_p": 0.6875
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 3,
+    "lost": 1,
+    "sign_test_p": 0.625
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 2,
+    "lost": 1,
+    "sign_test_p": 1.0
+   },
+   "grounding_vs_always_explained": {
+    "gained": 3,
+    "lost": 4,
+    "sign_test_p": 1.0
+   }
+  },
+  "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": {
+   "grounding_vs_fixA": {
+    "gained": 1,
+    "lost": 0,
+    "sign_test_p": 1.0
+   },
+   "grounding_plus_B_vs_grounding": {
+    "gained": 0,
+    "lost": 0,
+    "sign_test_p": 1.0
+   },
+   "grounding_plus_B_vs_always_explained": {
+    "gained": 1,
+    "lost": 0,
+    "sign_test_p": 1.0
+   },
+   "grounding_vs_always_explained": {
+    "gained": 1,
+    "lost": 0,
+    "sign_test_p": 1.0
+   }
+  }
+ },
+ "gold_counts": {
+  "first 50 pairs": {
+   "EXPLAINED": 41,
+   "NOT COMPARABLE": 9
+  },
+  "held-out 50 pairs": {
+   "EXPLAINED": 41,
+   "NOT COMPARABLE": 7,
+   "GENUINE": 2
+  },
+  "fresh 50 pairs (clean test)": {
+   "EXPLAINED": 35,
+   "NOT COMPARABLE": 15
+  },
+  "fresh-2 50 pairs (final clean test)": {
+   "EXPLAINED": 39,
+   "NOT COMPARABLE": 11
+  },
+  "fresh-3 50 pairs (clean test of the repaired store, 11 Oct)": {
+   "EXPLAINED": 45,
+   "NOT COMPARABLE": 4,
+   "GENUINE": 1
+  },
+  "fresh-4 50 pairs (clean test of settings by kind, labelled 11 Oct)": {
+   "EXPLAINED": 43,
+   "NOT COMPARABLE": 6,
+   "GENUINE": 1
+  }
+ },
+ "pooled_150_pairs": {
+  "frozen (every switch off)": {
+   "accuracy": 0.7433,
+   "right": 223,
+   "macro_f1": 0.3883,
+   "not_comparable_found": "15/52",
+   "verdicts": {
+    "GENUINE": 12,
+    "EXPLAINED": 244,
+    "NOT_COMPARABLE": 44
+   }
+  },
+  "fix A (before table grounding)": {
+   "accuracy": 0.7667,
+   "right": 230,
+   "macro_f1": 0.4281,
+   "not_comparable_found": "22/52",
+   "verdicts": {
+    "GENUINE": 9,
+    "EXPLAINED": 239,
+    "NOT_COMPARABLE": 52
+   }
+  },
+  "policy B alone": {
+   "accuracy": 0.79,
+   "right": 237,
+   "macro_f1": 0.297,
+   "not_comparable_found": "0/52",
+   "verdicts": {
+    "GENUINE": 12,
+    "EXPLAINED": 288
+   }
+  },
+  "fix A + policy B": {
+   "accuracy": 0.8367,
+   "right": 251,
+   "macro_f1": 0.4431,
+   "not_comparable_found": "14/52",
+   "verdicts": {
+    "GENUINE": 9,
+    "EXPLAINED": 276,
+    "NOT_COMPARABLE": 15
+   }
+  },
+  "fix A + table grounding (shipped 10 Oct)": {
+   "accuracy": 0.8433,
+   "right": 253,
+   "macro_f1": 0.4982,
+   "not_comparable_found": "29/52",
+   "verdicts": {
+    "EXPLAINED": 249,
+    "NOT_COMPARABLE": 47,
+    "GENUINE": 4
+   }
+  },
+  "fix A + grounding + policy B (shipped from 11 Oct)": {
+   "accuracy": 0.88,
+   "right": 264,
+   "macro_f1": 0.5195,
+   "not_comparable_found": "25/52",
+   "verdicts": {
+    "EXPLAINED": 268,
+    "NOT_COMPARABLE": 28,
+    "GENUINE": 4
+   }
+  },
+  "grounding + policy B + settings by kind (11 Oct, after error analysis)": {
+   "accuracy": 0.89,
+   "right": 267,
+   "macro_f1": 0.6936,
+   "not_comparable_found": "26/52",
+   "verdicts": {
+    "GENUINE": 8,
+    "EXPLAINED": 263,
+    "NOT_COMPARABLE": 29
+   }
+  },
+  "always EXPLAINED": {
+   "right": 244,
+   "of": 300
+  }
+ }
+}
