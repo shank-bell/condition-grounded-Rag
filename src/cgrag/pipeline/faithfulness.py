@@ -112,6 +112,22 @@ def answer_relevancy(question: str, answer: str, judge: OllamaLLM, embed: Callab
     return float(np.clip(vectors[1:] @ vectors[0], 0.0, 1.0).mean())
 
 
+@dataclass
+class AnswerScores:
+    faithfulness: Faithfulness
+    relevancy: float | None
+    seconds: float = 0.0
+
+
+def score_answer(question: str, answer: str, context: str, judge: OllamaLLM, embed: Callable[[list[str]], np.ndarray], *,
+                 with_relevancy: bool = True, max_context_chars: int = 16000) -> AnswerScores:
+    """Both RAGAS-style numbers of one answer, without ever rewriting it (`[features] ragas_score`: a diagnostic, not a gate)."""
+    t0 = time.perf_counter()
+    f = faithfulness(question, answer, context, judge, max_context_chars=max_context_chars)
+    rel = answer_relevancy(question, answer, judge, embed) if with_relevancy else None
+    return AnswerScores(f, rel, time.perf_counter() - t0)
+
+
 def improve_until_faithful(question: str, answer: str, context: str, *, judge: OllamaLLM, regenerate: Callable[[str], str], threshold: float,
                            max_retries: int, max_context_chars: int = 16000,
                            notify: Callable[[str], None] | None = None) -> tuple[str, Faithfulness | None, int]:
