@@ -215,6 +215,19 @@ system" for the junk filter. A level of a factor now carries the factor's name f
 the average column (64 profiles); a caption that says "the effects of" marks an ablation table (SpanBERT's Table 7: E5 F007); a run of header letters glued into a model label is
 cut off (18 profiles); the leaderboard spellings of Yelp and the WMT pairs are known names. All found on the independent key and on E5, so all are development changes.
 53. **A size-specific table lookup reached the table for a quarter of the questions (12 Oct, evening), section 4.7d (update).** The new per-size table of GPT-3 is only useful when retrieval finds it, and a question that names a size is not ranked by size. The profile signal of 11 Oct (off, "not adopted": +1 question of 28 at best) was tested on 24 generated lookups: 7 -> 11 correct, table among the sources 6 -> 10, no change on the 30 gold questions, +1.2 s. Adopted as the default. The test is built from the table itself and small (p = 0.22).
+54. **An audit of every quoted number against its result file (13 Oct), `data/index/_logs/paper_prep/numbers_ledger.md` (not in the repository).** 89 claims were traced to files and to the final
+inference pass `final13` (which reproduces `oct12f` on every accuracy-type measure): 62 match, and 16 rows quote an older state than the committed files. What matters: (a) **Stage 7 naming** over the
+238 pairs that key and system both call explained: the file gives all key conditions named 83.2 % (198 pairs), exact set 69.7 %, a condition beyond the key 18.1 %, recall 89.4 %, precision 88.7 %, against
+84.5 / 70.2 / 19.3 / 89.8 / 87.8 % in the one-page table (row 3), 4.5g and the README: those are the values of the 11 Oct store. The per-set naming table of 4.5g and "GENUINE calls 5 -> 8" (file: 4 -> 8)
+are likewise 11 Oct values. (b) **4.5f**: grounding alone 209 of 250 (not 206), frozen 180 and fix A 187 (not 177 / 184); on fresh-3 grounding alone 44 (not 42; macro-F1 49), policy B gained 3 and lost 1,
+p = 0.625 (not 5 : 1, p = 0.22); fresh-2 + fresh-3 6 : 1 (p = 0.125); five sets 15 : 4 (p = 0.019); the sentence "the clean evidence for policy B is small" is therefore weaker still. (c) The README quoted the judge's F1 88.9
+(4 : 0, p = 0.125; pass oct11g) and the gold page among the answer's sources 89.3 % (oct12c-e): the final pass gives 94.4 (2 : 0, p = 0.5; the judge ranges 85.7-94.4 over nine passes) and 85.7 %; the README was corrected.
+(d) **The "+1 question" of retrieval alone in `final13` (top 5: 85.7 -> 89.3 %) is an oracle**: `eval_retrieval_gold.py` hands the key's gold conditions and intent to the retriever and the profile signal uses
+them; the end-to-end figure (sources 85.7 %) did not move, so no paper should quote 89.3 % as a system number (the same holds for the 4.7d lever table). (e) The **faithfulness** numbers (99.2 %, 0.904, 0.60, critic 85 %)
+describe the 9-10 Oct system; on 13 Oct the critic supported 97.8 % of the claims of the 9 numeric answers and 85.7 % (48 of 56) of seven free-form demonstration answers. (f) The 267 of 300 headline, Stage 6,
+the leaderboard key and MetaLead reproduce exactly. The paper draft uses the file values; the sentences of this document that still quote the 11 Oct replay (one-page row 3, 4.5f, 4.5g, 4.7e) are listed here and not rewritten.
+
+55. **A score-only RAGAS mode in the pipeline (14 Oct); no measurement changed.** `[features] ragas_score` (off by default) makes the pipeline report the RAGAS-style faithfulness and answer relevancy of every answer (`QueryResponse.faithfulness`, `.answer_relevancy`, `.faithfulness_judge`; the web page shows them under the answer) without rewriting it; `ragas_loop` (the original design's rewrite loop) is unchanged and also off. With both switches off the code path is the one that produced every number in this document, so no table needs repeating. The numbers of section 4.8 (10 Oct, an earlier system) have not been re-measured on the final system; `scripts/eval_ragas.py` does that offline with the same functions (`pipeline/faithfulness.py`). Tests: `tests/test_ragas_score.py`.
 
 ## 4. Results
 
@@ -1289,6 +1302,8 @@ Reading:
 Decision: the loop stays an optional, off-by-default switch; the shipped design (NLI critic, one retry) is unchanged.
 
 Limits: one run per set (the model output is not exactly repeatable, section 5); 30 questions; **no valid independent judge was found**: the only independent one was a small 8B model that failed the hand check, and a larger judge of another family (a 14B model or more) was not tried; the hand check covers three answers in detail and three more at a glance, not a sample; the number check cannot see a right number attached to the wrong model; the metrics are our re-implementation, not the `ragas` package, and are not comparable with other papers'. The first two questions were also run once as a smoke test of the scripts; that test is not part of the numbers.
+14 Oct: the pipeline can also report the two scores for every answer without rewriting (`[features] ragas_score`, correction item 55); the study below was not repeated.
+
 Scripts: `scripts/eval_ragas.py` (collect / judge / report), `scripts/analyze_ragas.py` (paired tests, cost, number checks); results `eval/labels/ragas_report.json`, `eval/labels/ragas_analysis.json` (aggregates only; the answers and per-question scores are private files in `data/labelling/private/ragas/`).
 
 ### 4.9 An independent answer key on the 28-paper corpus: the Papers with Code leaderboards (11-12 Oct)
