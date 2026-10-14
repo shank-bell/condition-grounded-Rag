@@ -24,7 +24,7 @@ from .applicability import ApplicabilityAgent
 from .contradiction import ContradictionResolver
 from .conditions import claim_text
 from .critic import ClaimChecker
-from .faithfulness import improve_until_faithful
+from .faithfulness import answer_relevancy, faithfulness, improve_until_faithful
 from .generate import generate, select_sources
 from .orchestrator import OrchestratorAgent
 from .query_understanding import QueryUnderstanding
@@ -51,7 +51,7 @@ STEP_INFO: dict[str, tuple[int, str, str]] = {
     "7_contradiction": (7, "Contradiction resolver", "Separates real conflicts between papers from differences caused by different conditions"),
     "8_generate": (8, "Answer generation", "The language model writes the answer from the passages and the recorded conditions"),
     "9_critic": (9, "Claim critic", "An NLI model checks every sentence against its source and regenerates once if needed"),
-    "9b_ragas": (9, "Faithfulness loop (RAGAS-style)", "A judge splits the answer into statements and checks each against the passages; the answer is written again while too few are supported"),
+    "9b_ragas": (9, "Faithfulness and relevancy (RAGAS-style)", "A judge splits the answer into statements and checks each against the passages (faithfulness) and scores how well the answer fits the question (relevancy); with the loop switched on the answer is also written again while too few statements are supported"),
 }
 
 
@@ -135,7 +135,8 @@ class Pipeline:
             joint_setting=self.cfg.features.joint_setting)
         self.contradictions = ContradictionResolver(self.profiles, self.cfg.contradiction)
         self.critic = ClaimChecker(self.cfg.critic)
-        self.judge_llm = self._agent_llm(self.cfg.ragas.judge_model) if self.cfg.features.ragas_loop else None
+        self.judge_llm = (self._agent_llm(self.cfg.ragas.judge_model)
+                          if (self.cfg.features.ragas_loop or self.cfg.features.ragas_score) else None)
 
     def _agent_llm(self, model: str) -> OllamaLLM:
         """The LLM an agent uses: the shared one, or its own open-weights model when the config names one."""
@@ -302,31 +303,47 @@ class Pipeline:
             t.skip("9_critic", "the claim check is switched off")
 
         faith_score: float | None = None
+        relevancy: float | None = None
+        judge_name: str | None = None
         if self.judge_llm is not None and answer.strip():
             with t("9b_ragas"):
                 context = "\n\n".join(rc.chunk.text for rc in sources)
                 recorded = [claim_text(p) for ps in profile_map.values() for p in ps]
                 if recorded:
                     context += "\n\nRecorded results shown to the writer:\n" + "\n".join(recorded[:60])
-                answer, faith, retries = improve_until_faithful(
-                    question, answer, context, judge=self.judge_llm, threshold=self.cfg.ragas.threshold,
-                    max_retries=self.cfg.ragas.max_retries, max_context_chars=self.cfg.ragas.max_context_chars,
-                    notify=lambda msg: t.note(9, msg),
-                    regenerate=lambda feedback: generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
-                                                         profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions),
-                                                         feedback=feedback))
-                if retries:
-                    regenerated = True
-                    if plan.check_claims:
-                        checks = self.critic.check(answer, sources, profile_map)
-                        answer, checks = self.critic.repair_citations(answer, checks, sources)
+                retries = 0
+                if self.cfg.features.ragas_loop:
+                    answer, faith, retries = improve_until_faithful(
+                        question, answer, context, judge=self.judge_llm, threshold=self.cfg.ragas.threshold,
+                        max_retries=self.cfg.ragas.max_retries, max_context_chars=self.cfg.ragas.max_context_chars,
+                        notify=lambda msg: t.note(9, msg),
+                        regenerate=lambda feedback: generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
+                                                             profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions),
+                                                             feedback=feedback))
+                    if retries:
+                        regenerated = True
+                        if plan.check_claims:
+                            checks = self.critic.check(answer, sources, profile_map)
+                            answer, checks = self.critic.repair_citations(answer, checks, sources)
+                else:
+                    faith = faithfulness(question, answer, context, self.judge_llm, max_context_chars=self.cfg.ragas.max_context_chars)
+                    t.note(9, "no statement to check" if faith.score is None else
+                           f"faithfulness {faith.score:.2f} ({len(faith.statements) - len(faith.unsupported)} of {len(faith.statements)} statements "
+                           f"supported), judge {faith.judge}")
                 if faith is not None:
                     faith_score = faith.score
-                    trace.append(f"9 faithfulness {faith.score:.2f}" + (f" after {retries} rewrite(s)" if retries else "") + f" (judge {faith.judge})")
+                    judge_name = faith.judge or None
+                    if faith.score is not None:
+                        trace.append(f"9 faithfulness {faith.score:.2f}" + (f" after {retries} rewrite(s)" if retries else "") + f" (judge {faith.judge})")
+                if self.cfg.features.ragas_score:
+                    relevancy = answer_relevancy(question, answer, self.judge_llm, embed)
+                    if relevancy is not None:
+                        t.note(9, f"answer relevancy {relevancy:.2f}" + (" (a non-committal answer scores 0)" if relevancy == 0.0 else ""))
+                        trace.append(f"9 answer relevancy {relevancy:.2f}")
 
         t.ms["total"] = (time.perf_counter() - t0) * 1000
         return respond(question, answer, sources, analysis, applicability, contradictions, checks, regenerated, trace, t.ms,
-                       retrieval_weak=retrieval_weak, faithfulness=faith_score)
+                       retrieval_weak=retrieval_weak, faithfulness=faith_score, answer_relevancy=relevancy, faithfulness_judge=judge_name)
 
     def _research(self, question: str, queries: list[str], intent: str, kept: list[RetrievedChunk],
                   requested: dict[str, str] | None = None):
