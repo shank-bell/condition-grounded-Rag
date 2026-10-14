@@ -87,3 +87,4 @@ joint_coverage = true
 joint_setting = true
 dataset_context = true
 ragas_loop = false
+ragas_score = false
