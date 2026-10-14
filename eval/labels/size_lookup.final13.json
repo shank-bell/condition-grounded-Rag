@@ -1,0 +1,468 @@
+{
+ "summary": {
+  "questions": 24,
+  "answer_has_the_number": 11,
+  "table_among_sources": 10,
+  "seconds": 235
+ },
+ "rows": [
+  {
+   "question": "What is the one-shot accuracy of GPT-3 13B on ANLI R2?",
+   "value": 33.9,
+   "profile_id": "2005.14165:0143#219",
+   "dataset": "ANLI R2",
+   "metric": "acc",
+   "size": "13B",
+   "setting": "one-shot",
+   "answer": "GPT-3 13B achieves 33.9% accuracy on the ANLI R2 dataset in the one-shot setting [3].\n\nNote: The source records this result specifically for the GPT-3 13B model on the ANLI R2 dataset in the one-shot setting [4].",
+   "sources": [
+    "2005.14165:0009",
+    "2005.14165:0054",
+    "2005.14165:0143",
+    "2005.14165:0045",
+    "2005.14165:0053"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the zero-shot accuracy of GPT-3 Large on HellaSwag?",
+   "value": 51.0,
+   "profile_id": "2005.14165:0142#3",
+   "dataset": "HellaSwag",
+   "metric": "acc",
+   "size": "Large",
+   "setting": "zero-shot",
+   "answer": "The provided sources do not contain a recorded result for the zero-shot accuracy of GPT-3 on the HellaSwag dataset. [1] The available results for HellaSwag are 78.1% for the one-shot setting and 79.3% for the few-shot setting (both in English). [1]",
+   "sources": [
+    "2005.14165:0031",
+    "2005.14165:0045",
+    "2005.14165:0043",
+    "2005.14165:0033",
+    "2005.14165:0054"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the zero-shot accuracy of GPT-3 Small on Cycled Letters?",
+   "value": 0.62,
+   "profile_id": "2005.14165:0144#53",
+   "dataset": "Cycled Letters",
+   "metric": "acc",
+   "size": "Small",
+   "setting": "zero-shot",
+   "answer": "The provided sources do not contain information regarding the zero-shot accuracy of GPT-3 Small on the Cycled Letters dataset.",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0054",
+    "2005.14165:0029",
+    "2005.14165:0033",
+    "2005.14165:0031"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 Small on 1DC?",
+   "value": 1.7,
+   "profile_id": "2005.14165:0144#44",
+   "dataset": "1DC",
+   "metric": "acc",
+   "size": "Small",
+   "setting": "few-shot",
+   "answer": "GPT-3 Small achieves 1.7% accuracy on 1DC in the few-shot setting [5].",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0029",
+    "2005.14165:0055",
+    "2005.14165:0054",
+    "2005.14165:0144"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 Large on Copa?",
+   "value": 72.0,
+   "profile_id": "2005.14165:0143#394",
+   "dataset": "Copa",
+   "metric": "acc",
+   "size": "Large",
+   "setting": "few-shot",
+   "answer": "GPT-3 obtains 92% accuracy on the COPA few-shot test set in English [1]. This result was recorded for the GPT-3 few-shot model, which was provided with a total of 32 examples within the context of the task and performed no gradient updates [1].",
+   "sources": [
+    "2005.14165:0048",
+    "2005.14165:0045",
+    "2005.14165:0029",
+    "2005.14165:0033",
+    "2005.14165:0054"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 175B on 3D-?",
+   "value": 94.2,
+   "profile_id": "2005.14165:0143#349",
+   "dataset": "3D-",
+   "metric": "acc",
+   "size": "175B",
+   "setting": "few-shot",
+   "answer": "GPT-3 175B achieves 94.2% accuracy on the 3D- task in the few-shot setting [3, 4].\n\nNote: The 3D- task is defined as 3-digit subtraction [3, 4].",
+   "sources": [
+    "2005.14165:0047",
+    "2005.14165:0058",
+    "2005.14165:0055",
+    "2005.14165:0054",
+    "2005.14165:0045"
+   ],
+   "hit": true,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the zero-shot accuracy of GPT-3 Large on CB?",
+   "value": 8.93,
+   "profile_id": "2005.14165:0143#104",
+   "dataset": "CB",
+   "metric": "acc",
+   "size": "Large",
+   "setting": "zero-shot",
+   "answer": "The provided sources do not contain information regarding a dataset named \"CB\" or the specific zero-shot accuracy of GPT-3 Large on such a dataset. The sources report results for ARC [1], WebQuestions, Natural Questions, and TriviaQA [2, 3], as well as arithmetic tasks [4] and a fill-in-the-blank task [5].",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0033",
+    "2005.14165:0032",
+    "2005.14165:0054",
+    "2005.14165:0029"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 Medium on RACE-m?",
+   "value": 47.0,
+   "profile_id": "2005.14165:0143#43",
+   "dataset": "RACE-m",
+   "metric": "acc",
+   "size": "Medium",
+   "setting": "few-shot",
+   "answer": "GPT-3 Medium achieves 47% accuracy on the RACE-m dataset in the few-shot setting [6].\n\nNote: A different source reports 58.4% accuracy for GPT-3 on RACE-middle, but this result is for the zero-shot setting using the 175B model [4].",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0029",
+    "2005.14165:0054",
+    "2302.13971:0018",
+    "2005.14165:0033",
+    "2005.14165:0143"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the zero-shot accuracy of GPT-3 Medium on Winogrande?",
+   "value": 52.1,
+   "profile_id": "2005.14165:0142#276",
+   "dataset": "Winogrande",
+   "metric": "acc",
+   "size": "Medium",
+   "setting": "zero-shot",
+   "answer": "GPT-3 (175B) obtains 70.2% accuracy on the Winogrande (XL) dataset in the zero-shot, English setting [1][4][6].\n\nNote: A difference in accuracy (70.2% vs. 77.7%) is reported in the sources, but this is explained by the evaluation setting (zero-shot vs. few-shot) [4][6].",
+   "sources": [
+    "2005.14165:0042",
+    "2005.14165:0045",
+    "2005.14165:0054",
+    "2302.13971:0011",
+    "2005.14165:0033",
+    "2005.14165:0038"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the few-shot perplexity of GPT-3 Small on LAMBADA?",
+   "value": 165.0,
+   "profile_id": "2005.14165:0142#67",
+   "dataset": "LAMBADA",
+   "metric": "ppl",
+   "size": "Small",
+   "setting": "few-shot",
+   "answer": "GPT-3 Small obtains a perplexity of 165.0 on the LAMBADA dataset in a few-shot setting [3].",
+   "sources": [
+    "2005.14165:0026",
+    "2005.14165:0045",
+    "2005.14165:0142",
+    "2005.14165:0027",
+    "2005.14165:0031"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the one-shot accuracy of GPT-3 175B on StoryCloze?",
+   "value": 84.7,
+   "profile_id": "2005.14165:0142#91",
+   "dataset": "StoryCloze",
+   "metric": "acc",
+   "size": "175B",
+   "setting": "one-shot",
+   "answer": "The provided sources do not contain a recorded one-shot accuracy for GPT-3 175B on the StoryCloze dataset. The available results for StoryCloze 2016 are 83.2% in the zero-shot setting and 87.7% in the few-shot setting (with K = 70) [6].\n\nNote: The evidence does not cover the one-shot setting for the StoryCloze task.",
+   "sources": [
+    "2005.14165:0047",
+    "2005.14165:0058",
+    "2005.14165:0055",
+    "2005.14165:0056",
+    "2005.14165:0054",
+    "2005.14165:0031"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 2.7B on WiC?",
+   "value": 51.6,
+   "profile_id": "2005.14165:0143#148",
+   "dataset": "WiC",
+   "metric": "acc",
+   "size": "2.7B",
+   "setting": "few-shot",
+   "answer": "GPT-3 obtains 49.4% accuracy on the WiC task in the few-shot setting (English) [2, 5]. This result is noted as being at random chance [2].",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0050",
+    "2005.14165:0029",
+    "2005.14165:0054",
+    "2005.14165:0048"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the one-shot accuracy of GPT-3 13B on 5D-?",
+   "value": 0.05,
+   "profile_id": "2005.14165:0144#1",
+   "dataset": "5D-",
+   "metric": "acc",
+   "size": "13B",
+   "setting": "one-shot",
+   "answer": "The source does not provide the one-shot accuracy for the GPT-3 13B model on the 5D- task. While the 5D- task is defined as 5-digit subtraction with numbers sampled from [0, 100,000) [1], the specific results for the 13B model on this task are not recorded.\n\nSCOPE WARNING: The evidence covers 3 of 4 conditions in the question. No source reports dataset = 5D- together with model = GPT-3 13B, settin",
+   "sources": [
+    "2005.14165:0053",
+    "2005.14165:0045",
+    "2005.14165:0054",
+    "2005.14165:0029",
+    "2005.14165:0009",
+    "2005.14165:0055",
+    "2302.13971:0014"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 2.7B on Anagrams 1?",
+   "value": 3.81,
+   "profile_id": "2005.14165:0144#97",
+   "dataset": "Anagrams 1",
+   "metric": "acc",
+   "size": "2.7B",
+   "setting": "few-shot",
+   "answer": "The provided sources do not contain information regarding the performance of a \"GPT-3 2.7B\" model or a dataset named \"Anagrams 1.\"",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0029",
+    "2005.14165:0054",
+    "2005.14165:0050",
+    "2005.14165:0046"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What BLEU does GPT-3 Medium reach on En→De 16 in the few-shot setting?",
+   "value": 12.9,
+   "profile_id": "2005.14165:0142#242",
+   "dataset": "En→De 16",
+   "metric": "bleu",
+   "size": "Medium",
+   "setting": "few-shot",
+   "answer": "GPT-3 Medium obtains 12.9 BLEU on En→De 16 in the few-shot setting [2].",
+   "sources": [
+    "2005.14165:0036",
+    "2005.14165:0142",
+    "2005.14165:0039"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 13B on Natural Questions?",
+   "value": 21.0,
+   "profile_id": "2005.14165:0142#123",
+   "dataset": "Natural Questions",
+   "metric": "acc",
+   "size": "13B",
+   "setting": "few-shot",
+   "answer": "The sources do not provide a specific few-shot accuracy for a model identified as \"GPT-3 13B\" on the Natural Questions dataset.\n\nThe available data for Natural Questions (NQ) includes:\n- GPT-3 (175B) achieves 29.9% accuracy in the few-shot setting (English) [1, 3].\n- A \"13 billion parameter model\" (not explicitly identified as GPT-3) achieves 28.1% accuracy in a 5-shot setting on NaturalQuestions ",
+   "sources": [
+    "2005.14165:0033",
+    "2005.14165:0045",
+    "2302.13971:0014",
+    "2005.14165:0054",
+    "2005.14165:0029"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What BLEU does GPT-3 13B reach on EnℓFr 14 in the zero-shot setting?",
+   "value": 15.3,
+   "profile_id": "2005.14165:0142#181",
+   "dataset": "EnℓFr 14",
+   "metric": "bleu",
+   "size": "13B",
+   "setting": "zero-shot",
+   "answer": "GPT-3 13B obtains 15.3 BLEU on EnℓFr 14 in the zero-shot setting (French) [2].",
+   "sources": [
+    "2005.14165:0036",
+    "2005.14165:0142",
+    "2005.14165:0039"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the zero-shot accuracy of GPT-3 XL on 2Dx?",
+   "value": 2.1,
+   "profile_id": "2005.14165:0144#7",
+   "dataset": "2Dx",
+   "metric": "acc",
+   "size": "XL",
+   "setting": "zero-shot",
+   "answer": "GPT-3 obtains 19.8 accuracy on 2Dx in the zero-shot setting for the 175B model [3].",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0043",
+    "2005.14165:0055",
+    "2005.14165:0029",
+    "2005.14165:0054"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What BLEU does GPT-3 Large reach on De→En 16 in the zero-shot setting?",
+   "value": 3.41,
+   "profile_id": "2005.14165:0142#202",
+   "dataset": "De→En 16",
+   "metric": "bleu",
+   "size": "Large",
+   "setting": "zero-shot",
+   "answer": "GPT-3 Large obtains 3.41 BLEU on De→En 16 in the zero-shot setting [2].\n\nNote: The source reporting the 3.41 BLEU result specifies the model as GPT-3 Large, the dataset as De→En 16, and the setting as zero-shot; however, it does not explicitly list the language as \"De\" (German) in the specific row for that result, though it is grouped with other German-related translation tasks [2]. Another source",
+   "sources": [
+    "2005.14165:0036",
+    "2005.14165:0142",
+    "2005.14165:0039",
+    "2005.14165:0045",
+    "2005.14165:0047"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 6.7B on 3D+?",
+   "value": 0.9,
+   "profile_id": "2005.14165:0143#323",
+   "dataset": "3D+",
+   "metric": "acc",
+   "size": "6.7B",
+   "setting": "few-shot",
+   "answer": "The provided sources do not contain information regarding the few-shot accuracy of GPT-3 6.7B on the 3D+ dataset.\n\nSCOPE WARNING: The evidence covers 2 of 3 conditions in the question. No source reports dataset = 3D+ together with model = GPT-3 6.7B, setting = few-shot. For model = GPT-3 6.7B, setting = few-shot, the sources record: CB, WSC, LAMBADA, HellaSwag, WiC, ReCoRD. Each condition appears ",
+   "sources": [
+    "2005.14165:0045",
+    "2005.14165:0054",
+    "2005.14165:0050",
+    "2005.14165:0033",
+    "2005.14165:0052"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the zero-shot accuracy of GPT-3 6.7B on ReCoRD?",
+   "value": 88.6,
+   "profile_id": "2005.14165:0143#159",
+   "dataset": "ReCoRD",
+   "metric": "acc",
+   "size": "6.7B",
+   "setting": "zero-shot",
+   "answer": "GPT-3 6.7B obtains 88.6% accuracy on the ReCoRD dataset in a zero-shot setting [1].",
+   "sources": [
+    "2005.14165:0143",
+    "2005.14165:0054",
+    "2005.14165:0045",
+    "2005.14165:0033",
+    "2302.13971:0018"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the zero-shot accuracy of GPT-3 13B on 2D+?",
+   "value": 15.4,
+   "profile_id": "2005.14165:0143#260",
+   "dataset": "2D+",
+   "metric": "acc",
+   "size": "13B",
+   "setting": "zero-shot",
+   "answer": "The provided sources do not contain a specific zero-shot accuracy value for the GPT-3 13B model on the 2D+ dataset.\n\nNote: The evidence covers 3 of 4 conditions in the question. No source reports dataset = 2D+ together with model = GPT-3 13B, setting = zero-shot. For model = GPT-3 13B, setting = zero-shot, the sources record: LAMBADA, HellaSwag, PIQA, StoryCloze, TriviaQA, Natural Questions. Each ",
+   "sources": [
+    "2005.14165:0054",
+    "2005.14165:0045",
+    "2005.14165:0053",
+    "2302.13971:0018",
+    "2005.14165:0029"
+   ],
+   "hit": false,
+   "table_in_sources": false
+  },
+  {
+   "question": "What is the few-shot accuracy of GPT-3 13B on RACE-h?",
+   "value": 45.1,
+   "profile_id": "2005.14165:0143#23",
+   "dataset": "RACE-h",
+   "metric": "acc",
+   "size": "13B",
+   "setting": "few-shot",
+   "answer": "GPT-3 13B obtains 45.1 accuracy on RACE-h in the few-shot setting [4].\n\nCONFLICTS:\n- Sources [5] and [6] (explained): There is a difference in reported accuracy for RACE-h (45.5 vs 46.8) because [5] reports zero-shot results while [6] reports few-shot results.",
+   "sources": [
+    "2005.14165:0054",
+    "2005.14165:0045",
+    "2005.14165:0029",
+    "2005.14165:0143",
+    "2302.13971:0018",
+    "2005.14165:0044"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  },
+  {
+   "question": "What is the one-shot F1 of GPT-3 Medium on Quac?",
+   "value": 26.9,
+   "profile_id": "2005.14165:0142#335",
+   "dataset": "Quac",
+   "metric": "f1",
+   "size": "Medium",
+   "setting": "one-shot",
+   "answer": "GPT-3 Medium obtains 26.9 F1 on Quac in the one-shot setting [1]. Additionally, the one-shot setting for QuAC is reported as 43.3 F1 [5].",
+   "sources": [
+    "2005.14165:0142",
+    "2005.14165:0009",
+    "2005.14165:0047",
+    "2005.14165:0036",
+    "2005.14165:0044"
+   ],
+   "hit": true,
+   "table_in_sources": true
+  }
+ ]
+}
