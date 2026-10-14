@@ -199,12 +199,20 @@ def _written_as(name: str, question: str) -> bool:
     return bool(m) and m.group(0) == name
 
 
+def _plain_word(name: str) -> bool:
+    """An ordinary-looking word or phrase (letters and spaces, capitals only at the start of a word): "Average", "Better", "Math", "various". Table rows are
+    labelled with such words, so the store holds them as data sets; "SQuAD", "XNLI" or "TyDi QA" have a capital or a digit inside a word."""
+    return bool(re.fullmatch(r"[A-Za-z][a-z]*(?: [A-Za-z][a-z]*)*", name))
+
+
 def vocabulary_conditions(question: str, vocab: dict[str, list[str]]) -> dict[str, str]:
     """Dataset, version, model and language written literally in the question."""
     found: dict[str, str] = {}
-    datasets = {d for d in vocab.get("dataset", []) if len(d) >= 3 and norm(d) not in TASK_WORDS}
+    datasets = {d for d in vocab.get("dataset", []) if len(d) >= 3 and norm(d) not in TASK_WORDS and norm(d) not in _METRIC_WORDS and norm(d) not in _AGGREGATE_WORDS}
     for name in sorted(datasets, key=lambda d: (-len(d), not _written_as(d, question), d)):
         m = _find(name, question)
+        if m and _plain_word(name) and not (name[:1].isupper() and m.group(0)[:1].isupper() and m.start() > 0):
+            continue
         if m:
             found["dataset"] = name
             version = re.match(r"\s*(?:v|version\s*)?(\d+(?:\.\d+)+)", question[m.end():], re.I)
