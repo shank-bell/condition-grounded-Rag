@@ -69,6 +69,9 @@ export interface QueryResponse {
   claim_checks: ClaimCheck[];
   regenerated: boolean;
   retrieval_weak?: boolean;
+  faithfulness?: number | null;
+  answer_relevancy?: number | null;
+  faithfulness_judge?: string | null;
   trace: string[];
   timings_ms: Record<string, number>;
 }
