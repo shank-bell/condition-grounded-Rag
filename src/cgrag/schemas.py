@@ -152,5 +152,7 @@ class QueryResponse(BaseModel):
     regenerated: bool = False
     retrieval_weak: bool = False
     faithfulness: float | None = None
+    answer_relevancy: float | None = None
+    faithfulness_judge: str | None = None
     trace: list[str] = Field(default_factory=list)
     timings_ms: dict[str, float] = Field(default_factory=dict)
