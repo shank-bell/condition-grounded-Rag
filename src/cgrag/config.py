@@ -121,6 +121,7 @@ class FeaturesConfig(BaseModel):
     joint_setting: bool = True
     ragas_loop: bool = False
     ragas_score: bool = False
+    strip_guessed_reasons: bool = True
     profile_repair: bool = True
     dataset_context: bool = True
 
