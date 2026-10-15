@@ -11,7 +11,7 @@
 1. [The problem in one minute](#1-the-problem-in-one-minute)
 2. [What this project adds](#2-what-this-project-adds)
 3. [Key words explained](#3-key-words-explained)
-4. [Architecture](#4-architecture) (offline part, online part, the two new stages, design versus build)
+4. [Architecture](#4-architecture) (the design diagram and stage table, the pipeline as built, offline part, online part, the two new stages, design versus build)
 5. [Repository tour](#5-repository-tour)
 6. [Setup and first run](#6-setup-and-first-run)
 7. [Using the system](#7-using-the-system) (command line, API, web page, uploading a paper, switches)
@@ -83,7 +83,51 @@ The rest of the pipeline is a normal RAG chain. The contribution is the layer th
 
 ## 4. Architecture
 
-The design has an **offline** part (run once per paper) and an **online** part (run for every question). The two new stages are marked `(NEW)`.
+The architecture has an **offline** part (run once per paper) and an **online** part (run for every question). This section shows it twice: **4.1 is the design** (architecture v2: its diagram and its stage table), **4.2 is the same pipeline as it is built today**. 4.3 to 4.7 go through the built system step by step, and 4.8 lists where the build differs from the design.
+
+### 4.1 The design (architecture v2)
+
+![Architecture v2: offline ingestion into the stores; online stages 1 to 10, with the new stages 6 and 7 reading the Condition Profile Store](docs/architecture_v2.svg)
+
+*The design as drawn in September 2026. Amber = new (the contribution), blue = upgraded stage, white = unchanged, dashed = a feedback loop (an agent decides). The model names and the hardware in the picture are the design's own; the built system differs in places (see 4.8).*
+
+Condition profiles are extracted once, when a paper is added. At question time, stages 6 and 7 read them after reranking has cut the candidates to about 10, which keeps pairwise NLI to about 45 pairs. The two dashed loops are the points where an agent decides to act: stage 6 searches again for a missing condition, and stage 9 regenerates an unsupported sentence once.
+
+| | Component | What it does | Runs on | Role | Status |
+|---|---|---|---|---|---|
+| A | PDF Loader | Extracts text page by page and detects section headings | PyMuPDF | module | unchanged |
+| B | Section Chunker | Splits text within section boundaries; tags source, page, section | LangChain splitter | module | unchanged |
+| C | **Condition Profile Extractor** | Pulls a profile for each reported result from Results/Experiments chunks and links it to the Methods chunk from the same paper | Gemma 4, temperature 0 | module | **new** |
+| D | Embedder | Encodes chunks as 1024-d vectors | BGE-M3 | module | unchanged |
+| 1 | Query Understanding | Intent and complexity from one 2-head classifier; also extracts the conditions the question implies (language, model size, domain) | SciBERT + Gemma 4 | tool | upgraded |
+| 2 | Orchestrator | Plans the path: simple questions skip refinement; complex questions are decomposed | Python | agent (planner) | unchanged |
+| 3 | Query Refinement | Rewrites into technical form; decomposes multi-part questions | Gemma 4 E2B | tool | unchanged |
+| 4 | Hybrid Retrieval | Dense + BM25, fused with RRF (k=60); section match gives a soft boost, not a hard filter | ChromaDB, rank-bm25 | tool | unchanged |
+| 5 | Rerank + Filter | Scores question and chunk together; keeps chunks above a threshold (top ~10). Replaces the separate CRAG cosine stage | ms-marco-MiniLM | tool | merged |
+| 6 | **Applicability Agent** | Checks coverage for each condition in the question; if one is missing, searches again with it added; if still missing, attaches a scope warning | Profile Store | agent (investigator) | **new** |
+| 7 | **Condition-Aware Contradiction Resolver** | NLI + numeric disagreement flags candidate pairs; comparing their profiles gives genuine / explained / not comparable | DeBERTa NLI, Profile Store | agent (analyst) | **new** |
+| 8 | Generate | Top 5 chunks + chat history; the prompt now carries the scope warning and the explanations for conflicts | Gemma 4 E2B, Ollama | tool | upgraded |
+| 9 | Claim-Check Critic | Checks each answer sentence against its cited chunk; regenerates once if a sentence is unsupported. Replaces the RAGAS 3-retry loop at runtime | DeBERTa NLI | agent (critic) | replaced |
+| 10 | Respond | The JSON adds `applicability{coverage, missing}` and `contradictions[{type, differing}]`; the UI shows a coverage bar and conflict badges | FastAPI, React | module | upgraded |
+
+**Removed from v1, and why**
+
+- **Tavily web fallback:** web pages have no sections or condition profiles, and it breaks the fully offline design.
+- **HyDE:** a 2B model's hypothetical answers are unreliable, and searching with them adds noise and latency.
+- **Semantic cache (0.92):** near-identical questions (BERT vs RoBERTa) can return a wrong cached answer.
+- **Legal / Finance / Medical domains:** those documents do not follow the IMRaD section structure, and the conditions do not transfer.
+
+**Merged or replaced**
+
+- CRAG cosine stage + reranker become one rerank-and-threshold stage.
+- The RAGAS self-check with 3 retries becomes an NLI claim check with 1 retry; RAGAS is kept for offline evaluation.
+- The hard section filter becomes a soft boost, so answers that span sections are not lost.
+- Two DistilBERT classifiers become one SciBERT model with two heads.
+- The Groq API becomes Gemma 4 E2B on local Ollama.
+
+### 4.2 The pipeline as built
+
+The same pipeline as it is built today. The two new stages are marked `(NEW)`; the repair overlay, the retrieval cards and the table reader are additions to the design.
 
 ```
  OFFLINE (once per paper)                                                          scripts/ingest.py
@@ -107,7 +151,7 @@ The design has an **offline** part (run once per paper) and an **online** part (
                               8 generate answer -> 9 claim critic -> 10 respond (API + web page)
 ```
 
-### 4.1 Offline: from a PDF to the profile store
+### 4.3 Offline: from a PDF to the profile store
 
 | Step | Name | What it does | Tool | Code |
 |---|---|---|---|---|
@@ -120,7 +164,7 @@ The design has an **offline** part (run once per paper) and an **online** part (
 | D | Embedder | 1,024-number vectors for chunks and cards. | BGE-M3 | `src/cgrag/models.py` |
 | - | Stores | Chroma (vectors), BM25 (keywords), SQLite (profiles + the repair overlay). | | `src/cgrag/stores/` |
 
-### 4.2 Online: what happens to a question
+### 4.4 Online: what happens to a question
 
 | Stage | Name | What it does | Model / method | Code |
 |---|---|---|---|---|
@@ -129,15 +173,15 @@ The design has an **offline** part (run once per paper) and an **online** part (
 | 3 | Refinement | Rewrites the question into technical form and splits multi-part questions. | Gemma 4 12B | `refinement.py` |
 | 4 | Hybrid retrieval | Dense + BM25 search, merged by RRF (k = 60); cards are searched too; a "profile signal" adds chunks whose profiles record the named conditions together. | BGE-M3, BM25 | `retrieval.py` |
 | 5 | Rerank and filter | Scores question and chunk together and keeps the best (about 10). | `bge-reranker-base` | `rerank.py` |
-| **6** | **Scope check (NEW)** | See 4.3. | profile store + a small LLM agent + code guardrails | `applicability.py`, `conditions.py` |
-| **7** | **Conflict typing (NEW)** | See 4.4. | NLI + numeric trigger + profile store | `contradiction.py`, `grounding.py` |
+| **6** | **Scope check (NEW)** | See 4.5. | profile store + a small LLM agent + code guardrails | `applicability.py`, `conditions.py` |
+| **7** | **Conflict typing (NEW)** | See 4.6. | NLI + numeric trigger + profile store | `contradiction.py`, `grounding.py` |
 | 8 | Generate | Writes the answer from the top passages, the recorded results and the warnings of Stages 6 and 7. | Gemma 4 12B | `generate.py` |
 | 9 | Claim critic | Checks every sentence of the answer against its cited source and regenerates once if one is unsupported. | DeBERTa-v3 NLI | `critic.py` |
 | 10 | Respond | Returns the answer with a coverage bar, conflict badges and a step-by-step trace. | FastAPI + React | `respond.py`, `api/main.py`, `frontend/` |
 
 `src/cgrag/pipeline/run.py` wires all ten stages into one function, `Pipeline.run(question)`, with two loops (Stage 6 back to Stage 4, Stage 9 back to Stage 8).
 
-### 4.3 Stage 6, the scope check, in more detail
+### 4.5 Stage 6, the scope check, in more detail
 
 1. Look up, in the profile store, which conditions of the question are recorded among the retrieved results.
 2. Let a small LLM agent judge what the profiles cannot settle. **Guardrails:** a "covered" verdict must be backed by a recorded or quoted value, and the model, data set version and model size are never decided by the LLM.
@@ -145,7 +189,7 @@ The design has an **offline** part (run once per paper) and an **online** part (
 4. If something is missing, search once more with the missing combination (the store can also pull chunks whose profile records it).
 5. If it is still missing, a bigger model gives a second opinion, and then a **scope warning** names the condition and lists what is recorded for the others.
 
-### 4.4 Stage 7, conflict typing, in more detail
+### 4.6 Stage 7, conflict typing, in more detail
 
 1. **Trigger:** two results from different papers with the same model family, data set and metric whose values differ by more than 2 % of the larger value.
 2. **Ground each profile:** read the profile's own table cell again (block heading, caption, row and column labels) to get the split (dev / test), the system kind (single / ensemble) and the size; a profile whose cell does not fit is marked NOT COMPARABLE.
@@ -154,7 +198,7 @@ The design has an **offline** part (run once per paper) and an **online** part (
 
 EXPLAINED means that a recorded condition differs. It does not prove that the difference accounts for the whole size of the gap.
 
-### 4.5 Models used
+### 4.7 Models used
 
 | Role | Model | Where |
 |---|---|---|
@@ -165,7 +209,7 @@ EXPLAINED means that a recorded condition differs. It does not prove that the di
 | NLI (Stages 7 and 9) | `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` | `[models]` |
 | Intent / complexity classifier | `allenai/scibert_scivocab_uncased`, fine-tuned here on LLM-written questions | `scripts/train_query_classifier.py` |
 
-### 4.6 Is the architecture finished? Design versus build
+### 4.8 Is the architecture finished? Design versus build
 
 **Built and integrated: yes.** All components (A to D and stages 1 to 10) exist, are tested and run in one `run(question)` path. Nothing is a stub.
 **Finished as originally specified: no.** The honest list:
@@ -185,7 +229,7 @@ EXPLAINED means that a recorded condition differs. It does not prove that the di
 | Answer-quality claim | Qasper / SQuAI with a RAGAS independent judge | own check on 9 numeric questions and a RAGAS-style faithfulness study; no Qasper or SQuAI |
 
 Every departure is behind a switch in `config.toml` where that makes sense and is listed in the project notes ("Departures from the architecture").
-The original design document is unpublished and is not part of this repository; this section describes the system as built.
+The design document itself is not a file of this repository; its diagram and stage table are reproduced in 4.1, and 4.3 to 4.7 describe the system as built.
 
 ---
 
