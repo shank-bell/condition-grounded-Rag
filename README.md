@@ -228,7 +228,7 @@ EXPLAINED means that a recorded condition differs. It does not prove that the di
 | Evaluation size | 100 papers, ~150 questions, ~300 pairs with two human labellers (kappa 0.6 or higher) | 28 papers, 30 questions (plus 20 out-of-corpus and 32 store-made ones), 300 pairs; **keys written by one AI**, no human kappa yet |
 | Answer-quality claim | Qasper / SQuAI with a RAGAS independent judge | own check on 9 numeric questions and a RAGAS-style faithfulness study; no Qasper or SQuAI |
 
-Every departure is behind a switch in `config.toml` where that makes sense and is listed in the project notes ("Departures from the architecture").
+Every departure is behind a switch in `config.toml` where that makes sense and is listed in the table above.
 The design document itself is not a file of this repository; its diagram and stage table are reproduced in 4.1, and 4.3 to 4.7 describe the system as built.
 
 ---
@@ -238,7 +238,6 @@ The design document itself is not a file of this repository; its diagram and sta
 ```
 condition-grounded-Rag/
 ├── README.md                    this file
-├── NOTES.md                    working notes of the project (decisions, departures, state): long, for the authors
 ├── config.toml                  every default and every ablation switch
 ├── config.local.toml            (git-ignored) overrides for one machine; CGRAG_OVERLAY=<toml> merges one more file
 ├── config/                      extra overlays (the benchmark store, an ablation of the cards)
