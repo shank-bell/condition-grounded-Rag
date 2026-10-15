@@ -4,9 +4,13 @@ The prompt now also carries the scope warning from stage 6 and the explanations 
 """
 from __future__ import annotations
 
+import re
+
+from ..config import get_settings
 from ..llm import OllamaLLM
 from ..schemas import ConditionCheck, ConditionProfile, ContradictionPair, RetrievedChunk
 from .conditions import claim_text, observed_values, values_match
+from .text import _SENTENCE_END, strip_citations
 
 MAX_ANSWER_TOKENS = 500
 MAX_PROFILE_LINES = 6
@@ -24,8 +28,36 @@ SYSTEM = (
     "write any other caveat as a sentence starting with 'Note:'.\n"
     "5. Only if the message has a CONFLICTS section: describe each conflict. A difference explained by a named condition "
     "is not a real contradiction: say which condition explains it. A genuine conflict must be reported as unresolved.\n"
-    "6. Be concise: at most 180 words, no preamble."
+    "6. Never guess why two numbers differ. Give each number once, with its own source and the conditions the source "
+    "records. Name a reason only when a CONFLICTS line gives it or the cited text itself states it; a different paper, "
+    "a re-run or a different model size is a condition to name, not an explanation to invent. A 'Note:' states a fact "
+    "from the sources, never a guessed cause.\n"
+    "7. Be concise: at most 180 words, no preamble."
 )
+
+_REASON = re.compile(r"\b(?:explained|attributed|accounted\s+for|due\s+to|owing\s+to|because\s+of|caused\s+by|results?\s+from|stems?\s+from|reflects?)\b", re.I)
+_NUMBER = re.compile(r"\d+(?:\.\d+)?")
+
+
+def drop_guessed_reasons(answer: str, conflict_text: str) -> str:
+    """Remove each sentence that gives a reason for numbers when Stage 7 gave none for them. A sentence without numbers, and every sentence that only
+    repeats a CONFLICTS line, stays; a line that is left with nothing but "Note:" is removed."""
+    allowed = set(_NUMBER.findall(conflict_text))
+    lines: list[str] = []
+    for line in answer.split("\n"):
+        if not line.strip():
+            lines.append(line)
+            continue
+        kept = []
+        for sentence in _SENTENCE_END.split(line):
+            numbers = set(_NUMBER.findall(strip_citations(sentence)))
+            if _REASON.search(sentence) and numbers and not numbers <= allowed:
+                continue
+            kept.append(sentence)
+        text = " ".join(x.strip() for x in kept if x.strip())
+        if text.rstrip(":* ").strip().lower() not in ("", "note"):
+            lines.append(text)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
 def select_sources(kept: list[RetrievedChunk], conflicts: list[ContradictionPair], top: int,
@@ -108,4 +140,7 @@ def generate(question: str, sources: list[RetrievedChunk], llm: OllamaLLM, *, wa
         parts.append("Your previous answer contained sentences the sources do not support:\n" + feedback +
                      "\nWrite the answer again. Keep only statements that a cited source supports.")
     messages = [{"role": "system", "content": SYSTEM}, *(history or []), {"role": "user", "content": "\n\n".join(parts)}]
-    return llm.chat(messages, max_tokens=MAX_ANSWER_TOKENS).text.strip()
+    answer = llm.chat(messages, max_tokens=MAX_ANSWER_TOKENS).text.strip()
+    if get_settings().features.strip_guessed_reasons:
+        answer = drop_guessed_reasons(answer, conflict_text)
+    return answer
