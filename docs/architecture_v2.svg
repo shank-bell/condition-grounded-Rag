@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1420 720" width="1420" height="720" role="img" aria-label="Architecture v2: offline ingestion extracts condition profiles into a new store; online, after retrieval and reranking, a new Applicability Agent and a new Condition-Aware Contradiction Resolver read those profiles before the answer is generated, checked and returned.">
+<title>Condition-Grounded Scientific RAG - architecture v2 (design)</title>
+<rect x="0" y="0" width="1420" height="720" fill="#FFFFFF"/>
+
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#59635E"/>
+          </marker>
+          <marker id="ahn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#C98A12"/>
+          </marker>
+        </defs>
+
+        <!-- Lane labels -->
+        <text x="50" y="40" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" letter-spacing="0.88" fill="#59635E">OFFLINE · RUNS WHEN A PAPER IS ADDED</text>
+        <text x="50" y="232" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" letter-spacing="0.88" fill="#59635E">STORES</text>
+        <line x1="30" y1="300" x2="700" y2="300" stroke="#E2E6E2" stroke-width="1"/>
+        <text x="50" y="336" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" letter-spacing="0.88" fill="#59635E">ONLINE · RUNS FOR EVERY QUESTION</text>
+
+        <!-- ===== OFFLINE ROW (y=70) ===== -->
+        <rect x="50" y="70" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="64" y="96" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">PDF papers</text>
+        <text x="64" y="115" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">admin-loaded + /upload</text>
+
+        <rect x="278" y="70" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="292" y="96" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">PDF Loader</text>
+        <text x="292" y="115" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">PyMuPDF · section headings</text>
+
+        <rect x="506" y="70" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="520" y="96" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">Section Chunker</text>
+        <text x="520" y="115" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">IMRaD tags · 2000 / 200</text>
+
+        <rect x="734" y="70" width="176" height="64" rx="5" fill="#FFF2D4" stroke="#C98A12" stroke-width="2"/>
+        <text x="748" y="96" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">Condition Profile</text>
+        <text x="748" y="111" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">Extractor</text>
+        <text x="748" y="126" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">Gemma 4 · JSON schema</text>
+        <g><rect fill="#C98A12" x="868" y="76" width="36" height="15" rx="2"/><text x="886" y="87" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="9" font-weight="500" fill="#FFFFFF">NEW</text></g>
+
+        <rect x="962" y="70" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="976" y="96" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">BGE-M3 Embedder</text>
+        <text x="976" y="115" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">1024-d dense vectors</text>
+
+        <line x1="226" y1="102" x2="276" y2="102" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="454" y1="102" x2="504" y2="102" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="682" y1="102" x2="732" y2="102" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="910" y1="102" x2="960" y2="102" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+
+        <!-- chunker -> BM25 over the top -->
+        <path d="M594 70 V52 H1278 V198" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <text x="1010" y="46" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#59635E">chunks → keyword index</text>
+
+        <!-- ===== STORES (y=200) ===== -->
+        <rect x="734" y="200" width="176" height="56" rx="5" fill="#FFF2D4" stroke="#C98A12" stroke-width="2"/>
+        <text x="748" y="224" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">Condition Profile Store</text>
+        <text x="748" y="242" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">SQLite · keyed by chunk_id</text>
+
+        <rect x="962" y="200" width="176" height="56" rx="5" fill="#F4F5F2" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="976" y="224" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">ChromaDB</text>
+        <text x="976" y="242" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">vectors + section metadata</text>
+
+        <rect x="1190" y="200" width="176" height="56" rx="5" fill="#F4F5F2" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="1204" y="224" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">BM25 Index</text>
+        <text x="1204" y="242" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">rank-bm25 · Okapi</text>
+
+        <line x1="822" y1="134" x2="822" y2="198" fill="none" stroke="#C98A12" stroke-width="1.8" marker-end="url(#ahn)"/>
+        <text x="830" y="172" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#9A5A00">profiles</text>
+        <line x1="1050" y1="134" x2="1050" y2="198" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <text x="1058" y="172" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#59635E">vectors</text>
+
+        <!-- ===== ONLINE ROW 1 (y=350) ===== -->
+        <rect x="50" y="350" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="64" y="376" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">Researcher · React UI</text>
+        <text x="64" y="395" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">POST /query → FastAPI</text>
+
+        <rect x="278" y="350" width="176" height="64" rx="5" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.5"/>
+        <text x="292" y="373" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">1 Query Understanding</text>
+        <text x="292" y="390" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">SciBERT: intent + complexity</text>
+        <text x="292" y="405" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">+ query conditions</text>
+        <g><rect fill="#2C5A86" x="418" y="332" width="36" height="15" rx="2"/><text x="436" y="343" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="9" font-weight="500" fill="#FFFFFF">UPG</text></g>
+
+        <rect x="506" y="350" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="520" y="376" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">2 Orchestrator</text>
+        <text x="520" y="395" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">plans path by complexity</text>
+
+        <rect x="734" y="350" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="748" y="376" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">3 Query Refinement</text>
+        <text x="748" y="395" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">rewrite · decompose if complex</text>
+
+        <rect x="962" y="350" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="976" y="376" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">4 Hybrid Retrieval</text>
+        <text x="976" y="395" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">dense + BM25 → RRF · top 20</text>
+
+        <line x1="226" y1="382" x2="276" y2="382" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="454" y1="382" x2="504" y2="382" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="682" y1="382" x2="732" y2="382" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="910" y1="382" x2="960" y2="382" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+
+        <!-- stores -> retrieval -->
+        <line x1="1020" y1="256" x2="1020" y2="348" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <text x="1014" y="290" text-anchor="end" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#59635E">dense</text>
+        <path d="M1278 256 V318 H1110 V348" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <text x="1286" y="296" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#59635E">sparse</text>
+
+        <!-- profile store -> agents 6 and 7 -->
+        <path d="M760 256 V300 H720 V455 H822 V488" fill="none" stroke="#C98A12" stroke-width="1.8" marker-end="url(#ahn)"/>
+        <path d="M720 455 H594 V488" fill="none" stroke="#C98A12" stroke-width="1.8" marker-end="url(#ahn)"/>
+        <text x="600" y="318" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#9A5A00">profiles +</text>
+        <text x="600" y="332" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#9A5A00">linked Methods</text>
+
+        <!-- Local models panel -->
+        <rect x="1190" y="350" width="176" height="204" rx="5" fill="none" stroke="#C8CEC9" stroke-width="1.2" stroke-dasharray="3 3"/>
+        <text x="1204" y="374" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" letter-spacing="0.88" fill="#59635E">LOCAL MODELS</text>
+        <text x="1204" y="398" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">BGE-M3 · embeddings</text>
+        <text x="1204" y="418" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">SciBERT · 2-head classifier</text>
+        <text x="1204" y="438" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">MiniLM · cross-encoder</text>
+        <text x="1204" y="458" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">DeBERTa-v3 · NLI</text>
+        <text x="1204" y="478" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">Gemma 4 E2B · Ollama</text>
+        <text x="1204" y="506" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">all on RTX 4050, 6 GB</text>
+        <text x="1204" y="524" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">no external APIs</text>
+
+        <!-- ===== ONLINE ROW 2 (y=490), right to left ===== -->
+        <rect x="962" y="490" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="976" y="516" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">5 Rerank + Filter</text>
+        <text x="976" y="535" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">cross-encoder · keep top ~10</text>
+
+        <rect x="734" y="490" width="176" height="64" rx="5" fill="#FFF2D4" stroke="#C98A12" stroke-width="2"/>
+        <text x="748" y="513" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">6 Applicability</text>
+        <text x="748" y="528" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">Agent</text>
+        <text x="748" y="545" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">coverage score → warn</text>
+        <g><rect fill="#C98A12" x="868" y="496" width="36" height="15" rx="2"/><text x="886" y="507" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="9" font-weight="500" fill="#FFFFFF">NEW</text></g>
+
+        <rect x="506" y="490" width="176" height="64" rx="5" fill="#FFF2D4" stroke="#C98A12" stroke-width="2"/>
+        <text x="520" y="513" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">7 Contradiction</text>
+        <text x="520" y="528" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">Resolver</text>
+        <text x="520" y="545" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">NLI + numeric → 3 classes</text>
+        <g><rect fill="#C98A12" x="640" y="496" width="36" height="15" rx="2"/><text x="658" y="507" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="9" font-weight="500" fill="#FFFFFF">NEW</text></g>
+
+        <rect x="278" y="490" width="176" height="64" rx="5" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.5"/>
+        <text x="292" y="516" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">8 Generate</text>
+        <text x="292" y="535" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">Gemma 4 E2B · + warnings</text>
+        <g><rect fill="#2C5A86" x="418" y="472" width="36" height="15" rx="2"/><text x="436" y="483" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="9" font-weight="500" fill="#FFFFFF">UPG</text></g>
+
+        <rect x="50" y="490" width="176" height="64" rx="5" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+        <text x="64" y="516" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">9 Claim-Check Critic</text>
+        <text x="64" y="535" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">NLI per sentence</text>
+
+        <line x1="1050" y1="414" x2="1050" y2="488" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <text x="1058" y="456" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#59635E">top 20</text>
+        <line x1="962" y1="522" x2="912" y2="522" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="734" y1="522" x2="684" y2="522" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="506" y1="522" x2="456" y2="522" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <line x1="278" y1="522" x2="228" y2="522" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+
+        <!-- loops -->
+        <path d="M880 490 V440 H1000 V416" fill="none" stroke="#C98A12" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ahn)"/>
+        <text x="886" y="472" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#9A5A00">re-retrieve gap</text>
+        <path d="M180 554 V584 H330 V556" fill="none" stroke="#59635E" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+        <text x="255" y="600" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#59635E">regenerate ×1</text>
+
+        <!-- ===== ROW 3: respond ===== -->
+        <line x1="100" y1="554" x2="100" y2="618" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <rect x="50" y="620" width="404" height="64" rx="5" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.5"/>
+        <text x="64" y="645" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#18201C">10 Respond</text>
+        <text x="64" y="664" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">answer · sources · coverage · contradiction type + reason</text>
+        <g><rect fill="#2C5A86" x="418" y="602" width="36" height="15" rx="2"/><text x="436" y="613" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="9" font-weight="500" fill="#FFFFFF">UPG</text></g>
+        <path d="M50 652 H26 V382 H48" fill="none" stroke="#59635E" stroke-width="1.4" marker-end="url(#ah)"/>
+        <text x="20" y="520" transform="rotate(-90 20 520)" text-anchor="middle" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#59635E">JSON → UI card</text>
+
+        <!-- Legend -->
+        <g transform="translate(734 628)">
+          <rect x="0" y="0" width="22" height="14" rx="2" fill="#FFF2D4" stroke="#C98A12" stroke-width="2"/>
+          <text x="30" y="11" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">new: the contribution</text>
+          <rect x="170" y="0" width="22" height="14" rx="2" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.5"/>
+          <text x="200" y="11" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">upgraded stage</text>
+          <rect x="310" y="0" width="22" height="14" rx="2" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+          <text x="340" y="11" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">unchanged</text>
+          <line x1="0" y1="40" x2="22" y2="40" fill="none" stroke="#C98A12" stroke-width="1.6" stroke-dasharray="5 4"/>
+          <text x="30" y="44" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">feedback loop (agent decision)</text>
+          <line x1="230" y1="40" x2="252" y2="40" fill="none" stroke="#C98A12" stroke-width="1.8"/>
+          <text x="260" y="44" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E">reads condition profiles</text>
+        </g>
+      
+</svg>
