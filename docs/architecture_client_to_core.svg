@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 1290" width="1480" height="1290" role="img" aria-label="From the visitor's browser to the pipeline: the page is served by Vercel; a question goes through Cloudflare and a tunnel to the API on the college PC, passes the CORS check and the access code, runs through the ten pipeline stages with the language models, indexes and the condition profile store on the same PC, and the answer streams back live.">
+<title>Condition-Grounded Scientific RAG - from the client to the pipeline (as built, public demo)</title>
+<rect x="0" y="0" width="1480" height="1290" fill="#FFFFFF"/>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#59635E"/></marker></defs>
+<text x="30" y="30" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="16" fill="#18201C" font-weight="600" >Condition-Grounded Scientific RAG: from the visitor's browser to the pipeline (as built, public demo)</text>
+<rect x="30" y="50" width="1370" height="190" rx="8" fill="#FAFBFA" stroke="#E2E6E2" stroke-width="1"/>
+<text x="50" y="72" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#59635E" letter-spacing="0.88">1 · CLIENT · THE VISITOR'S BROWSER (ANY DEVICE, NO GPU NEEDED)</text>
+<rect x="60" y="90" width="300" height="130" rx="6" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.3"/>
+<text x="74" y="114" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#1F4466" font-weight="600" >Open the link</text>
+<text x="74" y="136" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#18201C" >&lt;app&gt;.vercel.app/?api=&lt;tunnel&gt;</text>
+<text x="74" y="152" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >The page keeps the tunnel address, then</text>
+<text x="74" y="168" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >removes it from the address bar</text>
+<rect x="396" y="90" width="300" height="130" rx="6" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.3"/>
+<text x="410" y="114" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#1F4466" font-weight="600" >Connect screen</text>
+<text x="410" y="136" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Server address and access code</text>
+<text x="410" y="152" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >A wrong code is refused (401)</text>
+<text x="410" y="168" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >The code stays in this tab only</text>
+<rect x="732" y="90" width="300" height="130" rx="6" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.3"/>
+<text x="746" y="114" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#1F4466" font-weight="600" >Chat page (React)</text>
+<text x="746" y="136" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Question box and the chat history</text>
+<text x="746" y="152" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Live step panel, answer, citations</text>
+<text x="746" y="168" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Coverage bar and conflict badges</text>
+<rect x="1068" y="90" width="300" height="130" rx="6" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.3"/>
+<text x="1082" y="114" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#1F4466" font-weight="600" >Each question is a request</text>
+<text x="1082" y="136" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#18201C" >POST /query/stream</text>
+<text x="1082" y="152" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#18201C" >header X-Access-Code</text>
+<text x="1082" y="168" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Body: the question + the chat history</text>
+<path d="M360,155 H396" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M696,155 H732" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M1032,155 H1068" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="30" y="262" width="1370" height="170" rx="8" fill="#FAFBFA" stroke="#E2E6E2" stroke-width="1"/>
+<text x="50" y="284" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#59635E" letter-spacing="0.88">2 · INTERNET</text>
+<rect x="60" y="302" width="620" height="110" rx="6" fill="#F4F5F2" stroke="#8A938D" stroke-width="1.3"/>
+<text x="74" y="326" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >Vercel · static hosting</text>
+<text x="74" y="348" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Serves the built page: HTML, JavaScript, CSS</text>
+<text x="74" y="364" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >No server code and no data; it never sees a question</text>
+<text x="74" y="380" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Deployed from the frontend folder: npx vercel --prod</text>
+<rect x="740" y="302" width="630" height="110" rx="6" fill="#F4F5F2" stroke="#8A938D" stroke-width="1.3"/>
+<text x="754" y="326" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >Cloudflare · quick tunnel (trycloudflare.com)</text>
+<text x="754" y="348" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >A public https address, a new one at every tunnel start</text>
+<text x="754" y="364" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Ends the https connection and hands the request to the tunnel</text>
+<text x="754" y="380" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >The visitor never sees this PC's own address</text>
+<path d="M210,302 V220" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="222" y="268" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#18201C" font-weight="600" >(1) page files</text>
+<path d="M1218,220 V302" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="1230" y="268" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#18201C" font-weight="600" >(2) question + access code, over https</text>
+<rect x="30" y="454" width="1370" height="190" rx="8" fill="#FAFBFA" stroke="#E2E6E2" stroke-width="1"/>
+<text x="50" y="476" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#59635E" letter-spacing="0.88">3 · THIS PC · GATE</text>
+<rect x="60" y="496" width="300" height="130" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="74" y="520" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >cloudflared (the tunnel)</text>
+<text x="74" y="542" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Opened from this PC out to Cloudflare:</text>
+<text x="74" y="558" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >no router port is opened</text>
+<text x="74" y="574" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Hands each request to localhost:8000</text>
+<rect x="396" y="496" width="300" height="130" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="410" y="520" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >CORS check</text>
+<text x="410" y="542" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Only the Vercel address may read</text>
+<text x="410" y="558" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >the answers (allowed_origins)</text>
+<text x="410" y="574" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >A refusal still carries CORS headers</text>
+<rect x="732" y="496" width="300" height="130" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="746" y="520" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >AccessGuard</text>
+<text x="746" y="542" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Every route needs X-Access-Code</text>
+<text x="746" y="558" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >except /health (status only)</text>
+<text x="746" y="574" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Public mode: /upload and /jobs give 403</text>
+<rect x="1068" y="496" width="300" height="130" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="1082" y="520" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >FastAPI (port 8000)</text>
+<text x="1082" y="542" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#18201C" >/query/stream  live steps (SSE)</text>
+<text x="1082" y="558" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#18201C" >/query /auth/check /health /papers</text>
+<text x="1082" y="574" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Calls Pipeline.run(question, history)</text>
+<path d="M360,561 H396" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M696,561 H732" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M1032,561 H1068" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M900,412 V443 H250 V496" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="470" y="438" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" font-style="italic" >through the tunnel</text>
+<rect x="30" y="666" width="1370" height="380" rx="8" fill="#FAFBFA" stroke="#E2E6E2" stroke-width="1"/>
+<text x="50" y="688" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#59635E" letter-spacing="0.88">4 · THIS PC · PIPELINE</text>
+<rect x="60" y="712" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="74" y="736" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >1 · Query understanding</text>
+<text x="74" y="758" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >SciBERT: intent and complexity</text>
+<text x="74" y="774" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Gemma 12B: the named conditions</text>
+<rect x="330" y="712" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="344" y="736" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >2 · Orchestrator (agent)</text>
+<text x="344" y="758" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Gemma E2B plans the path;</text>
+<text x="344" y="774" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >a simple question skips stage 3</text>
+<rect x="599" y="712" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="613" y="736" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >3 · Refinement</text>
+<text x="613" y="758" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Rewrites the question for search</text>
+<text x="613" y="774" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >and splits multi-part questions</text>
+<rect x="869" y="712" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="883" y="736" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >4 · Hybrid retrieval</text>
+<text x="883" y="758" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >BGE-M3 vectors + BM25 + cards,</text>
+<text x="883" y="774" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >fused by RRF, top 20</text>
+<rect x="1138" y="712" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="1152" y="736" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >5 · Rerank and filter</text>
+<text x="1152" y="758" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >bge-reranker-base keeps about</text>
+<text x="1152" y="774" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >10 passages; weak ones flagged</text>
+<rect x="60" y="870" width="232" height="108" rx="6" fill="#FFF2D4" stroke="#C98A12" stroke-width="1.3"/>
+<text x="74" y="894" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#9A5A00" font-weight="600" >6 · Scope check</text>
+<text x="280" y="894" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#9A5A00" font-weight="700" text-anchor="end" >NEW</text>
+<text x="74" y="916" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Are all named conditions covered?</text>
+<text x="74" y="932" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >If not: search again, then warn</text>
+<text x="74" y="948" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" font-style="italic" >Skipped when the question names</text>
+<text x="74" y="964" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" font-style="italic" >no conditions to check</text>
+<rect x="330" y="870" width="232" height="108" rx="6" fill="#FFF2D4" stroke="#C98A12" stroke-width="1.3"/>
+<text x="344" y="894" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#9A5A00" font-weight="600" >7 · Conflict typing</text>
+<text x="550" y="894" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="10.5" fill="#9A5A00" font-weight="700" text-anchor="end" >NEW</text>
+<text x="344" y="916" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Genuine, explained or not comparable</text>
+<text x="344" y="932" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >(reads the profile store)</text>
+<text x="344" y="948" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" font-style="italic" >Skipped with fewer than 2 passages</text>
+<text x="344" y="964" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" font-style="italic" >or when it is not about results</text>
+<rect x="599" y="870" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="613" y="894" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >8 · Generate</text>
+<text x="613" y="916" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Gemma 12B writes the answer from</text>
+<text x="613" y="932" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >passages, results and warnings</text>
+<rect x="869" y="870" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="883" y="894" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >9 · Claim critic</text>
+<text x="883" y="916" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >DeBERTa NLI checks each sentence</text>
+<text x="883" y="932" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >against its source; one retry</text>
+<rect x="1138" y="870" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="1152" y="894" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >10 · Respond</text>
+<text x="1152" y="916" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Answer, coverage bar, conflict</text>
+<text x="1152" y="932" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >badges and the step trace</text>
+<path d="M292,766 H330" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M292,924 H330" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M562,766 H599" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M562,924 H599" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M831,766 H869" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M831,924 H869" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M1101,766 H1138" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M1101,924 H1138" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M1254,820 V845 H176 V870" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M1218,626 V655 H250 V712" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="60" y="1004" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11.5" fill="#59635E" >Pipeline.run(question, history) runs the ten stages in this order. After each stage a step event goes back to the page.</text>
+<text x="60" y="1020" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11.5" fill="#59635E" >Two loops: stage 6 searches once more for a missing condition (back to 4); stage 9 regenerates once for an unsupported sentence (back to 8).</text>
+<text x="60" y="1036" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11.5" fill="#59635E" >A skipped step costs no time. The page shows it as skipped, with the reason.</text>
+<path d="M715,1046 V1068" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="727" y="1062" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" font-style="italic" >the stages call</text>
+<rect x="30" y="1068" width="1370" height="160" rx="8" fill="#FAFBFA" stroke="#E2E6E2" stroke-width="1"/>
+<text x="50" y="1090" font-family="'IBM Plex Mono',Consolas,'Courier New',monospace" font-size="11" fill="#59635E" letter-spacing="0.88">5 · THIS PC · WHAT THE STAGES USE (ALL LOCAL, NO EXTERNAL API)</text>
+<rect x="60" y="1102" width="238" height="110" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="74" y="1126" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >Ollama (port 11434)</text>
+<text x="74" y="1148" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Gemma 4 12B: answer, stages 1, 3</text>
+<text x="74" y="1164" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Gemma 4 E2B: agents of 2 and 6</text>
+<text x="74" y="1180" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Runs on the 24 GB GPU</text>
+<rect x="328" y="1102" width="238" height="110" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="342" y="1126" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >Models in the API process</text>
+<text x="342" y="1148" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >SciBERT classifier, BGE-M3</text>
+<text x="342" y="1164" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >bge-reranker-base</text>
+<text x="342" y="1180" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >DeBERTa-v3 NLI</text>
+<rect x="596" y="1102" width="238" height="110" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="610" y="1126" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >Search indexes</text>
+<text x="610" y="1148" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Chroma: vectors of 1,385 passages</text>
+<text x="610" y="1164" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >and their cards</text>
+<text x="610" y="1180" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >BM25: keyword index</text>
+<rect x="864" y="1102" width="238" height="110" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="878" y="1126" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >Condition Profile store</text>
+<text x="878" y="1148" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >SQLite: 12,465 profiles</text>
+<text x="878" y="1164" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >plus the repair overlay</text>
+<text x="878" y="1180" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Read by stages 1, 4, 6, 7, 8, 9</text>
+<rect x="1132" y="1102" width="238" height="110" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
+<text x="1146" y="1126" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >Papers</text>
+<text x="1146" y="1148" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >28 PDFs, read once offline</text>
+<text x="1146" y="1164" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >(scripts/ingest.py)</text>
+<text x="1146" y="1180" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >No upload on the public demo</text>
+<path d="M1370,924 H1430 V155 H1368" fill="none" stroke="#59635E" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="1452" y="640" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#18201C" font-weight="600" transform="rotate(-90 1452 640)" text-anchor="middle">(3) the answer streams back the same way, live: step · note · result (server-sent events)</text>
+<rect x="60" y="1252" width="22" height="14" rx="3" fill="#E4EEF8" stroke="#2C5A86" stroke-width="1.2"/>
+<text x="92" y="1264" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11.5" fill="#59635E" >Runs in the visitor's browser</text>
+<rect x="390" y="1252" width="22" height="14" rx="3" fill="#F4F5F2" stroke="#8A938D" stroke-width="1.2"/>
+<text x="422" y="1264" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11.5" fill="#59635E" >Hosted by others (Vercel, Cloudflare)</text>
+<rect x="720" y="1252" width="22" height="14" rx="3" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.2"/>
+<text x="752" y="1264" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11.5" fill="#59635E" >Runs on this PC</text>
+<rect x="1050" y="1252" width="22" height="14" rx="3" fill="#FFF2D4" stroke="#C98A12" stroke-width="1.2"/>
+<text x="1082" y="1264" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11.5" fill="#59635E" >New stages (the contribution)</text>
+</svg>
