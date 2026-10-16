@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+import hmac
 import json
 import queue
 import threading
@@ -41,9 +42,42 @@ async def lifespan(_: FastAPI):
     yield
 
 
+LOCAL_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"]
+OPEN_PATHS = {"/health"}
+UPLOAD_PATHS = ("/upload", "/jobs")
+
+
+async def _refuse(send, status: int, detail: str) -> None:
+    body = json.dumps({"detail": detail}).encode("utf-8")
+    await send({"type": "http.response.start", "status": status,
+                "headers": [(b"content-type", b"application/json"), (b"content-length", str(len(body)).encode())]})
+    await send({"type": "http.response.body", "body": body})
+
+
+class AccessGuard:
+    """Public demo guard (see `[server]` in config.toml; off by default). Pure ASGI so streamed answers pass through untouched. It sits
+    INSIDE the CORS layer, so a refusal still carries the CORS headers and the page can read it."""
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send) -> None:
+        if scope["type"] == "http" and scope["method"] != "OPTIONS":
+            cfg = get_settings().server
+            path = scope["path"]
+            if cfg.public_mode and path.startswith(UPLOAD_PATHS):
+                return await _refuse(send, 403, "Uploads are switched off on the public demo.")
+            if cfg.access_code and path not in OPEN_PATHS:
+                given = dict(scope["headers"]).get(b"x-access-code", b"")
+                if not hmac.compare_digest(given, cfg.access_code.encode("utf-8")):
+                    return await _refuse(send, 401, "Access code required.")
+        await self.app(scope, receive, send)
+
+
 app = FastAPI(title="Condition-Grounded Scientific RAG", lifespan=lifespan)
+app.add_middleware(AccessGuard)
 app.add_middleware(
-    CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
+    CORSMiddleware, allow_origins=[*LOCAL_ORIGINS, *get_settings().server.allowed_origins],
     allow_methods=["*"], allow_headers=["*"])
 
 _run_lock = threading.Lock()
@@ -79,11 +113,18 @@ def _pipeline():
 @app.get("/health")
 def health() -> dict:
     """Light: reports the warm-up state; counts appear once the pipeline exists (the UI can show "warming up")."""
+    auth_required = bool(get_settings().server.access_code)
     if _warm["status"] == "starting":
-        return {"status": "starting", "warm": _warm}
+        return {"status": "starting", "warm": _warm, "auth_required": auth_required}
     p = _pipeline()
     return {"status": "ok", "llm": p.cfg.llm.model, "chunks": p.vectors.count(), "profiles": p.profiles.count(),
-            "papers": len(_paper_rows()), "warm": _warm}
+            "papers": len(_paper_rows()), "warm": _warm, "auth_required": auth_required}
+
+
+@app.get("/auth/check")
+def auth_check() -> dict:
+    """Reaches the handler only when the access code (if one is set) was right: the page uses it to test a typed code."""
+    return {"ok": True}
 
 
 @app.post("/query", response_model=QueryResponse)
