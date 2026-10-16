@@ -1,6 +1,72 @@
+import { readString, writeString } from "./lib/storage";
 import type { Health, Paper, QueryResponse, StreamEvent, Turn, UploadJob } from "./types";
 
-const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const ADDRESS_KEY = "cgrag.api";
+const CODE_KEY = "cgrag.code";
+const BUILD_ADDRESS: string | undefined = import.meta.env.VITE_API_URL;
+
+const isLocalHost = (host: string) => host === "localhost" || host === "127.0.0.1";
+
+export const hostedElsewhere = (): boolean => !isLocalHost(window.location.hostname);
+
+export function cleanAddress(raw: string): string | null {
+  try {
+    const u = new URL(raw.trim());
+    if (u.protocol !== "https:" && !(u.protocol === "http:" && isLocalHost(u.hostname))) return null;
+    return u.origin;
+  } catch {
+    return null;
+  }
+}
+
+export const apiAddress = (): string =>
+  hostedElsewhere() ? (readString(ADDRESS_KEY) ?? BUILD_ADDRESS ?? "") : (BUILD_ADDRESS ?? "http://localhost:8000");
+
+export const needsAddress = (): boolean => hostedElsewhere() && apiAddress() === "";
+
+export function readCode(): string {
+  try {
+    return window.sessionStorage.getItem(CODE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+export function saveConnection(address: string | null, code: string): void {
+  if (address !== null) writeString(ADDRESS_KEY, address);
+  try {
+    if (code) window.sessionStorage.setItem(CODE_KEY, code);
+    else window.sessionStorage.removeItem(CODE_KEY);
+  } catch {
+  }
+}
+
+export function adoptAddressFromUrl(): void {
+  try {
+    const url = new URL(window.location.href);
+    const given = url.searchParams.get("api");
+    if (given === null) return;
+    const clean = cleanAddress(given);
+    if (clean && hostedElsewhere()) writeString(ADDRESS_KEY, clean);
+    url.searchParams.delete("api");
+    window.history.replaceState(null, "", url.toString());
+  } catch {
+  }
+}
+
+export class Unauthorized extends Error {
+  constructor() {
+    super("The access code is missing or wrong.");
+  }
+}
+
+function withCode(init?: RequestInit): RequestInit {
+  const code = readCode();
+  if (!code) return init ?? {};
+  const headers = new Headers(init?.headers);
+  headers.set("X-Access-Code", code);
+  return { ...init, headers };
+}
 
 export const MOCK: string | null = (() => {
   try {
@@ -27,7 +93,8 @@ async function failure(res: Response): Promise<Error> {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(BASE + path, init);
+  const res = await fetch(apiAddress() + path, withCode(init));
+  if (res.status === 401) throw new Unauthorized();
   if (!res.ok) throw await failure(res);
   return (await res.json()) as T;
 }
@@ -76,16 +143,20 @@ export async function readEventStream(body: ReadableStream<Uint8Array>, onEvent:
 async function queryStream(question: string, history: Turn[], onEvent: (e: StreamEvent) => void, signal: AbortSignal): Promise<void> {
   let res: Response;
   try {
-    res = await fetch(BASE + "/query/stream", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
-      body: JSON.stringify({ question, history }),
-      signal,
-    });
+    res = await fetch(
+      apiAddress() + "/query/stream",
+      withCode({
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+        body: JSON.stringify({ question, history }),
+        signal,
+      }),
+    );
   } catch (err) {
     if (signal.aborted) throw err;
     throw new StreamUnavailable(String(err));
   }
+  if (res.status === 401) throw new Unauthorized();
   if (res.status === 404 || res.status === 405) throw new StreamUnavailable(`${res.status} ${res.statusText}`);
   if (!res.ok) throw await failure(res);
   if (!res.body || !(res.headers.get("content-type") || "").includes("text/event-stream")) {
@@ -96,6 +167,7 @@ async function queryStream(question: string, history: Turn[], onEvent: (e: Strea
 
 export const api = {
   health: async (): Promise<Health> => (MOCK ? (await mock()).mockHealth(() => request<Health>("/health")) : request<Health>("/health")),
+  check: async (): Promise<{ ok: boolean }> => (MOCK ? { ok: true } : request<{ ok: boolean }>("/auth/check")),
   papers: async (): Promise<Paper[]> => (MOCK ? (await mock()).mockPapers(() => request<Paper[]>("/papers")) : request<Paper[]>("/papers")),
   query: async (question: string, history: Turn[], signal?: AbortSignal): Promise<QueryResponse> =>
     MOCK
