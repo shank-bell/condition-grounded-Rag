@@ -89,3 +89,8 @@ dataset_context = true
 ragas_loop = false
 ragas_score = false
 strip_guessed_reasons = true
+
+[server]
+access_code = ""
+public_mode = false
+allowed_origins = []
