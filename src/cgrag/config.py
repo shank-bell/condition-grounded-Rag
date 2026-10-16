@@ -126,6 +126,15 @@ class FeaturesConfig(BaseModel):
     dataset_context: bool = True
 
 
+class ServerConfig(BaseModel):
+    """Public demo (all off by default): a page hosted elsewhere reaches this API through a tunnel. `access_code` = every request except
+    /health must carry it in the X-Access-Code header; `public_mode` = uploads and upload jobs are refused; `allowed_origins` = extra
+    browser origins (the address of the hosted page) besides the local dev server."""
+    access_code: str = ""
+    public_mode: bool = False
+    allowed_origins: list[str] = []
+
+
 class Settings(BaseModel):
     llm: LLMConfig = LLMConfig()
     agents: AgentsConfig = AgentsConfig()
@@ -139,6 +148,7 @@ class Settings(BaseModel):
     critic: CriticConfig = CriticConfig()
     ragas: RagasConfig = RagasConfig()
     features: FeaturesConfig = FeaturesConfig()
+    server: ServerConfig = ServerConfig()
 
 
 def _deep_merge(base: dict[str, Any], over: dict[str, Any]) -> dict[str, Any]:
