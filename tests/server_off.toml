@@ -1,0 +1,4 @@
+[server]
+access_code = ""
+public_mode = false
+allowed_origins = []
