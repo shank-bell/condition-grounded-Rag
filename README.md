@@ -11,10 +11,10 @@
 1. [The problem in one minute](#1-the-problem-in-one-minute)
 2. [What this project adds](#2-what-this-project-adds)
 3. [Key words explained](#3-key-words-explained)
-4. [Architecture](#4-architecture) (the design diagram and stage table, the pipeline as built, offline part, online part, the two new stages, design versus build)
+4. [Architecture](#4-architecture) (the design diagram and stage table, the pipeline as built, from the browser to the pipeline, offline part, online part, the two new stages, design versus build)
 5. [Repository tour](#5-repository-tour)
 6. [Setup and first run](#6-setup-and-first-run)
-7. [Using the system](#7-using-the-system) (command line, API, web page, uploading a paper, switches)
+7. [Using the system](#7-using-the-system) (command line, API, web page, uploading a paper, switches, the public demo)
 8. [Evaluation: what was measured and how much to trust it](#8-evaluation-what-was-measured-and-how-much-to-trust-it)
 9. [Known limitations](#9-known-limitations)
 10. [Extending the project](#10-extending-the-project)
@@ -83,13 +83,13 @@ The rest of the pipeline is a normal RAG chain. The contribution is the layer th
 
 ## 4. Architecture
 
-The architecture has an **offline** part (run once per paper) and an **online** part (run for every question). This section shows it twice: **4.1 is the design** (architecture v2: its diagram and its stage table), **4.2 is the same pipeline as it is built today**. 4.3 to 4.7 go through the built system step by step, and 4.8 lists where the build differs from the design.
+The architecture has an **offline** part (run once per paper) and an **online** part (run for every question). This section shows it three ways: **4.1 is the design** (architecture v2: its diagram and its stage table), **4.2 is the same pipeline as it is built today**, and **4.3 follows one question from the visitor's browser to the answer** (the deployed system: page, tunnel, gate, pipeline, models and stores). 4.4 to 4.8 go through the built system step by step, and 4.9 lists where the build differs from the design.
 
 ### 4.1 The design (architecture v2)
 
 ![Architecture v2: offline ingestion into the stores; online stages 1 to 10, with the new stages 6 and 7 reading the Condition Profile Store](docs/architecture_v2.svg)
 
-*The design as drawn in September 2026. Amber = new (the contribution), blue = upgraded stage, white = unchanged, dashed = a feedback loop (an agent decides). The model names and the hardware in the picture are the design's own; the built system differs in places (see 4.8).*
+*The design as drawn in September 2026. Amber = new (the contribution), blue = upgraded stage, white = unchanged, dashed = a feedback loop (an agent decides). The model names and the hardware in the picture are the design's own; the built system differs in places (see 4.9).*
 
 Condition profiles are extracted once, when a paper is added. At question time, stages 6 and 7 read them after reranking has cut the candidates to about 10, which keeps pairwise NLI to about 45 pairs. The two dashed loops are the points where an agent decides to act: stage 6 searches again for a missing condition, and stage 9 regenerates an unsupported sentence once.
 
@@ -151,7 +151,45 @@ The same pipeline as it is built today. The two new stages are marked `(NEW)`; t
                               8 generate answer -> 9 claim critic -> 10 respond (API + web page)
 ```
 
-### 4.3 Offline: from a PDF to the profile store
+### 4.3 From the client to the pipeline (the deployed system)
+
+![From the visitor's browser to the pipeline: the page comes from Vercel, a question goes through Cloudflare and a tunnel to the API on the PC, passes the CORS check and the access code, runs through the ten stages with the models, indexes and the profile store on the same PC, and the answer streams back live](docs/architecture_client_to_core.svg)
+
+*One question, from the browser to the answer, as the system is built and deployed for demos. Blue = runs in the visitor's browser, grey = hosted by others, white = runs on the PC that holds the system, amber = the two new stages. Only the page files come from outside; the papers, the models, the indexes and the profile store never leave that PC.*
+
+| Piece | Runs on | What it does | Code |
+|---|---|---|---|
+| Chat page | the visitor's browser (files served by Vercel) | connect screen, chat, live step panel, answer with citations, coverage bar, conflict badges | `frontend/` |
+| Static hosting | Vercel | serves the built page; no server code, no data, never sees a question | `npx vercel --prod` in `frontend/` |
+| Tunnel | Cloudflare and `cloudflared` on the PC | gives the PC a public https address without opening a router port: `cloudflared` calls out to Cloudflare and keeps that connection open, and requests come back through it | `cloudflared tunnel --url http://localhost:8000` |
+| Gate | the PC (FastAPI middleware) | CORS check, access code, uploads off in public mode | `src/cgrag/api/main.py` |
+| Pipeline | the PC | the ten stages, section 4.5 | `src/cgrag/pipeline/run.py` |
+| Models and stores | the PC | Ollama (Gemma 4), SciBERT, BGE-M3, the reranker, the NLI model; Chroma, BM25 and the SQLite profile store | `config.toml`, `src/cgrag/stores/` |
+
+**The path of one question**
+
+1. The visitor opens the link `https://<app>.vercel.app/?api=<tunnel address>`. Vercel sends the page files; the page keeps the tunnel address and removes it from the address bar.
+2. The connect screen asks for the access code and checks it with `GET /auth/check`. The code is kept for this browser tab only (`sessionStorage`).
+3. A question is sent as `POST /query/stream` with the header `X-Access-Code` and the chat history. The page and the API are on different websites, so the browser first asks the API whether this site may read its answers (CORS); only the addresses in `[server] allowed_origins` get a yes.
+4. The request goes over https to Cloudflare, through the tunnel to `cloudflared`, which hands it to the API on `localhost:8000`.
+5. The access guard compares the code in constant time. Every route except `/health` needs it; in public mode `/upload` and `/jobs` answer 403 even with the right code. A refusal still carries the CORS headers, so the page can show a clear message.
+6. `Pipeline.run(question, history)` runs the ten stages. After each stage an event is queued.
+7. The events flow back the same way as server-sent events: `step` (running, done or skipped), `note`, and one final `result`. The page draws the live step panel from them. If a network cannot stream, the page falls back to `POST /query` and shows the answer when it is complete.
+8. The result carries the answer, the sources, the coverage from Stage 6 and the conflicts from Stage 7. The page shows them under the answer.
+
+**Why a step is sometimes skipped.** A skipped step costs no time, and the page shows it as skipped, with the reason:
+
+| Step | Skipped when |
+|---|---|
+| 3 Refinement | the orchestrator judges the question simple enough to search as it is |
+| 6 Scope check | the question names no condition to check (no model, data set, language, size or setting) |
+| 7 Conflict typing | fewer than two passages remain, or the question is not about results |
+| 9 Claim critic | `[features] critic` is switched off |
+| 9b RAGAS-style faithfulness | `[features] ragas_score` and `ragas_loop` are both off (the default) |
+
+A question such as "What is BERT?" names no condition and asks for no result, so Stages 6 and 7 have nothing to do. A follow-up that only says "it" is a different case: see the first limitation about follow-ups in section 9.
+
+### 4.4 Offline: from a PDF to the profile store
 
 | Step | Name | What it does | Tool | Code |
 |---|---|---|---|---|
@@ -164,7 +202,7 @@ The same pipeline as it is built today. The two new stages are marked `(NEW)`; t
 | D | Embedder | 1,024-number vectors for chunks and cards. | BGE-M3 | `src/cgrag/models.py` |
 | - | Stores | Chroma (vectors), BM25 (keywords), SQLite (profiles + the repair overlay). | | `src/cgrag/stores/` |
 
-### 4.4 Online: what happens to a question
+### 4.5 Online: what happens to a question
 
 | Stage | Name | What it does | Model / method | Code |
 |---|---|---|---|---|
@@ -173,15 +211,15 @@ The same pipeline as it is built today. The two new stages are marked `(NEW)`; t
 | 3 | Refinement | Rewrites the question into technical form and splits multi-part questions. | Gemma 4 12B | `refinement.py` |
 | 4 | Hybrid retrieval | Dense + BM25 search, merged by RRF (k = 60); cards are searched too; a "profile signal" adds chunks whose profiles record the named conditions together. | BGE-M3, BM25 | `retrieval.py` |
 | 5 | Rerank and filter | Scores question and chunk together and keeps the best (about 10). | `bge-reranker-base` | `rerank.py` |
-| **6** | **Scope check (NEW)** | See 4.5. | profile store + a small LLM agent + code guardrails | `applicability.py`, `conditions.py` |
-| **7** | **Conflict typing (NEW)** | See 4.6. | NLI + numeric trigger + profile store | `contradiction.py`, `grounding.py` |
+| **6** | **Scope check (NEW)** | See 4.6. | profile store + a small LLM agent + code guardrails | `applicability.py`, `conditions.py` |
+| **7** | **Conflict typing (NEW)** | See 4.7. | NLI + numeric trigger + profile store | `contradiction.py`, `grounding.py` |
 | 8 | Generate | Writes the answer from the top passages, the recorded results and the warnings of Stages 6 and 7. | Gemma 4 12B | `generate.py` |
 | 9 | Claim critic | Checks every sentence of the answer against its cited source and regenerates once if one is unsupported. | DeBERTa-v3 NLI | `critic.py` |
 | 10 | Respond | Returns the answer with a coverage bar, conflict badges and a step-by-step trace. | FastAPI + React | `respond.py`, `api/main.py`, `frontend/` |
 
 `src/cgrag/pipeline/run.py` wires all ten stages into one function, `Pipeline.run(question)`, with two loops (Stage 6 back to Stage 4, Stage 9 back to Stage 8).
 
-### 4.5 Stage 6, the scope check, in more detail
+### 4.6 Stage 6, the scope check, in more detail
 
 1. Look up, in the profile store, which conditions of the question are recorded among the retrieved results.
 2. Let a small LLM agent judge what the profiles cannot settle. **Guardrails:** a "covered" verdict must be backed by a recorded or quoted value, and the model, data set version and model size are never decided by the LLM.
@@ -189,7 +227,7 @@ The same pipeline as it is built today. The two new stages are marked `(NEW)`; t
 4. If something is missing, search once more with the missing combination (the store can also pull chunks whose profile records it).
 5. If it is still missing, a bigger model gives a second opinion, and then a **scope warning** names the condition and lists what is recorded for the others.
 
-### 4.6 Stage 7, conflict typing, in more detail
+### 4.7 Stage 7, conflict typing, in more detail
 
 1. **Trigger:** two results from different papers with the same model family, data set and metric whose values differ by more than 2 % of the larger value.
 2. **Ground each profile:** read the profile's own table cell again (block heading, caption, row and column labels) to get the split (dev / test), the system kind (single / ensemble) and the size; a profile whose cell does not fit is marked NOT COMPARABLE.
@@ -198,7 +236,7 @@ The same pipeline as it is built today. The two new stages are marked `(NEW)`; t
 
 EXPLAINED means that a recorded condition differs. It does not prove that the difference accounts for the whole size of the gap.
 
-### 4.7 Models used
+### 4.8 Models used
 
 | Role | Model | Where |
 |---|---|---|
@@ -209,7 +247,7 @@ EXPLAINED means that a recorded condition differs. It does not prove that the di
 | NLI (Stages 7 and 9) | `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` | `[models]` |
 | Intent / complexity classifier | `allenai/scibert_scivocab_uncased`, fine-tuned here on LLM-written questions | `scripts/train_query_classifier.py` |
 
-### 4.8 Is the architecture finished? Design versus build
+### 4.9 Is the architecture finished? Design versus build
 
 **Built and integrated: yes.** All components (A to D and stages 1 to 10) exist, are tested and run in one `run(question)` path. Nothing is a stub.
 **Finished as originally specified: no.** The honest list:
@@ -229,7 +267,7 @@ EXPLAINED means that a recorded condition differs. It does not prove that the di
 | Answer-quality claim | Qasper / SQuAI with a RAGAS independent judge | own check on 9 numeric questions and a RAGAS-style faithfulness study; no Qasper or SQuAI |
 
 Every departure is behind a switch in `config.toml` where that makes sense and is listed in the table above.
-The design document itself is not a file of this repository; its diagram and stage table are reproduced in 4.1, and 4.3 to 4.7 describe the system as built.
+The design document itself is not a file of this repository; its diagram and stage table are reproduced in 4.1, and 4.4 to 4.8 describe the system as built.
 
 ---
 
@@ -250,14 +288,14 @@ condition-grounded-Rag/
 │   ├── knowledge/               small lists the repair uses (benchmark -> task, language codes, optional Papers-with-Code names)
 │   ├── evaluation/              baselines (plain RAG, abstention, LLM judges), answer scoring, freeze records
 │   ├── labelling/               Excel sheets for human labelling, sampling, scoring
-│   ├── api/                     FastAPI app (/query, /query/stream, /upload, /papers, /health, /jobs)
+│   ├── api/                     FastAPI app (/query, /query/stream, /upload, /papers, /health, /auth/check, /jobs) with the CORS check and the access guard
 │   ├── config.py, schemas.py, llm.py, models.py
 ├── scripts/                     everything you run (grouped in section 7.5)
-├── frontend/                    React + Vite web page (chat, coverage bar, conflict badges, live step trace)
+├── frontend/                    React + Vite web page (connect screen, chat, coverage bar, conflict badges, live step trace)
 ├── eval/labels/                 aggregated results of every table of the evaluation, and the 30-question key `questions_gold.jsonl` (the pair keys and profile verdicts are private, on purpose)
-├── docs/                        evaluation_ai_annotated.md (the evaluation), reproducibility.md, ingestion_report.md,
+├── docs/                        evaluation_ai_annotated.md (the evaluation), architecture_v2.svg (the design), architecture_client_to_core.svg (the deployed system), reproducibility.md, ingestion_report.md,
 │                                stage1_training_report.md, labelling_guide.md, oct1_fixes_and_metrics.md, ...
-├── tests/                       336 unit tests (no GPU or LLM needed)
+├── tests/                       357 unit tests (no GPU or LLM needed)
 └── data/                        (git-ignored) papers, indexes, benchmark data, labelling files
 ```
 
@@ -289,7 +327,7 @@ ollama pull gemma4:e2b
 ```
 
 Check that Ollama uses the GPU: `ollama ps` must say **100% GPU**. If it says CPU, answers are about ten times slower.
-Machine settings (model names, `cuda` or `cpu` for each encoder, parallel slots) go in `config.local.toml`; `config.toml` lists every option with a comment.
+Machine settings (model names, `cuda` or `cpu` for each encoder, parallel slots) go in `config.local.toml`; `config.toml` lists every option and its default.
 
 ### 6.3 Get the papers
 
@@ -336,7 +374,8 @@ cd frontend && npm install && npm run dev       # then open http://localhost:517
 | `POST /query` | one question, returns the answer, sources, `applicability` (coverage, missing) and `contradictions` |
 | `POST /query/stream` | the same, as server-sent events: one event per stage (running / done / skipped) |
 | `POST /upload` | add a PDF; it is ingested in the background (see `/jobs`) |
-| `GET /papers`, `GET /health`, `GET /jobs` | corpus list, readiness, job status |
+| `GET /papers`, `GET /health`, `GET /jobs` | corpus list, readiness (`auth_required` says whether an access code is set), job status |
+| `GET /auth/check` | 200 when the access code is right (or none is set), else 401; used by the page's connect screen |
 
 ### 7.3 Adding a paper
 
@@ -373,6 +412,34 @@ Override any value for one run with `--set features.joint_coverage=false` where 
 
 The order for a full reproduction is in `docs/reproducibility.md`.
 
+### 7.6 Public demo: the page on Vercel, the system on your machine
+
+The system needs a GPU, Ollama and the index, so only the web page can live on an ordinary web host. The setup used for the project demo: the page on Vercel (free), the API on the machine that has the GPU, joined by a Cloudflare quick tunnel. The picture is in 4.3.
+
+1. **Switch the public mode on** in `config.local.toml` (git-ignored; never commit it):
+
+```
+[server]
+access_code = "<a long random string, 12 characters or more>"
+public_mode = true
+allowed_origins = ["https://<your-project>.vercel.app"]
+```
+
+`access_code`: every route except `/health` needs the header `X-Access-Code`. `public_mode`: `/upload` and `/jobs` answer 403. `allowed_origins`: the websites that may read the answers (the local page addresses are always allowed). With the three defaults (empty, `false`, empty) nothing changes for local use.
+
+2. **Start the API** and wait until `/health` shows `"warm":{"status":"ready"}` (about a minute): `.venv\Scripts\python -m uvicorn cgrag.api.main:app --port 8000`
+3. **Start the tunnel:** install it once with `winget install Cloudflare.cloudflared`, then run `cloudflared tunnel --url http://localhost:8000`. It prints a random `https://….trycloudflare.com` address (a new one at every start; no account needed).
+4. **Deploy the page once:** `cd frontend`, `npx vercel login`, `npx vercel --prod`. The build is `npm run build` and the output folder is `dist`. No environment variable is needed, because the page learns the API address at run time.
+5. **Share** `https://<your-project>.vercel.app/?api=<tunnel address>` and give the access code separately.
+
+Things to know:
+
+* The machine must stay on, with the API and the tunnel running. A new tunnel start means a new address and so a new link. A fixed address needs a named tunnel (a free Cloudflare account and a domain).
+* Quick tunnels are meant for testing and development, not for permanent hosting.
+* One GPU and two parallel slots: several visitors at once slow each other down.
+* Cloudflare carries the traffic; the papers, models and indexes stay on the machine. Check that your institution allows exposing the machine.
+* `tests/test_api_access.py` tests the guard; `tests/conftest.py` keeps a machine's own access code out of the test run.
+
 ## 8. Evaluation: what was measured and how much to trust it
 
 **Read this before quoting any number.** The answer keys of the evaluation (30 questions, 300 pairs, profile verdicts) were written by **one AI assistant** from the PDFs. That assistant also helped build the system.
@@ -398,6 +465,7 @@ same-family judge 0.90; a hand check found the independent judge unreliable on t
 
 ## 9. Known limitations
 
+* **Follow-up questions are not resolved before retrieval.** The chat history reaches only Stage 8, the writer. Stages 1 to 7 see the new question alone, so "Can you detail more on it?" names no condition and gives the search nothing to look for: Stage 6 and Stage 7 are skipped and the answer says that no relevant passage was found. Ask a follow-up as a full question for now.
 * **The keys are AI-written** and many numbers are development numbers (see section 8). A human check is planned.
 * **28 famous papers are both the development and the test corpus.** The final system has not been measured on unseen papers.
 * **Strictly correct profiles: 58.6 %.** Most remaining errors are vague cells: a subset or group of a data set (MMLU subjects, BOLD groups) is not a field.
@@ -406,6 +474,7 @@ same-family judge 0.90; a hand check found the independent judge unreliable on t
 * **GENUINE means "no recorded difference"**: prompts, harnesses and scoring scripts are not recorded, and the same model can score very differently under two implementations.
 * **Only 4 genuine contradictions** exist among the 300 labelled pairs, so the recall for real contradictions cannot be estimated.
 * **Local 12B models** read conditions and judge sufficiency less well than larger models would.
+* **The public demo is one PC** behind a quick tunnel: the address changes at every tunnel start, the machine has to stay on, and one GPU serves all visitors (section 7.6).
 
 ## 10. Extending the project
 
@@ -418,7 +487,7 @@ same-family judge 0.90; a hand check found the independent judge unreliable on t
 | Label data yourself | `docs/labelling_guide.md`, `scripts/make_label_sheets.py`, `scripts/score_labels.py`; human files can be dropped in and scored with the same scripts. |
 | Turn a part off for an experiment | Section 7.4. |
 
-Run `python -m pytest` after any change (336 tests, no GPU needed).
+Run `python -m pytest` after any change (357 tests, no GPU needed).
 
 ## 11. FAQ
 
@@ -433,6 +502,8 @@ Run `python -m pytest` after any change (336 tests, no GPU needed).
 **Can I trust the numbers in the evaluation?** Read section 8: they are measured against AI-written keys, many are development numbers, and the independent keys do not contain condition fields.
 
 **Where are the data and the answer keys?** `data/` is git-ignored: the papers are third-party documents, and the pair keys and profile verdicts are kept private on purpose so that the labels stay blind (the 30-question key is public, in `eval/labels/questions_gold.jsonl`). Aggregated results are in `eval/labels/`.
+
+**How can someone try it without installing anything?** Section 7.6: the page is hosted on Vercel and talks to the API on the machine that has the GPU, through a tunnel and behind an access code. The visitor only needs a browser, the link and the code.
 
 **Do I need a GPU?** For the reported setting, yes (24 GB). A 6 GB GPU runs the smaller default model; CPU-only is too slow for ingestion.
 
