@@ -90,6 +90,7 @@ export interface Health {
   profiles?: number;
   papers?: number;
   warm?: { status: string; seconds: number | null; error: string | null };
+  auth_required?: boolean;
 }
 
 export interface Turn {
