@@ -14,7 +14,7 @@ from cgrag.schemas import QueryResponse
 def test_every_timed_step_has_a_name_and_a_description():
     for step_id, (stage, component, blurb) in STEP_INFO.items():
         assert stage >= 1 and component and blurb, step_id
-    assert set(STEP_INFO) == {"1_understand", "2_plan", "3_refine", "4_retrieve", "5_rerank", "2b_replan", "6_applicability",
+    assert set(STEP_INFO) == {"1a_followup", "1_understand", "2_plan", "3_refine", "4_retrieve", "5_rerank", "2b_replan", "6_applicability",
                               "7_contradiction", "8_generate", "9_critic", "9b_ragas"}
 
 
