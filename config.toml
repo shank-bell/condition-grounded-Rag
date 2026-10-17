@@ -89,6 +89,7 @@ dataset_context = true
 ragas_loop = false
 ragas_score = false
 strip_guessed_reasons = true
+followup_rewrite = true
 
 [server]
 access_code = ""
