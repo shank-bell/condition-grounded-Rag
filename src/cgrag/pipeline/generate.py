@@ -35,6 +35,16 @@ SYSTEM = (
     "7. Be concise: at most 180 words, no preamble."
 )
 
+ELABORATE_WORDS = 300
+ELABORATE = (
+    "FOLLOW-UP: the reader already has your previous answer (earlier in this chat) and asks for MORE DETAIL. "
+    "Start at once with the new information and do not list again the numbers that the earlier answer gave; mention one only to compare. "
+    "Add what the SOURCES record about the same subject that the earlier answer left out, for example the same systems in other languages, "
+    "the average over languages, other systems or versions of the data set in the same table, the evaluation setting, the training data, "
+    "model sizes, and what the paper itself says about the result. Source numbers in the earlier answer belong to an earlier list: cite only "
+    "the numbered SOURCES below. If the sources hold nothing more on this, say so in one sentence."
+)
+
 _REASON = re.compile(r"\b(?:explained|attributed|accounted\s+for|due\s+to|owing\s+to|because\s+of|caused\s+by|results?\s+from|stems?\s+from|reflects?)\b", re.I)
 _NUMBER = re.compile(r"\d+(?:\.\d+)?")
 
@@ -128,7 +138,7 @@ def describe_conflicts(conflicts: list[ContradictionPair], sources: list[Retriev
 def generate(question: str, sources: list[RetrievedChunk], llm: OllamaLLM, *, warning: str | None = None,
              conflicts: list[ContradictionPair] | None = None, history: list[dict] | None = None,
              profiles: dict[str, list[ConditionProfile]] | None = None, include_profiles: bool = True,
-             requested: dict[str, str | list[str]] | None = None, feedback: str | None = None) -> str:
+             requested: dict[str, str | list[str]] | None = None, feedback: str | None = None, elaborate: bool = False) -> str:
     parts = [f"QUESTION: {question}"]
     if warning:
         parts.append(f"SCOPE WARNING: {warning}")
@@ -136,10 +146,13 @@ def generate(question: str, sources: list[RetrievedChunk], llm: OllamaLLM, *, wa
     if conflict_text:
         parts.append(f"CONFLICTS:\n{conflict_text}")
     parts.append("SOURCES:\n" + format_sources(sources, profiles or {}, include_profiles, requested))
+    if elaborate:
+        parts.append(ELABORATE)
     if feedback:
         parts.append("Your previous answer contained sentences the sources do not support:\n" + feedback +
                      "\nWrite the answer again. Keep only statements that a cited source supports.")
-    messages = [{"role": "system", "content": SYSTEM}, *(history or []), {"role": "user", "content": "\n\n".join(parts)}]
+    system = SYSTEM.replace("at most 180 words", f"at most {ELABORATE_WORDS} words") if elaborate else SYSTEM
+    messages = [{"role": "system", "content": system}, *(history or []), {"role": "user", "content": "\n\n".join(parts)}]
     answer = llm.chat(messages, max_tokens=MAX_ANSWER_TOKENS).text.strip()
     if get_settings().features.strip_guessed_reasons:
         answer = drop_guessed_reasons(answer, conflict_text)
