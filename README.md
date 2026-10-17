@@ -173,7 +173,7 @@ The same pipeline as it is built today. The two new stages are marked `(NEW)`; t
 3. A question is sent as `POST /query/stream` with the header `X-Access-Code` and the chat history. The page and the API are on different websites, so the browser first asks the API whether this site may read its answers (CORS); only the addresses in `[server] allowed_origins` get a yes.
 4. The request goes over https to Cloudflare, through the tunnel to `cloudflared`, which hands it to the API on `localhost:8000`.
 5. The access guard compares the code in constant time. Every route except `/health` needs it; in public mode `/upload` and `/jobs` answer 403 even with the right code. A refusal still carries the CORS headers, so the page can show a clear message.
-6. `Pipeline.run(question, history)` runs the ten stages. After each stage an event is queued.
+6. If the question leans on the chat (for example "Can you detail more on it?"), the follow-up resolver (step 1a) first rewrites it into a question that stands alone, from the last four turns of the chat (about one second). The same reading says whether the message asks for more detail on the last answer; if so, the writer is told not to repeat that answer, to add what the passages hold beyond it, and may use up to 300 words instead of 180. Then `Pipeline.run(question, history)` runs the ten stages. After each stage an event is queued.
 7. The events flow back the same way as server-sent events: `step` (running, done or skipped), `note`, and one final `result`. The page draws the live step panel from them. If a network cannot stream, the page falls back to `POST /query` and shows the answer when it is complete.
 8. The result carries the answer, the sources, the coverage from Stage 6 and the conflicts from Stage 7. The page shows them under the answer.
 
@@ -181,13 +181,14 @@ The same pipeline as it is built today. The two new stages are marked `(NEW)`; t
 
 | Step | Skipped when |
 |---|---|
+| 1a Follow-up resolver | the question stands on its own (the step is left out when the chat has no earlier turn, or when `[features] followup_rewrite` is off) |
 | 3 Refinement | the orchestrator judges the question simple enough to search as it is |
 | 6 Scope check | the question names no condition to check (no model, data set, language, size or setting) |
 | 7 Conflict typing | fewer than two passages remain, or the question is not about results |
 | 9 Claim critic | `[features] critic` is switched off |
 | 9b RAGAS-style faithfulness | `[features] ragas_score` and `ragas_loop` are both off (the default) |
 
-A question such as "What is BERT?" names no condition and asks for no result, so Stages 6 and 7 have nothing to do. A follow-up that only says "it" is a different case: see the first limitation about follow-ups in section 9.
+A question such as "What is BERT?" names no condition and asks for no result, so Stages 6 and 7 have nothing to do. A follow-up that only says "it" is rewritten first (step 1a), so Stages 6 and 7 see the full question.
 
 ### 4.4 Offline: from a PDF to the profile store
 
@@ -217,7 +218,7 @@ A question such as "What is BERT?" names no condition and asks for no result, so
 | 9 | Claim critic | Checks every sentence of the answer against its cited source and regenerates once if one is unsupported. | DeBERTa-v3 NLI | `critic.py` |
 | 10 | Respond | Returns the answer with a coverage bar, conflict badges and a step-by-step trace. | FastAPI + React | `respond.py`, `api/main.py`, `frontend/` |
 
-`src/cgrag/pipeline/run.py` wires all ten stages into one function, `Pipeline.run(question)`, with two loops (Stage 6 back to Stage 4, Stage 9 back to Stage 8).
+`src/cgrag/pipeline/run.py` wires all ten stages into one function, `Pipeline.run(question)`, with two loops (Stage 6 back to Stage 4, Stage 9 back to Stage 8). A question that leans on the chat is rewritten to stand alone before Stage 1 (`followup.py`).
 
 ### 4.6 Stage 6, the scope check, in more detail
 
@@ -261,6 +262,7 @@ EXPLAINED means that a recorded condition differs. It does not prove that the di
 | Stage 7 | NLI + profile comparison | adds table-cell grounding, settings compared by kind, a probable-explanation rule |
 | Stage 9 | NLI critic, one retry | also accepts a sentence backed by a recorded profile or by numbers found in the source |
 | New parts | not in the design | repair overlay, retrieval cards, profile signal in Stage 4, table reader |
+| Follow-up questions | not in the design: the chat history reaches only Stage 8 | a follow-up resolver before Stage 1 rewrites a question that leans on the chat into one that stands alone (`followup_rewrite`) |
 | Runtime RAGAS loop | removed (replaced by the NLI critic) | kept as an off-by-default switch (`ragas_loop`); plus a score-only diagnostic (`ragas_score`, off by default) that reports faithfulness and answer relevancy for every answer |
 | Hardware | one 6 GB GPU | every reported number was produced on a 24 GB GPU (`config.toml` defaults still fit a small machine) |
 | Evaluation size | 100 papers, ~150 questions, ~300 pairs with two human labellers (kappa 0.6 or higher) | 28 papers, 30 questions (plus 20 out-of-corpus and 32 store-made ones), 300 pairs; **keys written by one AI**, no human kappa yet |
@@ -283,7 +285,7 @@ condition-grounded-Rag/
 ├── src/cgrag/
 │   ├── ingestion/               PDF -> chunks -> profiles: pdf_loader, chunker, sections, tables, profile_extractor,
 │   │                            repair (the overlay rules), dataset_context, model_context, cards, pipeline
-│   ├── pipeline/                the ten online stages (+ run.py wiring, grounding.py, conditions.py, faithfulness.py)
+│   ├── pipeline/                the ten online stages (+ run.py wiring, followup.py, grounding.py, conditions.py, faithfulness.py)
 │   ├── stores/                  vector_store (Chroma), bm25_store, profile_store (SQLite + overlay)
 │   ├── knowledge/               small lists the repair uses (benchmark -> task, language codes, optional Papers-with-Code names)
 │   ├── evaluation/              baselines (plain RAG, abstention, LLM judges), answer scoring, freeze records
@@ -295,7 +297,7 @@ condition-grounded-Rag/
 ├── eval/labels/                 aggregated results of every table of the evaluation, and the 30-question key `questions_gold.jsonl` (the pair keys and profile verdicts are private, on purpose)
 ├── docs/                        evaluation_ai_annotated.md (the evaluation), architecture_v2.svg (the design), architecture_client_to_core.svg (the deployed system), reproducibility.md, ingestion_report.md,
 │                                stage1_training_report.md, labelling_guide.md, oct1_fixes_and_metrics.md, ...
-├── tests/                       357 unit tests (no GPU or LLM needed)
+├── tests/                       384 unit tests (no GPU or LLM needed)
 └── data/                        (git-ignored) papers, indexes, benchmark data, labelling files
 ```
 
@@ -393,6 +395,7 @@ Use the page's upload button or `POST /upload`. About two minutes for a 15-page 
 | `[contradiction] table_grounding`, `one_sided_conditions_explain`, `setting_dimensions` | Stage 7 variants used in the ablations |
 | `[retrieval] use_cards`, `profile_signal` | retrieval without the cards or without the profile signal |
 | `[features] ragas_score` | (off by default) **turn ON** to score every answer with RAGAS-style faithfulness and answer relevancy. The answer is never changed; both numbers are returned in the API response (`faithfulness`, `answer_relevancy`, `faithfulness_judge`) and shown in the web page under the answer. About three judge calls (the step took 19 s in a first, cold run; measure it on your machine). Set `[ragas] judge_model` to another model family for a fairer judge |
+| `[features] followup_rewrite` | a follow-up is searched exactly as typed and the writer is not told to add to the earlier answer (the chat history then reaches only the writer, so "Can you detail more on it?" finds nothing) |
 | `[features] ragas_loop` | (off by default) the original design's loop: rewrite answers while their faithfulness is below `[ragas] threshold`; +14 to 22 s per question |
 
 Override any value for one run with `--set features.joint_coverage=false` where a script supports it, or put it in `config.local.toml`.
@@ -465,7 +468,7 @@ same-family judge 0.90; a hand check found the independent judge unreliable on t
 
 ## 9. Known limitations
 
-* **Follow-up questions are not resolved before retrieval.** The chat history reaches only Stage 8, the writer. Stages 1 to 7 see the new question alone, so "Can you detail more on it?" names no condition and gives the search nothing to look for: Stage 6 and Stage 7 are skipped and the answer says that no relevant passage was found. Ask a follow-up as a full question for now.
+* **Follow-up rewriting is one more LLM step.** A question that leans on the chat is rewritten by the 12B model from the last four turns; if it picks the wrong referent, the whole search follows it. It was tried on a handful of hand-written follow-ups (all read correctly) and has not been measured on a labelled set. "More detail" can only add what the five passages that were found hold; if they hold nothing more, the answer says so.
 * **The keys are AI-written** and many numbers are development numbers (see section 8). A human check is planned.
 * **28 famous papers are both the development and the test corpus.** The final system has not been measured on unseen papers.
 * **Strictly correct profiles: 58.6 %.** Most remaining errors are vague cells: a subset or group of a data set (MMLU subjects, BOLD groups) is not a field.
@@ -487,7 +490,7 @@ same-family judge 0.90; a hand check found the independent judge unreliable on t
 | Label data yourself | `docs/labelling_guide.md`, `scripts/make_label_sheets.py`, `scripts/score_labels.py`; human files can be dropped in and scored with the same scripts. |
 | Turn a part off for an experiment | Section 7.4. |
 
-Run `python -m pytest` after any change (357 tests, no GPU needed).
+Run `python -m pytest` after any change (384 tests, no GPU needed).
 
 ## 11. FAQ
 
