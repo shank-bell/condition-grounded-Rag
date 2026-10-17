@@ -122,6 +122,7 @@ class FeaturesConfig(BaseModel):
     ragas_loop: bool = False
     ragas_score: bool = False
     strip_guessed_reasons: bool = True
+    followup_rewrite: bool = True
     profile_repair: bool = True
     dataset_context: bool = True
 
