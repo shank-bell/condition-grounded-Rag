@@ -78,6 +78,8 @@
 <text x="74" y="736" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >1 · Query understanding</text>
 <text x="74" y="758" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >SciBERT: intent and complexity</text>
 <text x="74" y="774" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Gemma 12B: the named conditions</text>
+<text x="74" y="790" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >A follow-up is first rewritten</text>
+<text x="74" y="806" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >to stand alone (step 1a)</text>
 <rect x="330" y="712" width="232" height="108" rx="6" fill="#FFFFFF" stroke="#C8CEC9" stroke-width="1.3"/>
 <text x="344" y="736" font-family="'IBM Plex Sans Condensed','Arial Narrow',Arial,sans-serif" font-size="13.5" fill="#18201C" font-weight="600" >2 · Orchestrator (agent)</text>
 <text x="344" y="758" font-family="'IBM Plex Sans','Segoe UI',Arial,sans-serif" font-size="11" fill="#59635E" >Gemma E2B plans the path;</text>
