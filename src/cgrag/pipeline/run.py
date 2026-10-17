@@ -1,5 +1,6 @@
 """The online path: one question through stages 1-10.
 
+  (a follow-up that leans on the chat is first rewritten to stand alone)
   1 Query Understanding -> 2 Orchestrator -> 3 Query Refinement -> 4 Hybrid Retrieval -> 5 Rerank + Filter
   -> 6 Applicability Agent (may loop back to 4) -> 7 Contradiction Resolver -> 8 Generate
   -> 9 Claim-Check Critic (may loop back to 8) -> 10 Respond
@@ -25,6 +26,7 @@ from .contradiction import ContradictionResolver
 from .conditions import claim_text
 from .critic import ClaimChecker
 from .faithfulness import answer_relevancy, faithfulness, improve_until_faithful
+from .followup import needs_chat, resolve
 from .generate import generate, select_sources
 from .orchestrator import OrchestratorAgent
 from .query_understanding import QueryUnderstanding
@@ -41,6 +43,7 @@ PROFILE_GUIDED_SLOTS = 2
 
 
 STEP_INFO: dict[str, tuple[int, str, str]] = {
+    "1a_followup": (1, "Follow-up resolver", "Reads a question that leans on the chat (\"Can you detail more on it?\") together with the earlier turns and rewrites it so that it stands alone"),
     "1_understand": (1, "Query understanding", "SciBERT reads the intent and complexity; the language model extracts the conditions (model, dataset, language ...)"),
     "2_plan": (2, "Orchestrator agent", "Decides whether to refine or split the question and which checks to run"),
     "3_refine": (3, "Query refinement", "Rewrites the question into search queries"),
@@ -204,6 +207,21 @@ class Pipeline:
         if self.vectors.count() == 0:
             return respond(question, EMPTY_INDEX, [], None, None, [], [], False, ["index is empty"], {})
 
+        asked = question
+        elaborate = False
+        if history and self.cfg.features.followup_rewrite:
+            if needs_chat(question):
+                with t("1a_followup"):
+                    resolved = resolve(question, history, self.refine_llm)
+                question = resolved.question
+                elaborate = resolved.more_detail and any(h.get("role") == "assistant" for h in history)
+                if question != asked:
+                    say(f"1 follow-up read as: {question}")
+                if elaborate:
+                    say("1 asks for more detail: the answer adds to the earlier one and does not repeat it")
+            else:
+                t.skip("1a_followup", "the question stands on its own")
+
         with t("1_understand"):
             analysis = self.understand.analyze(question)
         with t("2_plan"):
@@ -259,7 +277,7 @@ class Pipeline:
             say("4 weak-evidence flag withdrawn: every condition named in the question is recorded in the kept passages")
         if stop_after == "applicability":
             t.ms["total"] = (time.perf_counter() - t0) * 1000
-            return respond(question, "", kept[: self.cfg.retrieval.generate_top], analysis, applicability, [], [], False, trace, t.ms,
+            return respond(asked, "", kept[: self.cfg.retrieval.generate_top], analysis, applicability, [], [], False, trace, t.ms,
                            retrieval_weak=retrieval_weak)
 
         contradictions: list[ContradictionPair] = []
@@ -278,7 +296,8 @@ class Pipeline:
 
         with t("8_generate"):
             answer = generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
-                              profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions))
+                              profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions),
+                              elaborate=elaborate)
         t.note(8, f"wrote {len(answer)} characters from {len(sources)} passages")
 
         checks: list[ClaimCheck] = []
@@ -291,7 +310,7 @@ class Pipeline:
                     t.note(9, f"{len(bad)} sentence(s) not backed by the sources: writing the answer once more")
                     retry = generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
                                      profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions),
-                                     feedback="\n".join(f"- {c.sentence}" for c in bad))
+                                     feedback="\n".join(f"- {c.sentence}" for c in bad), elaborate=elaborate)
                     retry_checks = self.critic.check(retry, sources, profile_map)
                     regenerated = True
                     if len(self.critic.unsupported(retry_checks)) <= len(bad):
@@ -319,7 +338,7 @@ class Pipeline:
                         notify=lambda msg: t.note(9, msg),
                         regenerate=lambda feedback: generate(question, sources, self.llm, warning=warning, conflicts=contradictions, history=history,
                                                              profiles=profile_map, include_profiles=include, requested=requested_for_prompt(analysis.conditions),
-                                                             feedback=feedback))
+                                                             feedback=feedback, elaborate=elaborate))
                     if retries:
                         regenerated = True
                         if plan.check_claims:
@@ -342,7 +361,7 @@ class Pipeline:
                         trace.append(f"9 answer relevancy {relevancy:.2f}")
 
         t.ms["total"] = (time.perf_counter() - t0) * 1000
-        return respond(question, answer, sources, analysis, applicability, contradictions, checks, regenerated, trace, t.ms,
+        return respond(asked, answer, sources, analysis, applicability, contradictions, checks, regenerated, trace, t.ms,
                        retrieval_weak=retrieval_weak, faithfulness=faith_score, answer_relevancy=relevancy, faithfulness_judge=judge_name)
 
     def _research(self, question: str, queries: list[str], intent: str, kept: list[RetrievedChunk],
